@@ -502,161 +502,120 @@ st.markdown("""
 :root{
   --accent:#2e7efb;
   --accent-2:#5ad1ff;
-  --text:#eaeaea;                 /* main text */
+  --text:#eaeaea;
   --text-dim:rgba(234,234,234,.85);
-  --bg-main:#0f1217;              /* page background */
-  --bg-card:#161a20;              /* cards/inputs background */
+  --bg-main:#0f1217;
+  --bg-card:#161a20;
   --border:rgba(255,255,255,.10);
+  --st-header-height:56px;
 }
-            
-/* Compact the Streamlit header and add top padding so content isn't covered */
-:root { --st-header-height: 56px; }  /* adjust if you want a thinner header */
+
+/* Layout + backgrounds */
+html, body, .stApp, div[data-testid="stAppViewContainer"]{ background: var(--bg-main) !important; }
+section[data-testid="stSidebar"]{ background: var(--bg-main) !important; border-right: 1px solid var(--border); }
 header[data-testid="stHeader"]{
-  background: transparent !important;   /* blends with your theme */
-  box-shadow: none !important;
+  background: var(--bg-main) !important; box-shadow:none !important; border-bottom: 1px solid var(--border);
   height: var(--st-header-height) !important;
 }
-.block-container{
-  padding-top: calc(1rem + var(--st-header-height)) !important; /* pushes content below header */
-}
+.block-container{ max-width: 1200px; padding-top: calc(1rem + var(--st-header-height)) !important; }
 
-/* === Hard-set dark backgrounds across app === */
-html, body, .stApp, div[data-testid="stAppViewContainer"]{
-  background: var(--bg-main) !important;
-}
-section[data-testid="stSidebar"]{
-  background: var(--bg-main) !important;
-  border-right: 1px solid var(--border);
-}
-header[data-testid="stHeader"]{
-  background: var(--bg-main) !important;   /* kill the black/white mismatch */
-  box-shadow: none !important;
-  border-bottom: 1px solid var(--border);
-}
+/* Readable text + smaller headings */
+.stApp, .stApp p, .stApp li, .stApp span, .stApp label, .stApp code, h1,h2,h3,h4,h5,h6{ color: var(--text) !important; }
+h1, h2, h3 { letter-spacing:.2px; }
+h1 { font-size: 1.65rem; margin-bottom:.25rem; }
+h2 { font-size: 1.25rem; margin:.35rem 0 .25rem; }
 
-/* === Global text color for readability === */
-.stApp, .stApp p, .stApp li, .stApp span, .stApp label, .stApp code,
-h1,h2,h3,h4,h5,h6 { color: var(--text) !important; }
-
-/* Section width */
-.block-container{ max-width: 1200px; padding-top: 1rem; }
-
-/* Headings */
-h1, h2, h3 { letter-spacing: .2px; }
-h1 { font-size: 1.65rem; margin-bottom: .25rem; }
-h2 { font-size: 1.25rem; margin: .35rem 0 .25rem; }
-
-/* === Inputs: dark backgrounds + visible text/placeholder === */
+/* Inputs */
 .stTextInput > div > div > input,
 .stNumberInput > div > div > input,
 .stSelectbox div[data-baseweb="select"] > div,
 .stTextArea textarea{
-  background: var(--bg-card) !important;
-  color: var(--text) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 10px !important;
+  background: var(--bg-card) !important; color: var(--text) !important;
+  border: 1px solid var(--border) !important; border-radius: 10px !important;
 }
-.stTextInput input::placeholder,
-.stNumberInput input::placeholder,
-.stTextArea textarea::placeholder{
-  color: var(--text-dim) !important;
-}
-
-/* Labels/help text */
+.stTextInput input::placeholder, .stNumberInput input::placeholder, .stTextArea textarea::placeholder{ color: var(--text-dim) !important; }
 label, .stMarkdown small, .stCaption { color: var(--text-dim) !important; }
 
 /* Expanders */
 section[data-testid="stSidebar"] .st-expander, .st-expander{
-  border: 1px solid var(--border);
-  border-radius: 12px !important;
-  overflow: hidden;
-  background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: 12px !important; overflow: hidden; background: var(--bg-card);
 }
-section[data-testid="stSidebar"] .st-expander{ max-height: 40vh; overflow: auto; }
+section[data-testid="stSidebar"] .st-expander{ max-height: 40vh; overflow:auto; }
 
-/* Tables */
-.stTable table{
-  border: 1px solid var(--border);
-  border-radius: 10px; overflow: hidden;
-  background: var(--bg-card);
-}
-.stTable thead tr th{ background: rgba(255,255,255,0.04) !important; color: var(--text) !important; }
+/* Tables & alerts */
+.stTable table{ border: 1px solid var(--border); border-radius:10px; overflow:hidden; background: var(--bg-card); }
+.stTable thead tr th{ background: rgba(255,255,255,0.04) !important; color: var(--text) !important; font-weight:700 !important; }
 .stTable tbody td{ color: var(--text) !important; }
 .stTable tbody tr:nth-child(even){ background: rgba(255,255,255,0.02); }
-
-/* Alerts */
-.stAlert{ border-radius: 12px; background: var(--bg-card) !important; color: var(--text) !important; }
+.stAlert{ border-radius:12px; background: var(--bg-card) !important; color: var(--text) !important; }
 
 /* Sidebar column layout */
-section[data-testid="stSidebar"] > div{ height: 100%; display: flex; flex-direction: column; }
+section[data-testid="stSidebar"] > div{ height:100%; display:flex; flex-direction:column; }
 
-/* === Sticky submit button INSIDE the sidebar === */
-section[data-testid="stSidebar"] .stButton > button{
+/* === Robust sticky submit button (covers primary/secondary + Cloud variants) === */
+section[data-testid="stSidebar"] div.stButton > button[kind],
+section[data-testid="stSidebar"] div[data-testid="stFormSubmitButton"] button,
+section[data-testid="stSidebar"] button[data-testid="baseButton-primary"],
+section[data-testid="stSidebar"] button[data-testid="baseButton-secondary"]{
   position: sticky; top: calc(100vh - 72px);
   width: 100%; margin-top: 12px; padding: 12px 14px;
-  border: 0; border-radius: 12px; font-weight: 700;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #fff; box-shadow: 0 8px 22px rgba(46,126,251,0.40);
+  border: 0 !important; border-radius: 12px !important; font-weight: 700;
+  background-image: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
+  background-color: var(--accent) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(46,126,251,0.40) !important;
   transition: transform .03s, box-shadow .2s, filter .2s;
+  -webkit-appearance: none; appearance: none;
 }
-section[data-testid="stSidebar"] .stButton > button:hover{
-  filter: brightness(1.05);
-  box-shadow: 0 10px 26px rgba(46,126,251,0.50);
+section[data-testid="stSidebar"] div.stButton > button:hover:not(:disabled){
+  filter: brightness(1.05); box-shadow: 0 10px 26px rgba(46,126,251,0.50) !important;
 }
-section[data-testid="stSidebar"] .stButton > button:active{ transform: translateY(1px); }
+section[data-testid="stSidebar"] div.stButton > button:active:not(:disabled){ transform: translateY(1px); }
+section[data-testid="stSidebar"] div.stButton > button:focus-visible{ outline: 2px solid rgba(46,126,251,.65) !important; outline-offset: 2px; }
+section[data-testid="stSidebar"] div.stButton > button:disabled{
+  opacity:.9 !important; cursor:not-allowed !important;
+  background-image: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
+  background-color: var(--accent) !important; color:#fff !important;
+}
 
 /* Creator card */
 section[data-testid="stSidebar"] .creator-card{
-  margin-top: 12px; padding: 12px 14px; border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  display: flex; align-items: center; gap: 12px;
+  margin-top:12px; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
+  background: var(--bg-card); display:flex; align-items:center; gap:12px;
 }
 section[data-testid="stSidebar"] .creator-card .avatar{
-  width: 36px; height: 36px; border-radius: 999px;
-  display: grid; place-items: center; font-weight: 700; letter-spacing: .4px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white;
+  width:36px; height:36px; border-radius:999px; display:grid; place-items:center; font-weight:700; letter-spacing:.4px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff;
 }
 section[data-testid="stSidebar"] .creator-card .meta{ display:flex; flex-direction:column; line-height:1.2; }
-section[data-testid="stSidebar"] .creator-card .meta .label{ font-size: 11px; text-transform: uppercase; opacity: .8; color: var(--text-dim); }
-section[data-testid="stSidebar"] .creator-card .meta .name{ font-weight: 700; color: var(--text); }
+section[data-testid="stSidebar"] .creator-card .meta .label{ font-size:11px; text-transform:uppercase; color:var(--text-dim); }
+section[data-testid="stSidebar"] .creator-card .meta .name{ font-weight:700; color:var(--text); }
 section[data-testid="stSidebar"] .creator-card .actions{ margin-left:auto; }
 section[data-testid="stSidebar"] .creator-card .link-btn{
   display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:8px;
-  border: 1px solid rgba(46,126,251,.35); background: rgba(46,126,251,.08);
-  text-decoration:none; font-size:13px; color: var(--accent);
-  transition: background .2s, transform .02s, box-shadow .2s;
+  border:1px solid rgba(46,126,251,.35); background:rgba(46,126,251,.08);
+  text-decoration:none; font-size:13px; color:var(--accent); transition: background .2s, transform .02s, box-shadow .2s;
 }
-section[data-testid="stSidebar"] .creator-card .link-btn:hover{ background: rgba(46,126,251,.12); box-shadow: 0 6px 16px rgba(46,126,251,.25); }
+section[data-testid="stSidebar"] .creator-card .link-btn:hover{ background:rgba(46,126,251,.12); box-shadow:0 6px 16px rgba(46,126,251,.25); }
 section[data-testid="stSidebar"] .creator-card .link-btn svg{ width:16px; height:16px; display:block; }
 
-/* Reusable cards for main content */
-.ui-card{
-  margin: 12px 0; padding: 16px 18px;
-  border-radius: 14px; border: 1px solid var(--border);
-  background: var(--bg-card);
-}
-.ui-card .ui-card-title{ display:flex; align-items:center; gap:8px; margin:0 0 8px 0; font-weight:700; font-size:1.1rem; color: var(--text); }
-.ui-card .ui-card-sub{ font-size:.9rem; color: var(--text-dim); }
+/* Reusable main cards */
+.ui-card{ margin:12px 0; padding:16px 18px; border-radius:14px; border:1px solid var(--border); background: var(--bg-card); }
+.ui-card .ui-card-title{ display:flex; align-items:center; gap:8px; margin:0 0 8px; font-weight:700; font-size:1.1rem; color:var(--text); }
+.ui-card .ui-card-sub{ font-size:.9rem; color:var(--text-dim); }
 
 /* Header widget */
 .app-header{
-  margin: 8px 0 10px; padding: 14px 16px; border-radius: 14px;
-  border: 1px solid var(--border); background: var(--bg-card);
-  display: flex; gap: 12px; align-items: center;
+  margin:8px 0 10px; padding:14px 16px; border-radius:14px; border:1px solid var(--border); background: var(--bg-card);
+  display:flex; gap:12px; align-items:center;
 }
-.app-header .title{ flex: 1; }
-.app-header .title .eyebrow{ font-size: 12px; text-transform: uppercase; color: var(--text-dim); }
-.app-header .subtitle{ font-size: 13px; color: var(--text-dim); margin-top: 2px; }
-.app-header .chips{ display: flex; gap: 8px; flex-wrap: wrap; }
-.app-header .chip{
-  padding: 6px 10px; border-radius: 999px;
-  border: 1px solid rgba(46,126,251,.35); background: rgba(46,126,251,.10);
-  font-size: 12px; color: var(--text);
-}
+.app-header .title{ flex:1; }
+.app-header .title .eyebrow{ font-size:12px; text-transform:uppercase; color:var(--text-dim); }
+.app-header .subtitle{ font-size:13px; color:var(--text-dim); margin-top:2px; }
+.app-header .chips{ display:flex; gap:8px; flex-wrap:wrap; }
+.app-header .chip{ padding:6px 10px; border-radius:999px; border:1px solid rgba(46,126,251,.35); background:rgba(46,126,251,.10); font-size:12px; color:var(--text); }
 </style>
 """, unsafe_allow_html=True)
-
 
 # ---------- Sidebar form ----------
 with st.sidebar.form("report_form"):
@@ -666,7 +625,7 @@ with st.sidebar.form("report_form"):
         ["1y", "3y", "5y", "max"],
         index=["1y", "3y", "5y", "max"].index(st.session_state.get("timeframe", "5y")),
     )
-    submitted = st.form_submit_button("Generate Report")
+    submitted = st.form_submit_button("Generate Report", type="primary")
 
 # ---------- Sidebar: About/Disclaimer ----------
 with st.sidebar.expander("ℹ️ About & Disclaimer", expanded=False):
@@ -747,9 +706,6 @@ else:
       </div>
     </div>
     """, unsafe_allow_html=True)
-
-
-
 
 if submitted:
     price_df, inc, bs, cf, cf_q, extras = fetch_financials(ticker, timeframe)
