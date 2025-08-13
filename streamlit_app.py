@@ -7,6 +7,8 @@ from datetime import datetime
 import requests
 from requests.exceptions import ConnectionError as RequestsConnectionError
 from http.client import RemoteDisconnected
+import numpy as np
+import pandas as pd
 
 # -------------------- Configuration -----------------------------
 openai.api_key = st.secrets.get("OPENAI_API_KEY", "")
@@ -135,6 +137,50 @@ def _pad_annual_with_quarterly_if_needed(yt: yf.Ticker,
     cf2  = _pad(cf,  q_cf_ann)  if need_cf  else cf
     return inc2, bs2, cf2
 
+# -------------------- Accounting Syntax ----------
+def _make_accounting_formatter(decimals: int = 0, parens_for_neg: bool = True):
+    """Returns a callable for Styler.format that prints 1,234,567 (and (1,234,567) for negatives)."""
+    fmt_spec = f"{{:,.{decimals}f}}"
+
+    def _fmt(x):
+        if x is None or (isinstance(x, float) and np.isnan(x)):
+            return ""
+        try:
+            val = float(x)
+        except Exception:
+            return x  # non-numeric -> leave as is
+
+        s = fmt_spec.format(abs(val))
+        # if decimals==0, strip trailing .00 from some pandas versions
+        if decimals == 0 and "." in s:
+            s = s.split(".")[0]
+        return f"({s})" if (parens_for_neg and val < 0) else s
+    return _fmt
+
+
+def format_statement(df: pd.DataFrame, decimals: int = 0) -> pd.io.formats.style.Styler:
+    """
+    Ensures numeric columns are formatted consistently across local + Cloud:
+    - thousands separators
+    - fixed decimals (default 0)
+    - parentheses for negatives
+    """
+    if df is None or df.empty:
+        return df
+
+    out = df.copy()
+
+    # Coerce object columns that look numeric (common with yfinance frames)
+    for c in out.columns:
+        if out[c].dtype == "object":
+            out[c] = pd.to_numeric(out[c], errors="ignore")
+
+    num_cols = out.select_dtypes(include=["number"]).columns
+    fmt = _make_accounting_formatter(decimals=decimals, parens_for_neg=True)
+
+    # Apply consistent formatting via Styler (works in Streamlit Cloud & local)
+    styler = out.style.format({c: fmt for c in num_cols}, na_rep="")
+    return styler
 
 # -------------------- Data fetch ------------
 
@@ -577,6 +623,14 @@ section[data-testid="stSidebar"] div.stButton > button:disabled{
   background-image: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
   background-color: var(--accent) !important; color:#fff !important;
 }
+            /* Make the submit wrapper full-width so the button can stretch */
+section[data-testid="stSidebar"] :is(div.stButton, div[data-testid="stFormSubmitButton"]){
+  width: 100% !important; display: block !important;
+}
+section[data-testid="stSidebar"] :is(div.stButton, div[data-testid="stFormSubmitButton"]) > div{
+  width: 100% !important; display: block !important;
+}
+
 
 /* Creator card */
 section[data-testid="stSidebar"] .creator-card{
@@ -752,14 +806,19 @@ bs_cols = [c for c in desired_bs if c in bs.columns] + equity_cols + \
 cf_pref = ["Total Cash From Operating Activities", "Capital Expenditures"]
 cf_cols = [c for c in cf_pref if c in cf.columns] + [c for c in cf.columns if c not in cf_pref]
 
-st.subheader(f"Income Statement (Last {years_back} years)")
-st.dataframe(inc[inc_cols].head(years_back), use_container_width=True)
+st.markdown('<div class="ui-card"><div class="ui-card-title">🧾 Income Statement</div>', unsafe_allow_html=True)
+st.dataframe(format_statement(inc[inc_cols].head(years_back), decimals=0), use_container_width=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
-st.subheader(f"Balance Sheet (Last {years_back} years)")
-st.dataframe(bs[bs_cols].head(years_back), use_container_width=True)
+st.markdown('<div class="ui-card"><div class="ui-card-title">📒 Balance Sheet</div>', unsafe_allow_html=True)
+st.dataframe(format_statement(bs[bs_cols].head(years_back), decimals=0), use_container_width=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
-st.subheader(f"Cash Flow Statement (Last {years_back} years)")
-st.dataframe(cf[cf_cols].head(years_back), use_container_width=True)
+st.markdown('<div class="ui-card"><div class="ui-card-title">💵 Cash Flow</div>', unsafe_allow_html=True)
+st.dataframe(format_statement(cf[cf_cols].head(years_back), decimals=0), use_container_width=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+
 
 # ---------- Metrics ----------
 metrics = compute_metrics(inc, bs, cf, years_back)
