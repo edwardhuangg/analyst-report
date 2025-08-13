@@ -508,6 +508,75 @@ with st.sidebar.form("report_form"):
     )
     submitted = st.form_submit_button("Generate Report")
 
+# ---------- Sidebar: About/Disclaimer & Credits ----------
+with st.sidebar.expander("ℹ️ About & Disclaimer", expanded=False):
+    st.markdown(
+        """
+**Status:** This app is an in-progress, student-built passion project.
+
+**What’s inside (top → bottom):**
+- **Generate Report** — Enter a ticker & window; fetches price and financial statements.
+- **Price Performance** — Closing-price line chart.
+- **Financial Statements** — Income, Balance Sheet, Cash Flow (last N years).
+- **Key Metrics & Ratios** — Margins, ROE/ROIC, asset turnover, FCF trends, plus basic market multiples.
+- **Comparable Companies** — Quick peer multiples table.
+- **Cost of Capital (WACC)** — CAPM inputs; optionally used as the DCF discount rate.
+- **Growth Consistency** — Cross-check: g ≈ ROIC × reinvestment.
+- **DCF Valuation (Two-Stage)** — Optional fade g₁ → g₂; can auto-solve for **r** or **g₁** to match market.
+- **Residual Income (Financials)** — Bank/insurer-friendly equity valuation.
+- **Executive Summary (AI Generated)** — Narrative synthesis of your current settings.
+- **Export** — One-click Excel with all tables and model sheets.
+
+**Data & API caveats:** Data is sourced from public APIs (e.g., Yahoo Finance via `yfinance`). Occasional gaps, mapping quirks, or timing differences can create small discrepancies. If something looks off, it’s likely an API field or minor edge case I’m still sanding down.
+
+**How the AI uses your inputs:** The **Executive Summary (AI)** composes analysis based on the full report given with the ticker, timeframe, and every modeling choice you make (WACC/CAPM inputs, growth rates, fade on/off, residual-income params). Change inputs → regenerate to reflect them.
+
+**No investment advice:** For educational/informational use only — **not** financial advice, a recommendation, or a solicitation to buy/sell securities. Do your own research and verify assumptions.
+
+        """
+    )
+
+st.sidebar.markdown("""
+        <p style="
+            background-color: #1D1B1B;
+            padding: 1px 5px;
+            border-radius: 8px;
+            font-family: Gill Sans;
+            font-size: 14px;
+            color: #009933;
+            width: fit-content;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 0px;
+        "> 
+            Created by:
+        </p>
+        <div style="
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            width: fit-content;
+        ">
+            <a href="https://linkedin.com/in/edwardhuangg">
+                <i class="ion-social-linkedin" style="font-size: 30px; margin-right: 8px;"></i>
+            </a>
+            <h6 style="
+                    background-color: #1D1B1B;
+                    padding: 3px 5px;
+                    border-radius: 8px;
+                    font-family: Gill Sans;
+                    font-size: 14px;
+                    color: white;
+                    width: fit-content;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            ">
+                Edward Huang
+            </h6>
+        </div>
+
+        <link href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
+    """, unsafe_allow_html=True)
+
+
 if submitted:
     price_df, inc, bs, cf, cf_q, extras = fetch_financials(ticker, timeframe)
     st.session_state.update({
