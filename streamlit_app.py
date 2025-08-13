@@ -496,7 +496,156 @@ def residual_income_valuation(bv0, shares_out, ke, N, roe_start, payout, fade_to
 # -------------------- Streamlit UI ------------------------------
 
 st.set_page_config(page_title="📈 Analyst Dashboard", layout="wide")
-st.title("📊 Analyst Dashboard & Report Generator")
+
+st.markdown("""
+<style>
+:root{
+  --accent:#2e7efb;
+  --accent-2:#5ad1ff;
+  --text:#eaeaea;                 /* main text */
+  --text-dim:rgba(234,234,234,.85);
+  --bg-main:#0f1217;              /* page background */
+  --bg-card:#161a20;              /* cards/inputs background */
+  --border:rgba(255,255,255,.10);
+}
+
+/* === Hard-set dark backgrounds across app === */
+html, body, .stApp, div[data-testid="stAppViewContainer"]{
+  background: var(--bg-main) !important;
+}
+section[data-testid="stSidebar"]{
+  background: var(--bg-main) !important;
+  border-right: 1px solid var(--border);
+}
+header[data-testid="stHeader"]{
+  background: var(--bg-main) !important;   /* kill the black/white mismatch */
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--border);
+}
+
+/* === Global text color for readability === */
+.stApp, .stApp p, .stApp li, .stApp span, .stApp label, .stApp code,
+h1,h2,h3,h4,h5,h6 { color: var(--text) !important; }
+
+/* Section width */
+.block-container{ max-width: 1200px; padding-top: 1rem; }
+
+/* Headings */
+h1, h2, h3 { letter-spacing: .2px; }
+h1 { font-size: 1.65rem; margin-bottom: .25rem; }
+h2 { font-size: 1.25rem; margin: .35rem 0 .25rem; }
+
+/* === Inputs: dark backgrounds + visible text/placeholder === */
+.stTextInput > div > div > input,
+.stNumberInput > div > div > input,
+.stSelectbox div[data-baseweb="select"] > div,
+.stTextArea textarea{
+  background: var(--bg-card) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+}
+.stTextInput input::placeholder,
+.stNumberInput input::placeholder,
+.stTextArea textarea::placeholder{
+  color: var(--text-dim) !important;
+}
+
+/* Labels/help text */
+label, .stMarkdown small, .stCaption { color: var(--text-dim) !important; }
+
+/* Expanders */
+section[data-testid="stSidebar"] .st-expander, .st-expander{
+  border: 1px solid var(--border);
+  border-radius: 12px !important;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+section[data-testid="stSidebar"] .st-expander{ max-height: 40vh; overflow: auto; }
+
+/* Tables */
+.stTable table{
+  border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+  background: var(--bg-card);
+}
+.stTable thead tr th{ background: rgba(255,255,255,0.04) !important; color: var(--text) !important; }
+.stTable tbody td{ color: var(--text) !important; }
+.stTable tbody tr:nth-child(even){ background: rgba(255,255,255,0.02); }
+
+/* Alerts */
+.stAlert{ border-radius: 12px; background: var(--bg-card) !important; color: var(--text) !important; }
+
+/* Sidebar column layout */
+section[data-testid="stSidebar"] > div{ height: 100%; display: flex; flex-direction: column; }
+
+/* === Sticky submit button INSIDE the sidebar === */
+section[data-testid="stSidebar"] .stButton > button{
+  position: sticky; top: calc(100vh - 72px);
+  width: 100%; margin-top: 12px; padding: 12px 14px;
+  border: 0; border-radius: 12px; font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff; box-shadow: 0 8px 22px rgba(46,126,251,0.40);
+  transition: transform .03s, box-shadow .2s, filter .2s;
+}
+section[data-testid="stSidebar"] .stButton > button:hover{
+  filter: brightness(1.05);
+  box-shadow: 0 10px 26px rgba(46,126,251,0.50);
+}
+section[data-testid="stSidebar"] .stButton > button:active{ transform: translateY(1px); }
+
+/* Creator card */
+section[data-testid="stSidebar"] .creator-card{
+  margin-top: 12px; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  display: flex; align-items: center; gap: 12px;
+}
+section[data-testid="stSidebar"] .creator-card .avatar{
+  width: 36px; height: 36px; border-radius: 999px;
+  display: grid; place-items: center; font-weight: 700; letter-spacing: .4px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white;
+}
+section[data-testid="stSidebar"] .creator-card .meta{ display:flex; flex-direction:column; line-height:1.2; }
+section[data-testid="stSidebar"] .creator-card .meta .label{ font-size: 11px; text-transform: uppercase; opacity: .8; color: var(--text-dim); }
+section[data-testid="stSidebar"] .creator-card .meta .name{ font-weight: 700; color: var(--text); }
+section[data-testid="stSidebar"] .creator-card .actions{ margin-left:auto; }
+section[data-testid="stSidebar"] .creator-card .link-btn{
+  display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:8px;
+  border: 1px solid rgba(46,126,251,.35); background: rgba(46,126,251,.08);
+  text-decoration:none; font-size:13px; color: var(--accent);
+  transition: background .2s, transform .02s, box-shadow .2s;
+}
+section[data-testid="stSidebar"] .creator-card .link-btn:hover{ background: rgba(46,126,251,.12); box-shadow: 0 6px 16px rgba(46,126,251,.25); }
+section[data-testid="stSidebar"] .creator-card .link-btn svg{ width:16px; height:16px; display:block; }
+
+/* Reusable cards for main content */
+.ui-card{
+  margin: 12px 0; padding: 16px 18px;
+  border-radius: 14px; border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+.ui-card .ui-card-title{ display:flex; align-items:center; gap:8px; margin:0 0 8px 0; font-weight:700; font-size:1.1rem; color: var(--text); }
+.ui-card .ui-card-sub{ font-size:.9rem; color: var(--text-dim); }
+
+/* Header widget */
+.app-header{
+  margin: 8px 0 10px; padding: 14px 16px; border-radius: 14px;
+  border: 1px solid var(--border); background: var(--bg-card);
+  display: flex; gap: 12px; align-items: center;
+}
+.app-header .title{ flex: 1; }
+.app-header .title .eyebrow{ font-size: 12px; text-transform: uppercase; color: var(--text-dim); }
+.app-header .subtitle{ font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+.app-header .chips{ display: flex; gap: 8px; flex-wrap: wrap; }
+.app-header .chip{
+  padding: 6px 10px; border-radius: 999px;
+  border: 1px solid rgba(46,126,251,.35); background: rgba(46,126,251,.10);
+  font-size: 12px; color: var(--text);
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 # ---------- Sidebar form ----------
 with st.sidebar.form("report_form"):
@@ -508,7 +657,7 @@ with st.sidebar.form("report_form"):
     )
     submitted = st.form_submit_button("Generate Report")
 
-# ---------- Sidebar: About/Disclaimer & Credits ----------
+# ---------- Sidebar: About/Disclaimer ----------
 with st.sidebar.expander("ℹ️ About & Disclaimer", expanded=False):
     st.markdown(
         """
@@ -532,49 +681,64 @@ with st.sidebar.expander("ℹ️ About & Disclaimer", expanded=False):
 **How the AI uses your inputs:** The **Executive Summary (AI)** composes analysis based on the full report given with the ticker, timeframe, and every modeling choice you make (WACC/CAPM inputs, growth rates, fade on/off, residual-income params). Change inputs → regenerate to reflect them.
 
 **No investment advice:** For educational/informational use only — **not** financial advice, a recommendation, or a solicitation to buy/sell securities. Do your own research and verify assumptions.
-
         """
     )
 
+# ---------- Sidebar: Creator card ----------
 st.sidebar.markdown("""
-        <p style="
-            background-color: #1D1B1B;
-            padding: 1px 5px;
-            border-radius: 8px;
-            font-family: Gill Sans;
-            font-size: 14px;
-            color: #009933;
-            width: fit-content;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 0px;
-        "> 
-            Created by:
-        </p>
-        <div style="
-            display: flex;
-            align-items: center;
-            padding: 8px 10px;
-            width: fit-content;
-        ">
-            <a href="https://linkedin.com/in/edwardhuangg">
-                <i class="ion-social-linkedin" style="font-size: 30px; margin-right: 8px;"></i>
-            </a>
-            <h6 style="
-                    background-color: #1D1B1B;
-                    padding: 3px 5px;
-                    border-radius: 8px;
-                    font-family: Gill Sans;
-                    font-size: 14px;
-                    color: white;
-                    width: fit-content;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            ">
-                Edward Huang
-            </h6>
-        </div>
+<div class="creator-card">
+  <div class="avatar">EH</div>
+  <div class="meta">
+    <div class="label">Created by</div>
+    <div class="name">Edward Huang</div>
+  </div>
+  <div class="actions">
+    <a class="link-btn" href="https://linkedin.com/in/edwardhuangg" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M20.45 20.45h-3.57v-5.58c0-1.33-.02-3.04-1.86-3.04-1.86 0-2.14 1.45-2.14 2.95v5.67H9.31V9.75h3.43v1.46h.05c.48-.91 1.64-1.86 3.37-1.86 3.61 0 4.28 2.38 4.28 5.48v5.61zM5.34 8.29a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.13 20.45H3.56V9.75h3.57v10.7zM22 2H2C.9 2 0 2.9 0 4v16c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+      </svg>
+      LinkedIn
+    </a>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-        <link href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
+# ---------- Top header (main area) ----------
+if st.session_state.get("data_ready"):
+    _ticker = st.session_state["ticker"]
+    _tf = st.session_state["timeframe"]
+    _sector = (st.session_state.get("extras") or {}).get("Sector") or "—"
+    _industry = (st.session_state.get("extras") or {}).get("Industry") or "—"
+    st.markdown(f"""
+    <div class="app-header">
+      <div class="title">
+        <div class="eyebrow">Analyst Dashboard</div>
+        <h1>📊 Analyst Dashboard & Report Generator</h1>
+        <div class="subtitle">AI-assisted valuation and fundamentals — calibrated to your assumptions.</div>
+      </div>
+      <div class="chips">
+        <span class="chip">{_ticker}</span>
+        <span class="chip">{_tf}</span>
+        <span class="chip">{_sector}</span>
+        <span class="chip">{_industry}</span>
+      </div>
+    </div>
     """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <div class="app-header">
+      <div class="title">
+        <div class="eyebrow">Analyst Dashboard</div>
+        <h1>📊 Analyst Dashboard & Report Generator</h1>
+        <div class="subtitle">Enter a ticker in the sidebar to generate the report.</div>
+      </div>
+      <div class="chips">
+        <span class="chip">Ready</span>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
 
 
 if submitted:
