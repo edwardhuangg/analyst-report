@@ -1,1 +1,9 @@
 streamlit>=1.26.0
+pandas
+yfinance
+openai
+io
+datetime
+requests
+requests.exceptions
+http.client
