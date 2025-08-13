@@ -508,6 +508,17 @@ st.markdown("""
   --bg-card:#161a20;              /* cards/inputs background */
   --border:rgba(255,255,255,.10);
 }
+            
+/* Compact the Streamlit header and add top padding so content isn't covered */
+:root { --st-header-height: 56px; }  /* adjust if you want a thinner header */
+header[data-testid="stHeader"]{
+  background: transparent !important;   /* blends with your theme */
+  box-shadow: none !important;
+  height: var(--st-header-height) !important;
+}
+.block-container{
+  padding-top: calc(1rem + var(--st-header-height)) !important; /* pushes content below header */
+}
 
 /* === Hard-set dark backgrounds across app === */
 html, body, .stApp, div[data-testid="stAppViewContainer"]{
@@ -730,7 +741,6 @@ else:
       <div class="title">
         <div class="eyebrow">Analyst Dashboard</div>
         <h1>📊 Analyst Dashboard & Report Generator</h1>
-        <div class="subtitle">Enter a ticker in the sidebar to generate the report.</div>
       </div>
       <div class="chips">
         <span class="chip">Ready</span>
