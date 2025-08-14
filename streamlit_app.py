@@ -8,10 +8,44 @@ import requests
 from requests.exceptions import ConnectionError as RequestsConnectionError
 from http.client import RemoteDisconnected
 import numpy as np
-import pandas as pd
+from typing import Optional, List
 
 # -------------------- Configuration -----------------------------
 openai.api_key = st.secrets.get("OPENAI_API_KEY", "")
+
+# ---- OpenAI compatibility shim (new v1 client OR legacy 0.x) ---
+def _make_create_chat():
+    try:
+        # Newer SDK (>=1.0)
+        from openai import OpenAI
+        _client = OpenAI(api_key=openai.api_key or None)
+        def _create_chat(**kwargs):
+            return _client.chat.completions.create(**kwargs)
+        def _extract(resp):
+            try:
+                return resp.choices[0].message.content
+            except Exception:
+                return str(resp)
+        return _create_chat, _extract
+    except Exception:
+        # Legacy SDK (<1.0)
+        def _create_chat(**kwargs):
+            model = kwargs.get("model")
+            messages = kwargs.get("messages", [])
+            temperature = kwargs.get("temperature")
+            max_tokens = kwargs.get("max_tokens")
+            return openai.ChatCompletion.create(
+                model=model, messages=messages,
+                temperature=temperature, max_tokens=max_tokens
+            )
+        def _extract(resp):
+            try:
+                return resp["choices"][0]["message"]["content"]
+            except Exception:
+                return str(resp)
+        return _create_chat, _extract
+
+_create_chat, _extract_chat = _make_create_chat()
 
 # -------------------- Session-state bootstrap -------------------
 if "data_ready" not in st.session_state:
@@ -139,46 +173,29 @@ def _pad_annual_with_quarterly_if_needed(yt: yf.Ticker,
 
 # -------------------- Accounting Syntax ----------
 def _make_accounting_formatter(decimals: int = 0, parens_for_neg: bool = True):
-    """Returns a callable for Styler.format that prints 1,234,567 (and (1,234,567) for negatives)."""
     fmt_spec = f"{{:,.{decimals}f}}"
-
     def _fmt(x):
         if x is None or (isinstance(x, float) and np.isnan(x)):
             return ""
         try:
             val = float(x)
         except Exception:
-            return x  # non-numeric -> leave as is
-
+            return x
         s = fmt_spec.format(abs(val))
-        # if decimals==0, strip trailing .00 from some pandas versions
         if decimals == 0 and "." in s:
             s = s.split(".")[0]
         return f"({s})" if (parens_for_neg and val < 0) else s
     return _fmt
 
-
-def format_statement(df: pd.DataFrame, decimals: int = 0) -> pd.io.formats.style.Styler:
-    """
-    Ensures numeric columns are formatted consistently across local + Cloud:
-    - thousands separators
-    - fixed decimals (default 0)
-    - parentheses for negatives
-    """
+def format_statement(df: pd.DataFrame, decimals: int = 0):
     if df is None or df.empty:
         return df
-
     out = df.copy()
-
-    # Coerce object columns that look numeric (common with yfinance frames)
     for c in out.columns:
         if out[c].dtype == "object":
             out[c] = pd.to_numeric(out[c], errors="ignore")
-
     num_cols = out.select_dtypes(include=["number"]).columns
     fmt = _make_accounting_formatter(decimals=decimals, parens_for_neg=True)
-
-    # Apply consistent formatting via Styler (works in Streamlit Cloud & local)
     styler = out.style.format({c: fmt for c in num_cols}, na_rep="")
     return styler
 
@@ -275,7 +292,7 @@ def fetch_financials(ticker: str, period: str = "5y"):
 
 # -------------------- DCF (two-stage + inverse) -----------------
 
-def _pick_first(df: pd.DataFrame, candidates: list[str]):
+def _pick_first(df: pd.DataFrame, candidates: List[str]):
     for c in candidates:
         if c in df.columns:
             return df[c]
@@ -285,7 +302,7 @@ def _latest(series: pd.Series):
     return series.iloc[0] if (series is not None and not series.empty) else None
 
 # --- FIXED: normalize CapEx sign + use *latest* 4 quarters ---
-def get_base_fcf(cf_annual: pd.DataFrame, cf_quarterly: pd.DataFrame | None = None):
+def get_base_fcf(cf_annual: pd.DataFrame, cf_quarterly: Optional[pd.DataFrame] = None):
     """
     Base FCF preference:
       (a) TTM from quarterlies: sum last 4 quarters of (OCF - CapEx)
@@ -315,7 +332,6 @@ def get_base_fcf(cf_annual: pd.DataFrame, cf_quarterly: pd.DataFrame | None = No
             ocf_q = ocf_q.dropna().sort_index(ascending=False)
             capex_q = capex_q.dropna().sort_index(ascending=False)
 
-            # If capex appears positive (outflow as +), flip sign
             if not capex_q.empty and capex_q.iloc[:8].median() > 0:
                 capex_q = -capex_q
 
@@ -344,7 +360,7 @@ def get_base_fcf(cf_annual: pd.DataFrame, cf_quarterly: pd.DataFrame | None = No
 
     return None
 
-def pick_shares(yf_info: dict, inc_annual: pd.DataFrame, bs_annual: pd.DataFrame) -> int | None:
+def pick_shares(yf_info: dict, inc_annual: pd.DataFrame, bs_annual: pd.DataFrame) -> Optional[int]:
     info_so = None
     try:
         if yf_info and "sharesOutstanding" in yf_info and yf_info["sharesOutstanding"]:
@@ -441,7 +457,6 @@ def solve_implied_g1(target_px, base_fcf, shares_out, net_debt, N, r, g2, fade: 
         return None if px is None else (px - target_px)
     return _bisect_solve(f, lo, hi)
 
-
 # --------------------  Financials (Residual Income) ---------
 
 def detect_is_financials(extras: dict) -> bool:
@@ -453,7 +468,6 @@ def detect_is_financials(extras: dict) -> bool:
 def estimate_starting_bve_and_roe(inc: pd.DataFrame, bs: pd.DataFrame):
     eq_cols = [c for c in bs.columns if "equity" in c.lower()]
     bve0 = float(bs[eq_cols[0]].iloc[0]) if eq_cols else None
-    # ROE ≈ NI / avg equity (latest)
     try:
         ni = float(inc["Net Income"].iloc[0])
         eq_now = float(bs[eq_cols[0]].iloc[0])
@@ -464,11 +478,9 @@ def estimate_starting_bve_and_roe(inc: pd.DataFrame, bs: pd.DataFrame):
         roe0 = None
     return bve0, roe0
 
-def residual_income_valuation(bv0, shares_out, ke, N, roe_start, payout, fade_to_ke=True, roe_terminal=None, g_ri=0.0):
+def residual_income_valuation(bv0, shares_out, ke, N, roe_start, payout, fade_to_ke=True, roe_terminal: Optional[float]=None, g_ri: float=0.0):
     """
     Value0 = BV0 + Σ PV[ (ROE_t - ke) * BV_{t-1} ] + PV(terminal RI, optional)
-    Payout = dividend payout ratio; retention = 1 - payout
-    BV_t = BV_{t-1} + (ROE_t * BV_{t-1}) * (1 - payout)
     """
     if bv0 is None or shares_out in (None, 0) or ke is None:
         return None, None, None
@@ -507,7 +519,6 @@ def residual_income_valuation(bv0, shares_out, ke, N, roe_start, payout, fade_to
 
     term_pv = 0.0
     if not fade_to_ke:
-        # Continuing RI from year N+1, using ROE_T and growth g_ri
         roe_T = roe_path[-1]
         bv_T = bv_end[-1]
         ri_N1 = (roe_T - ke) * bv_T
@@ -546,32 +557,19 @@ st.set_page_config(page_title="📈 Analyst Dashboard", layout="wide")
 st.markdown("""
 <style>
 :root{
-  --accent:#2e7efb;
-  --accent-2:#5ad1ff;
-  --text:#eaeaea;
-  --text-dim:rgba(234,234,234,.85);
-  --bg-main:#0f1217;
-  --bg-card:#161a20;
-  --border:rgba(255,255,255,.10);
+  --accent:#2e7efb; --accent-2:#5ad1ff;
+  --text:#eaeaea; --text-dim:rgba(234,234,234,.85);
+  --bg-main:#0f1217; --bg-card:#161a20; --border:rgba(255,255,255,.10);
   --st-header-height:56px;
 }
-
-/* Layout + backgrounds */
 html, body, .stApp, div[data-testid="stAppViewContainer"]{ background: var(--bg-main) !important; }
 section[data-testid="stSidebar"]{ background: var(--bg-main) !important; border-right: 1px solid var(--border); }
-header[data-testid="stHeader"]{
-  background: var(--bg-main) !important; box-shadow:none !important; border-bottom: 1px solid var(--border);
-  height: var(--st-header-height) !important;
-}
+header[data-testid="stHeader"]{ background: var(--bg-main) !important; box-shadow:none !important; border-bottom: 1px solid var(--border); height: var(--st-header-height) !important; }
 .block-container{ max-width: 1200px; padding-top: calc(1rem + var(--st-header-height)) !important; }
-
-/* Readable text + smaller headings */
 .stApp, .stApp p, .stApp li, .stApp span, .stApp label, .stApp code, h1,h2,h3,h4,h5,h6{ color: var(--text) !important; }
 h1, h2, h3 { letter-spacing:.2px; }
 h1 { font-size: 1.65rem; margin-bottom:.25rem; }
 h2 { font-size: 1.25rem; margin:.35rem 0 .25rem; }
-
-/* Inputs */
 .stTextInput > div > div > input,
 .stNumberInput > div > div > input,
 .stSelectbox div[data-baseweb="select"] > div,
@@ -581,24 +579,17 @@ h2 { font-size: 1.25rem; margin:.35rem 0 .25rem; }
 }
 .stTextInput input::placeholder, .stNumberInput input::placeholder, .stTextArea textarea::placeholder{ color: var(--text-dim) !important; }
 label, .stMarkdown small, .stCaption { color: var(--text-dim) !important; }
-
-/* Expanders */
 section[data-testid="stSidebar"] .st-expander, .st-expander{
   border: 1px solid var(--border); border-radius: 12px !important; overflow: hidden; background: var(--bg-card);
 }
 section[data-testid="stSidebar"] .st-expander{ max-height: 40vh; overflow:auto; }
-
-/* Tables & alerts */
 .stTable table{ border: 1px solid var(--border); border-radius:10px; overflow:hidden; background: var(--bg-card); }
 .stTable thead tr th{ background: rgba(255,255,255,0.04) !important; color: var(--text) !important; font-weight:700 !important; }
 .stTable tbody td{ color: var(--text) !important; }
 .stTable tbody tr:nth-child(even){ background: rgba(255,255,255,0.02); }
 .stAlert{ border-radius:12px; background: var(--bg-card) !important; color: var(--text) !important; }
-
-/* Sidebar column layout */
 section[data-testid="stSidebar"] > div{ height:100%; display:flex; flex-direction:column; }
-
-/* === Robust sticky submit button (covers primary/secondary + Cloud variants) === */
+/* Sticky submit button */
 section[data-testid="stSidebar"] div.stButton > button[kind],
 section[data-testid="stSidebar"] div[data-testid="stFormSubmitButton"] button,
 section[data-testid="stSidebar"] button[data-testid="baseButton-primary"],
@@ -607,8 +598,7 @@ section[data-testid="stSidebar"] button[data-testid="baseButton-secondary"]{
   width: 100%; margin-top: 12px; padding: 12px 14px;
   border: 0 !important; border-radius: 12px !important; font-weight: 700;
   background-image: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
-  background-color: var(--accent) !important;
-  color: #fff !important;
+  background-color: var(--accent) !important; color: #fff !important;
   box-shadow: 0 8px 22px rgba(46,126,251,0.40) !important;
   transition: transform .03s, box-shadow .2s, filter .2s;
   -webkit-appearance: none; appearance: none;
@@ -623,15 +613,12 @@ section[data-testid="stSidebar"] div.stButton > button:disabled{
   background-image: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
   background-color: var(--accent) !important; color:#fff !important;
 }
-            /* Make the submit wrapper full-width so the button can stretch */
 section[data-testid="stSidebar"] :is(div.stButton, div[data-testid="stFormSubmitButton"]){
   width: 100% !important; display: block !important;
 }
 section[data-testid="stSidebar"] :is(div.stButton, div[data-testid="stFormSubmitButton"]) > div{
   width: 100% !important; display: block !important;
 }
-
-
 /* Creator card */
 section[data-testid="stSidebar"] .creator-card{
   margin-top:12px; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
@@ -652,20 +639,17 @@ section[data-testid="stSidebar"] .creator-card .link-btn{
 }
 section[data-testid="stSidebar"] .creator-card .link-btn:hover{ background:rgba(46,126,251,.12); box-shadow:0 6px 16px rgba(46,126,251,.25); }
 section[data-testid="stSidebar"] .creator-card .link-btn svg{ width:16px; height:16px; display:block; }
-
-/* Reusable main cards */
+/* Cards & Header */
 .ui-card{ margin:12px 0; padding:16px 18px; border-radius:14px; border:1px solid var(--border); background: var(--bg-card); }
 .ui-card .ui-card-title{ display:flex; align-items:center; gap:8px; margin:0 0 8px; font-weight:700; font-size:1.1rem; color:var(--text); }
 .ui-card .ui-card-sub{ font-size:.9rem; color:var(--text-dim); }
-
-/* Header widget */
 .app-header{
   margin:8px 0 10px; padding:14px 16px; border-radius:14px; border:1px solid var(--border); background: var(--bg-card);
   display:flex; gap:12px; align-items:center;
 }
 .app-header .title{ flex:1; }
 .app-header .title .eyebrow{ font-size:12px; text-transform:uppercase; color:var(--text-dim); }
-.app-header .subtitle{ font-size:13px; color:var(--text-dim); margin-top:2px; }
+.app-header .subtitle{ font-size:13px; color: var(--text-dim); margin-top:2px; }
 .app-header .chips{ display:flex; gap:8px; flex-wrap:wrap; }
 .app-header .chip{ padding:6px 10px; border-radius:999px; border:1px solid rgba(46,126,251,.35); background:rgba(46,126,251,.10); font-size:12px; color:var(--text); }
 </style>
@@ -754,6 +738,7 @@ else:
       <div class="title">
         <div class="eyebrow">Analyst Dashboard</div>
         <h1>📊 Analyst Dashboard & Report Generator</h1>
+        <div class="subtitle">AI-assisted valuation and fundamentals — calibrated to your assumptions.</div>
       </div>
       <div class="chips">
         <span class="chip">Ready</span>
@@ -818,8 +803,6 @@ st.markdown('<div class="ui-card"><div class="ui-card-title">💵 Cash Flow</div
 st.dataframe(format_statement(cf[cf_cols].head(years_back), decimals=0), use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
-
-
 # ---------- Metrics ----------
 metrics = compute_metrics(inc, bs, cf, years_back)
 metrics.update({
@@ -870,7 +853,6 @@ for peer in peers:
         rows.append({"Ticker": peer})
 comps_df = pd.DataFrame(rows).set_index("Ticker")
 st.table(comps_df)
-
 
 # -------------------- DCF (two-stage + inverse) -----------------
 
@@ -948,7 +930,7 @@ st.session_state.setdefault("shares_out", shares_out)
 st.session_state.setdefault("net_debt", net_debt)
 st.session_state.setdefault("last_close", last_close)
 
-# DCF widgets
+# DCF widgets (values are decimals; labels show % to keep UI compact)
 st.number_input("Stage-1 FCF Growth (g₁, %)", key="g1",
                 value=st.session_state.get("g1", 0.10), step=0.1, format="%.2f")
 st.number_input("Terminal Growth (g₂, %)",   key="g2",
@@ -1076,7 +1058,6 @@ except ValueError as e:
     st.warning(str(e))
     dcf_df, dcf_head, implied_px = None, None, None
 
-
 # -------------------- Financials (Residual Income) --------------
 
 st.subheader("Financials (Residual Income) – Recommended for Banks/Insurers")
@@ -1086,7 +1067,7 @@ use_financials_mode = st.checkbox("Use Financials (Residual Income) mode", value
                                   help=f"Auto-detected financials: {auto_fin} (Sector: {extras.get('Sector')}, Industry: {extras.get('Industry')})")
 
 bve0_guess, roe0_guess = estimate_starting_bve_and_roe(inc, bs)
-ke_default = ke_capm  # from CAPM expander above
+ke_default = float((st.session_state.get("rf", 0.04) + st.session_state.get("beta", 1.20) * st.session_state.get("erp", 0.05)))
 
 col1, col2 = st.columns(2)
 with col1:
@@ -1134,7 +1115,6 @@ st.session_state["ri_params"] = {
     "g_ri": float(g_ri or 0.0),
     "ri_price": float(ri_price or 0.0),
 }
-
 
 # -------------------- Executive Summary (manual) -----------------
 
@@ -1184,7 +1164,7 @@ if st.button("🧠 Generate / Refresh AI Summary"):
         )
 
         with st.spinner("✍️  Writing summary …"):
-            chat = openai.chat.completions.create(
+            resp = _create_chat(
                 model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "You are a discerning buy-side partner."},
@@ -1193,7 +1173,7 @@ if st.button("🧠 Generate / Refresh AI Summary"):
                 temperature=0.5,
                 max_tokens=700,
             )
-            st.session_state["exec_summary"] = chat.choices[0].message.content
+            st.session_state["exec_summary"] = _extract_chat(resp)
     except Exception as e:
         st.session_state["exec_summary"] = f"_Summary unavailable_: {e}"
 
@@ -1202,9 +1182,7 @@ if st.session_state["exec_summary"]:
 else:
     st.info("Click **Generate / Refresh AI Summary** to produce the write-up including the calibrated DCF and RI.")
 
-
 # -------------------- Excel Report ------------
-
 def build_excel_report(
     ticker: str,
     timeframe: str,
@@ -1243,7 +1221,7 @@ def build_excel_report(
     ri_roe_start: float = 0.10,
     ri_payout: float = 0.00,
     ri_fade_to_ke: bool = True,
-    ri_roe_terminal: float | None = None,
+    ri_roe_terminal: Optional[float] = None,
     ri_g: float = 0.00,
 ):
     buffer = io.BytesIO()
@@ -1252,7 +1230,6 @@ def build_excel_report(
         if hasattr(wb, "set_calc_mode"):
             wb.set_calc_mode("auto")
 
-        # -------- Formats --------
         fmt_hdr   = wb.add_format({"bold": True, "bg_color": "#F2F2F2", "border": 1})
         fmt_bold  = wb.add_format({"bold": True})
         fmt_money = wb.add_format({"num_format": "#,##0;(#,##0)", "align": "right"})
@@ -1274,13 +1251,11 @@ def build_excel_report(
         ov.write("A9", "DCF Implied Price:", fmt_bold);   ov.write_formula("B9", "=IMPLIED_PRICE_DCF")
         ov.write("A10", "RI Implied Price:", fmt_bold);   ov.write_formula("B10", "=IMPLIED_PRICE_RI")
         ov.write("A12", "Chosen Price:", fmt_bold)
-        # Chosen price uses RI if fin_mode else DCF
         ov.write_formula("B12", "=IF(CHOOSE_RI, IMPLIED_PRICE_RI, IMPLIED_PRICE_DCF)")
         ov.write("A13", "Upside vs Current:", fmt_bold)
         ov.write_formula("B13", "=(IF(CHOOSE_RI, IMPLIED_PRICE_RI, IMPLIED_PRICE_DCF)/B4)-1", fmt_pct2)
         ov.set_column("A:A", 22); ov.set_column("B:B", 18)
 
-        # -------- Helpers to write tidy tables --------
         def write_df(sheetname, df, money_col_idxs=None, width=22):
             if df is None or df.empty:
                 ws = wb.add_worksheet(sheetname)
@@ -1398,7 +1373,7 @@ def build_excel_report(
         dcf.write("D3",  "WACC (Fundamentals)", fmt_bold)
         dcf.write("D4",  "Risk-free (rf)", fmt_txt);                 dcf.write_number("E4",  float(rf or 0.0),  fmt_pct4)
         dcf.write("D5",  "Equity Risk Premium (ERP)", fmt_txt);      dcf.write_number("E5",  float(erp or 0.0), fmt_pct4)
-        dcf.write("D6",  "Beta (levered)", fmt_txt);                  dcf.write_number("E6",  float(beta or 0.0), fmt_num)
+        dcf.write("D6",  "Beta (levered)", fmt_txt);                 dcf.write_number("E6",  float(beta or 0.0), fmt_num)
         dcf.write("D7",  "Cost of Debt (pre-tax)", fmt_txt);         dcf.write_number("E7",  float(kd or 0.0),  fmt_pct4)
         dcf.write("D8",  "Tax Rate", fmt_txt);                       dcf.write_number("E8",  float(tax or 0.0), fmt_pct4)
         dcf.write("D9",  "Target D/V", fmt_txt);                     dcf.write_number("E9",  float(dv or 0.0),  fmt_pct4)
@@ -1410,7 +1385,6 @@ def build_excel_report(
 
         dcf.write_formula("B14", "=IF($B$13=1, E13, $B$7)", fmt_pct4)
 
-        # Validations / guardrail
         dcf.data_validation("B5", {"validate": "decimal", "criteria": "between", "minimum": -0.5,  "maximum": 0.5})
         dcf.data_validation("B6", {"validate": "decimal", "criteria": "between", "minimum": -0.01, "maximum": 0.05})
         dcf.data_validation("B7", {"validate": "decimal", "criteria": "between", "minimum": 0.01, "maximum": 0.5})
@@ -1420,7 +1394,6 @@ def build_excel_report(
         fmt_bad = wb.add_format({"bg_color": "#FDEDEF", "font_color": "#9C0006"})
         dcf.conditional_format("B14", {"type": "formula", "criteria": "=$B$14<=$B$6", "format": fmt_bad})
 
-        # Headers
         start_row = 16
         dcf.write(start_row-1, 0, "Year", fmt_hdr)
         dcf.write(start_row-1, 1, "FCF", fmt_hdr)
@@ -1476,21 +1449,18 @@ def build_excel_report(
             f'INDEX(C{start_row+1}:C{start_row+20},1), NA())', fmt_num)
 
         dcf.set_column("B:C", 20)
-
-        # Named links
         wb.define_name("IMPLIED_PRICE_DCF", f"='DCF Model'!$B${(sum_row+4)+1}")
 
-        # -------- Residual Income (Financials) --------
+        # -------- Residual Income --------
         ri = wb.add_worksheet("Residual Income")
         ri.set_column("A:A", 10)
         ri.set_column("B:H", 18)
         ri.write("A1", "Residual Income (Financials)", fmt_title)
 
-        # Inputs
         ri.write("A3", "Inputs", fmt_bold)
         ri.write("A4", "BV₀ (Book Value of Equity)", fmt_txt); ri.write_number("B4", float(ri_bv0 or 0.0), fmt_usd)
         ri.write("A5", "Shares Outstanding", fmt_txt);         ri.write_number("B5", float(ri_shares or 0), fmt_num)
-        ri.write("A6", "Cost of Equity kₑ", fmt_txt)  # will link to E8
+        ri.write("A6", "Cost of Equity kₑ", fmt_txt)
         ri.write("A7", "Projection Years (N)", fmt_txt);       ri.write_number("B7", int(ri_N or 0), fmt_num)
         ri.write("A8", "Starting ROE", fmt_txt);               ri.write_number("B8", float(ri_roe_start or 0.0), fmt_pct4)
         ri.write("A9", "Dividend Payout Ratio", fmt_txt);      ri.write_number("B9", float(ri_payout or 0.0), fmt_pct4)
@@ -1498,57 +1468,39 @@ def build_excel_report(
         ri.write("A11","Terminal ROE (if fade=0)", fmt_txt);   ri.write_number("B11", float(ri_roe_terminal or 0.0), fmt_pct4)
         ri.write("A12","Terminal g (if fade=0)", fmt_txt);     ri.write_number("B12", float(ri_g or 0.0), fmt_pct4)
 
-        # CAPM block for k_e (optional)
         ri.write("D3",  "CAPM for kₑ (optional)", fmt_bold)
         ri.write("D4",  "Risk-free (rf)", fmt_txt);           ri.write_number("E4", float(rf or 0.0), fmt_pct4)
         ri.write("D5",  "Equity Risk Premium", fmt_txt);      ri.write_number("E5", float(erp or 0.0), fmt_pct4)
         ri.write("D6",  "Beta (levered)", fmt_txt);           ri.write_number("E6", float(beta or 0.0), fmt_num)
         ri.write("D8",  "kₑ (CAPM)", fmt_txt);                ri.write_formula("E8", "=E4+E6*E5", fmt_pct4)
-        # Link B6 to E8 if not provided explicitly
         ri.write_formula("B6", "=E8", fmt_pct4)
 
-        # Headers
         ri_start = 16
         for idx, h in enumerate(["Year","BV_Beg","ROE","Earnings","Dividends","BV_End","Residual Income","PV RI"]):
             ri.write(ri_start-1, idx, h, fmt_hdr)
 
-        # Formulas
         for i in range(1, 20+1):
             r0 = ri_start + i - 1
-            ri.write_number(r0, 0, i, fmt_num)  # Year
-
-            # BV_Beg
+            ri.write_number(r0, 0, i, fmt_num)
             if i == 1:
                 ri.write_formula(r0, 1, f'=$B$4')
             else:
-                ri.write_formula(r0, 1, f'=F{r0}')  # prev BV_End
-
-            # ROE path
-            # =IF($B$7>=i, IF($B$10=1, $B$8 + ($B$6-$B$8)*(i-1)/MAX($B$7-1,1), $B$8 + ($B$11-$B$8)*(i-1)/MAX($B$7-1,1)), NA())
+                ri.write_formula(r0, 1, f'=F{r0}')
             ri.write_formula(r0, 2, f'=IF($B$7>={i}, IF($B$10=1, $B$8 + ($B$6-$B$8)*({i}-1)/MAX($B$7-1,1), $B$8 + ($B$11-$B$8)*({i}-1)/MAX($B$7-1,1)), NA())', fmt_pct4)
-
-            # Earnings = BV_Beg * ROE
             ri.write_formula(r0, 3, f'=B{r0+1}*C{r0+1}', fmt_usd)
-            # Dividends = payout * earnings
             ri.write_formula(r0, 4, f'=$B$9*D{r0+1}', fmt_usd)
-            # BV_End = BV_Beg + Earnings - Dividends
             ri.write_formula(r0, 5, f'=B{r0+1}+D{r0+1}-E{r0+1}', fmt_usd)
-            # Residual Income = (ROE - ke) * BV_Beg
             ri.write_formula(r0, 6, f'=(C{r0+1}-$B$6)*B{r0+1}', fmt_usd)
-            # PV RI
             ri.write_formula(r0, 7, f'=IF($B$7>={i}, G{r0+1}/POWER(1+$B$6,{i}), NA())', fmt_usd)
 
-        # Terminal PV of RI (only if fade=0)
         ri_term_row = ri_start + 21
         ri.write(ri_term_row-1, 0, "Terminal", fmt_hdr)
         ri.write(ri_term_row-1, 6, "Terminal PV (RI)", fmt_hdr)
-        # RI_{N+1} = (ROE_T - k_e) * BV_T; PV = RI_{N+1}/(k_e - g)/ (1+k_e)^N
         ri.write_formula(ri_term_row, 6,
             f'=IF($B$10=0, ((INDEX(C{ri_start+1}:C{ri_start+20},$B$7)-$B$6)*INDEX(F{ri_start+1}:F{ri_start+20},$B$7))/($B$6-$B$12)/POWER(1+$B$6,$B$7), 0)',
             fmt_usd
         )
 
-        # Summary
         ri_sum = ri_term_row + 3
         ri.write(ri_sum,   0, "Equity Value = BV₀ + ΣPV(RI) + Terminal", fmt_bold)
         ri.write(ri_sum+1, 0, "Implied Price (per share)", fmt_bold)
@@ -1560,11 +1512,9 @@ def build_excel_report(
         )
         ri.write_formula(ri_sum+1, 1, f'=IF($B$5>0, B{ri_sum+1}/$B$5, NA())', fmt_usd)
 
-        # Named links for RI and a mode flag
         wb.define_name("IMPLIED_PRICE_RI", f"='Residual Income'!$B${(ri_sum+1)+1}")
         wb.define_name("CHOOSE_RI", f"={ 'TRUE' if fin_mode else 'FALSE' }")
 
-        # -------- Charts (optional light) --------
         pv_chart = wb.add_chart({"type": "column"})
         pv_chart.add_series({
             "name":       "PV of RI",
@@ -1574,7 +1524,6 @@ def build_excel_report(
         pv_chart.set_title({"name": "PV of Residual Income"}); pv_chart.set_legend({"none": True})
         ri.insert_chart("J4", pv_chart, {"x_scale": 1.0, "y_scale": 1.0})
 
-        # -------- DCF line chart --------
         pv_chart2 = wb.add_chart({"type": "column"})
         pv_chart2.add_series({
             "name":       "PV of FCFs",
