@@ -708,29 +708,7 @@ section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] > div > div{
   flex: 1 1 auto !important;
 }
 
-/* Finally, stretch the button itself */
-section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] button,
-section[data-testid="stSidebar"] .stButton > button,
-section[data-testid="stSidebar"] button[data-testid="baseButton-primary"],
-section[data-testid="stSidebar"] button[data-testid="baseButton-secondary"]{
-  flex: 1 1 100% !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-  align-self: stretch !important;
-}
 
-/* Keep your sticky styling WITHOUT touching width */
-section[data-testid="stSidebar"] :is(div.stButton, div[data-testid="stFormSubmitButton"]) button{
-  position: sticky; top: calc(100vh - 72px);
-  margin-top: 12px; padding: 12px 14px;
-  border: 0 !important; border-radius: 12px !important; font-weight: 700;
-  background-image: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
-  background-color: var(--accent) !important; color: #fff !important;
-  box-shadow: 0 8px 22px rgba(46,126,251,0.40) !important;
-  transition: transform .03s, box-shadow .2s, filter .2s;
-}
 </style>
 """, unsafe_allow_html=True)
 
