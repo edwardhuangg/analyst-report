@@ -656,24 +656,10 @@ section[data-testid="stSidebar"] .creator-card .link-btn{
 section[data-testid="stSidebar"] .creator-card .link-btn:hover{ background:rgba(46,126,251,.12); box-shadow:0 6px 16px rgba(46,126,251,.25); }
 section[data-testid="stSidebar"] .creator-card .link-btn svg{ width:16px; height:16px; display:block; }
             
-/* --- Responsive wider sidebar --- */
-:root{
-  /* Tweak these bounds to taste */
-  --sidebar-w: clamp(300px, 28vw, 350px);
-}
 
-/* Force the aside to reserve more space */
-section[data-testid="stSidebar"]{
-  width: var(--sidebar-w) !important;
-  min-width: var(--sidebar-w) !important;
-  max-width: var(--sidebar-w) !important;
-  flex: 0 0 var(--sidebar-w) !important; /* ensure the layout allocates it */
-}
-
-/* Inner container sometimes has its own width; keep it in sync */
-section[data-testid="stSidebar"] > div{
-  width: var(--sidebar-w) !important;
-  max-width: var(--sidebar-w) !important;
+/* Keep your sticky behavior without affecting width */
+section[data-testid="stSidebar"] :is(div.stButton, div[data-testid="stFormSubmitButton"]) button{
+  position: sticky; top: calc(100vh - 72px);
 }
 
 /* Cards & Header */
@@ -701,6 +687,52 @@ with st.sidebar.form("report_form"):
         index=["1y", "3y", "5y", "max"].index(st.session_state.get("timeframe", "5y")),
     )
     submitted = st.form_submit_button("Generate Report", type="primary")
+
+st.markdown("""
+<style id="sidebar-button-fix">
+/* Stretch every ancestor wrapper so nothing clamps the width */
+section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"],
+section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] > div,
+section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] > div > div{
+  display: flex !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Some builds center buttons; kill that */
+section[data-testid="stSidebar"] .stButton{ text-align: initial !important; }
+
+/* Make the innermost wrapper participate in the flex stretch */
+section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] > div > div{
+  flex: 1 1 auto !important;
+}
+
+/* Finally, stretch the button itself */
+section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] button,
+section[data-testid="stSidebar"] .stButton > button,
+section[data-testid="stSidebar"] button[data-testid="baseButton-primary"],
+section[data-testid="stSidebar"] button[data-testid="baseButton-secondary"]{
+  flex: 1 1 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  align-self: stretch !important;
+}
+
+/* Keep your sticky styling WITHOUT touching width */
+section[data-testid="stSidebar"] :is(div.stButton, div[data-testid="stFormSubmitButton"]) button{
+  position: sticky; top: calc(100vh - 72px);
+  margin-top: 12px; padding: 12px 14px;
+  border: 0 !important; border-radius: 12px !important; font-weight: 700;
+  background-image: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
+  background-color: var(--accent) !important; color: #fff !important;
+  box-shadow: 0 8px 22px rgba(46,126,251,0.40) !important;
+  transition: transform .03s, box-shadow .2s, filter .2s;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ---------- Sidebar: About/Disclaimer ----------
 with st.sidebar.expander("ℹ️ About & Disclaimer", expanded=False):
