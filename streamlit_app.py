@@ -52,6 +52,11 @@ if "data_ready" not in st.session_state:
     st.session_state["data_ready"] = False
 if "exec_summary" not in st.session_state:
     st.session_state["exec_summary"] = None
+# NEW: hold comps analysis + previous peer string for change detection
+if "comps_analysis" not in st.session_state:
+    st.session_state["comps_analysis"] = None
+if "peer_input_prev" not in st.session_state:
+    st.session_state["peer_input_prev"] = None
 
 # -------------------- Helpers: metrics & padding -----------------
 
@@ -736,7 +741,7 @@ section[data-testid="stSidebar"] .stFormSubmitButton button{
 """, unsafe_allow_html=True)
 
 # ---------- Sidebar: About/Disclaimer ----------
-with st.sidebar.expander("ℹ️ About & Disclaimer", expanded=False):
+with st.sidebar.expander("About & Disclaimer", expanded=False):
     st.markdown(
         """
 **Status:** This app is an in-progress, student-built passion project.
@@ -746,7 +751,7 @@ with st.sidebar.expander("ℹ️ About & Disclaimer", expanded=False):
 - **Price Performance** — Closing-price line chart.
 - **Financial Statements** — Income, Balance Sheet, Cash Flow (last N years).
 - **Key Metrics & Ratios** — Margins, ROE/ROIC, asset turnover, FCF trends, plus basic market multiples.
-- **Comparable Companies** — Quick peer multiples table.
+- **Comparable Companies** — Quick peer multiples table. AI Comps & Market Analysis
 - **Cost of Capital (WACC)** — CAPM inputs; optionally used as the DCF discount rate.
 - **Growth Consistency** — Cross-check: g ≈ ROIC × reinvestment.
 - **DCF Valuation (Two-Stage)** — Optional fade g₁ → g₂; can auto-solve for **r** or **g₁** to match market.
@@ -773,7 +778,7 @@ st.sidebar.markdown("""
   <div class="actions">
     <a class="link-btn" href="https://linkedin.com/in/edwardhuangg" target="_blank" rel="noopener noreferrer">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M20.45 20.45h-3.57v-5.58c0-1.33-.02-3.04-1.86-3.04-1.86 0-2.14 1.45-2.14 2.95v5.67H9.31V9.75h3.43v1.46h.05c.48-.91 1.64-1.86 3.37-1.86 3.61 0 4.28 2.38 4.28 5.48v5.61zM5.34 8.29a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.13 20.45H3.56V9.75h3.57v10.7zM22 2H2C.9 2 0 2.9 0 4v16c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+        <path d="M20.45 20.45h-3.57v-5.58c0-1.33-.02-3.04-1.86-3.04-1.86 0-2.14 1.45-2.14 2.95v5.67H9.31V9.75h3.43v1.46h.05c.48-.91 1.64-1.86 3.37-1.86 3.61 0 4.28 2.38 4.28 5.48v5.61zM5.34 8.29a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.13 20.45H3.56V9.75h3.57v10.7zM22 2H2C.9 2 0 2.9 0 4v16c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2z"/>
       </svg>
       LinkedIn
     </a>
@@ -792,7 +797,7 @@ if st.session_state.get("data_ready"):
       <div class="title">
         <div class="eyebrow">Analyst Dashboard</div>
         <h1>📊 Analyst Dashboard & Report Generator</h1>
-        <div class="subtitle">AI-assisted valuation and fundamentals — calibrated to your assumptions.</div>
+        <div class="subtitle">AI-assisted valuation, tailored to your assumptions - Excel export included.</div>
       </div>
       <div class="chips">
         <span class="chip">{_ticker}</span>
@@ -808,7 +813,7 @@ else:
       <div class="title">
         <div class="eyebrow">Analyst Dashboard</div>
         <h1>📊 Analyst Dashboard & Report Generator</h1>
-        <div class="subtitle">AI-assisted valuation and fundamentals — calibrated to your assumptions.</div>
+        <div class="subtitle">AI-assisted valuation, tailored to your assumptions - Excel export included.</div>
       </div>
       <div class="chips">
         <span class="chip">Ready</span>
@@ -826,6 +831,9 @@ if submitted:
         # DCF defaults (editable)
         "N": 5, "g1": 0.10, "g2": 0.025, "r": 0.09, "fade": True,
         "exec_summary": None,
+        # reset comps analysis on new report
+        "comps_analysis": None,
+        "peer_input_prev": None,
     })
 
 # ---------- Guard ----------
@@ -861,15 +869,15 @@ bs_cols = [c for c in desired_bs if c in bs.columns] + equity_cols + \
 cf_pref = ["Total Cash From Operating Activities", "Capital Expenditures"]
 cf_cols = [c for c in cf_pref if c in cf.columns] + [c for c in cf.columns if c not in cf_pref]
 
-st.markdown('<div class="ui-card"><div class="ui-card-title">🧾 Income Statement</div>', unsafe_allow_html=True)
+st.markdown('<div class="ui-card"><div class="ui-card-title">Income Statement</div>', unsafe_allow_html=True)
 st.dataframe(format_statement(inc[inc_cols].head(years_back), decimals=0), use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="ui-card"><div class="ui-card-title">📒 Balance Sheet</div>', unsafe_allow_html=True)
+st.markdown('<div class="ui-card"><div class="ui-card-title">Balance Sheet</div>', unsafe_allow_html=True)
 st.dataframe(format_statement(bs[bs_cols].head(years_back), decimals=0), use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="ui-card"><div class="ui-card-title">💵 Cash Flow</div>', unsafe_allow_html=True)
+st.markdown('<div class="ui-card"><div class="ui-card-title">Cash Flow</div>', unsafe_allow_html=True)
 st.dataframe(format_statement(cf[cf_cols].head(years_back), decimals=0), use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -904,6 +912,8 @@ st.table(pd.DataFrame.from_dict({k: fmt_metrics[k] for k in ordered_keys},
 
 # ---------- Comparable comps ----------
 st.subheader("Comparable Companies")
+# NEW: friendly reminder text around comps
+st.caption("You control the comp set. The tickers below are just a gentle auto-set filler—replace/add peers that truly match business model, size, growth, and region.")
 peer_input = st.text_input("Peer tickers (comma-separated)", "MSFT,GOOG,AMZN")
 peers = [p.strip().upper() for p in peer_input.split(",") if p.strip()]
 
@@ -923,6 +933,116 @@ for peer in peers:
         rows.append({"Ticker": peer})
 comps_df = pd.DataFrame(rows).set_index("Ticker")
 st.table(comps_df)
+
+# ===== NEW: AI Comps & Market Analysis (auto-trigger) =====
+def _format_float(x, pct=False, multiple=False):
+    try:
+        v = float(x)
+    except Exception:
+        return "—"
+    if pct:
+        return f"{v*100:.2f}%"
+    if multiple:
+        return f"{v:.2f}x"
+    return f"{v:,.2f}"
+
+def _prepare_comp_stats(df: pd.DataFrame):
+    out = {}
+    for col, as_mult in [("P/E", True), ("EV/EBITDA", True), ("P/B", True), ("P/S", True), ("Dividend Yield", False)]:
+        if col in df.columns:
+            series = pd.to_numeric(df[col], errors="coerce")
+            if series.notna().any():
+                out[col] = {
+                    "median": float(np.nanmedian(series)),
+                    "min": float(np.nanmin(series)),
+                    "max": float(np.nanmax(series)),
+                    "count": int(series.notna().sum()),
+                }
+            else:
+                out[col] = None
+        else:
+            out[col] = None
+    return out
+
+def _make_comps_prompt(ticker: str, extras: dict, comps_df: pd.DataFrame, stats: dict, timeframe: str, fmt_metrics: dict):
+    sector = extras.get("Sector") or "—"
+    industry = extras.get("Industry") or "—"
+    target_pe = extras.get("P/E Ratio")
+    target_ebitda = extras.get("EV/EBITDA")
+
+    lines = [
+        f"Ticker: {ticker}",
+        f"Timeframe: {timeframe}",
+        f"Sector: {sector} | Industry: {industry}",
+        f"Target P/E: {target_pe} | Target EV/EBITDA: {target_ebitda}",
+        f"Peers provided: {', '.join(comps_df.index.tolist()) or '—'}",
+        "",
+        "Peer multiples summary (median/min/max/count):"
+    ]
+    for col in ["P/E", "EV/EBITDA", "P/B", "P/S", "Dividend Yield"]:
+        s = stats.get(col)
+        if s:
+            lines.append(f"- {col}: median={s['median']:.2f}, min={s['min']:.2f}, max={s['max']:.2f}, n={s['count']}")
+        else:
+            lines.append(f"- {col}: n/a")
+    lines.append("")
+    lines.append("Other target metrics: " + "; ".join([f"{k}={v}" for k,v in fmt_metrics.items() if k in ("P/E Ratio","EV/EBITDA","Market Cap ($)")]))
+    ctx = "\n".join(lines)
+
+    prompt = (
+        "You are an equity analyst. Write a compact analysis of the provided comp set and the market context.\n"
+        "Deliver 3 short sections with bullets:\n"
+        "1) Peer Set Sanity Check – Are these peers appropriate? Note any obvious mismatches and suggest 1–3 adjustments.\n"
+        "2) Relative Valuation – Where does the target sit vs comp medians on P/E and EV/EBITDA (cheap/fair/expensive)? Mention P/B or P/S if more relevant.\n"
+        "3) Market Context & Takeaways – Brief comment on sector/industry backdrop implied by the peer set, and 2–3 concrete diligence items.\n"
+        "Keep it crisp, numbers-driven, and avoid hype.\n\n"
+        f"DATA:\n{ctx}"
+    )
+    return prompt
+
+def generate_comps_analysis_if_needed():
+    # Only run if we have an API key and at least one peer
+    if not openai.api_key:
+        st.info("Add an OpenAI API key in Secrets to enable AI comps analysis.")
+        return
+    if comps_df is None or comps_df.empty:
+        st.session_state["comps_analysis"] = None
+        return
+
+    stats = _prepare_comp_stats(comps_df)
+    prompt = _make_comps_prompt(ticker, extras, comps_df, stats, timeframe, fmt_metrics)
+    with st.spinner("🔎 Analyzing comps & market …"):
+        try:
+            resp = _create_chat(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are a rigorous, numbers-first equity analyst looking to identify key takeaways of the comps and surrounding market context/trends"},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.4,
+                max_tokens=650,
+            )
+            st.session_state["comps_analysis"] = _extract_chat(resp)
+        except Exception as e:
+            st.session_state["comps_analysis"] = f"_Comps analysis unavailable_: {e}"
+
+# Trigger on new report or when peer list changes
+comps_changed = (st.session_state.get("peer_input_prev") != peer_input)
+if submitted or comps_changed:
+    generate_comps_analysis_if_needed()
+st.session_state["peer_input_prev"] = peer_input
+
+# Show the analysis block
+st.markdown("**Comps & Market Analysis (AI)**")
+colA, colB = st.columns([1, 5])
+with colA:
+    if st.button("🔁 Refresh", use_container_width=True):
+        generate_comps_analysis_if_needed()
+with colB:
+    if st.session_state.get("comps_analysis"):
+        st.markdown(st.session_state["comps_analysis"])
+    else:
+        st.caption("Edit the peer list above (or click **Refresh**) to generate an AI summary of the comp set and market context.")
 
 # -------------------- DCF (two-stage + inverse) -----------------
 
