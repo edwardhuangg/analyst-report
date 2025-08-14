@@ -589,11 +589,27 @@ section[data-testid="stSidebar"] .st-expander{ max-height: 40vh; overflow:auto; 
 .stTable tbody tr:nth-child(even){ background: rgba(255,255,255,0.02); }
 .stAlert{ border-radius:12px; background: var(--bg-card) !important; color: var(--text) !important; }
 section[data-testid="stSidebar"] > div{ height:100%; display:flex; flex-direction:column; }
-/* Sticky submit button */
-section[data-testid="stSidebar"] div.stButton > button[kind],
-section[data-testid="stSidebar"] div[data-testid="stFormSubmitButton"] button,
+section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"]{
+  width: 100% !important;
+  display: block !important;
+}
+section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] > div{
+  width: 100% !important;
+  display: block !important;
+}
+section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] button{
+  width: 100% !important;
+}
+
+/* Fallbacks for different Streamlit builds */
+section[data-testid="stSidebar"] .stButton > button,
 section[data-testid="stSidebar"] button[data-testid="baseButton-primary"],
 section[data-testid="stSidebar"] button[data-testid="baseButton-secondary"]{
+  width: 100% !important;
+}
+
+/* Keep your sticky-at-bottom behavior */
+section[data-testid="stSidebar"] :is(div.stButton, div[data-testid="stFormSubmitButton"]) button{
   position: sticky; top: calc(100vh - 72px);
   width: 100%; margin-top: 12px; padding: 12px 14px;
   border: 0 !important; border-radius: 12px !important; font-weight: 700;
@@ -639,6 +655,27 @@ section[data-testid="stSidebar"] .creator-card .link-btn{
 }
 section[data-testid="stSidebar"] .creator-card .link-btn:hover{ background:rgba(46,126,251,.12); box-shadow:0 6px 16px rgba(46,126,251,.25); }
 section[data-testid="stSidebar"] .creator-card .link-btn svg{ width:16px; height:16px; display:block; }
+            
+/* --- Responsive wider sidebar --- */
+:root{
+  /* Tweak these bounds to taste */
+  --sidebar-w: clamp(300px, 28vw, 350px);
+}
+
+/* Force the aside to reserve more space */
+section[data-testid="stSidebar"]{
+  width: var(--sidebar-w) !important;
+  min-width: var(--sidebar-w) !important;
+  max-width: var(--sidebar-w) !important;
+  flex: 0 0 var(--sidebar-w) !important; /* ensure the layout allocates it */
+}
+
+/* Inner container sometimes has its own width; keep it in sync */
+section[data-testid="stSidebar"] > div{
+  width: var(--sidebar-w) !important;
+  max-width: var(--sidebar-w) !important;
+}
+
 /* Cards & Header */
 .ui-card{ margin:12px 0; padding:16px 18px; border-radius:14px; border:1px solid var(--border); background: var(--bg-card); }
 .ui-card .ui-card-title{ display:flex; align-items:center; gap:8px; margin:0 0 8px; font-weight:700; font-size:1.1rem; color:var(--text); }
