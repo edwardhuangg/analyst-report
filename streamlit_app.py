@@ -796,6 +796,35 @@ section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] button{ widt
 )
 
 st.markdown("""
+<style id="fix-formsubmit-width">
+/* Stretch ALL element-containers inside the sidebar, so nothing is clamped */
+section[data-testid="stSidebar"] [data-testid="stElementContainer"]{
+  width:100% !important; max-width:100% !important; min-width:0 !important;
+  align-self:stretch !important; display:block !important;
+}
+/* If the container wraps content in an extra div, stretch that too */
+section[data-testid="stSidebar"] [data-testid="stElementContainer"] > div{
+  width:100% !important; max-width:100% !important; display:block !important;
+}
+
+/* Make submit **and** legacy buttons fill the container */
+section[data-testid="stSidebar"] :is(.stFormSubmitButton, .stButton){ width:100% !important; display:block !important; }
+section[data-testid="stSidebar"] :is(.stFormSubmitButton, .stButton) > *{ width:100% !important; display:block !important; }
+section[data-testid="stSidebar"] :is(.stFormSubmitButton button, .stButton > button,
+  button[data-testid="baseButton-primary"], button[data-testid="baseButton-secondary"]){
+  width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important;
+
+  /* sticky visuals */
+  position: sticky; top: calc(100vh - 72px);
+  margin-top:12px; padding:12px 14px; border:0 !important; border-radius:12px !important; font-weight:700;
+  background-image: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
+  background-color: var(--accent) !important; color:#fff !important;
+  box-shadow: 0 8px 22px rgba(46,126,251,0.40) !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
 <style>
 /* ---------- Creator card (sidebar) ---------- */
 section[data-testid="stSidebar"] .creator-card{
@@ -882,8 +911,6 @@ st.sidebar.markdown("""
   </div>
 </div>
 """, unsafe_allow_html=True)
-
-
 
 # ---------- Header ----------
 if st.session_state.get("data_ready"):
