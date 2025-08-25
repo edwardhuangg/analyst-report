@@ -52,11 +52,16 @@ if "data_ready" not in st.session_state:
     st.session_state["data_ready"] = False
 if "exec_summary" not in st.session_state:
     st.session_state["exec_summary"] = None
-# NEW: hold comps analysis + previous peer string for change detection
+# Comps analysis + previous peer string for change detection
 if "comps_analysis" not in st.session_state:
     st.session_state["comps_analysis"] = None
 if "peer_input_prev" not in st.session_state:
     st.session_state["peer_input_prev"] = None
+# 3S state holders
+if "three_s" not in st.session_state:
+    st.session_state["three_s"] = {}
+if "dcf_choice" not in st.session_state:
+    st.session_state["dcf_choice"] = "Two-Stage (Simple)"
 
 # -------------------- Helpers: metrics & padding -----------------
 
@@ -117,6 +122,8 @@ def compute_metrics(inc: pd.DataFrame, bs: pd.DataFrame, cf: pd.DataFrame, years
 
     return m
 
+# ---------- Quarterly → Annual padding ----------
+
 def _annualize_quarterly(qdf: pd.DataFrame, kind: str) -> pd.DataFrame:
     if qdf is None or qdf.empty:
         return pd.DataFrame()
@@ -129,6 +136,7 @@ def _annualize_quarterly(qdf: pd.DataFrame, kind: str) -> pd.DataFrame:
         ann = df.resample("Y").last()
     ann = ann.dropna(how="all").sort_index(ascending=False)
     return ann
+
 
 def _pad_annual_with_quarterly_if_needed(yt: yf.Ticker,
                                          inc: pd.DataFrame, bs: pd.DataFrame, cf: pd.DataFrame,
@@ -176,7 +184,8 @@ def _pad_annual_with_quarterly_if_needed(yt: yf.Ticker,
     cf2  = _pad(cf,  q_cf_ann)  if need_cf  else cf
     return inc2, bs2, cf2
 
-# -------------------- Accounting Syntax ----------
+# -------------------- Accounting / formatting ----------
+
 def _make_accounting_formatter(decimals: int = 0, parens_for_neg: bool = True):
     fmt_spec = f"{{:,.{decimals}f}}"
     def _fmt(x):
@@ -191,6 +200,7 @@ def _make_accounting_formatter(decimals: int = 0, parens_for_neg: bool = True):
             s = s.split(".")[0]
         return f"({s})" if (parens_for_neg and val < 0) else s
     return _fmt
+
 
 def format_statement(df: pd.DataFrame, decimals: int = 0):
     if df is None or df.empty:
@@ -219,8 +229,10 @@ def _try_once_then_retry(fn):
             return fn()
         raise
 
+
 def _has_rows(df: pd.DataFrame) -> bool:
     return (df is not None) and hasattr(df, "empty") and (not df.empty)
+
 
 @st.cache_data(ttl=3600, show_spinner="⏳ Fetching data …")
 def fetch_financials(ticker: str, period: str = "5y"):
@@ -303,18 +315,14 @@ def _pick_first(df: pd.DataFrame, candidates: List[str]):
             return df[c]
     return None
 
+
 def _latest(series: pd.Series):
     return series.iloc[0] if (series is not None and not series.empty) else None
 
-# --- FIXED: normalize CapEx sign + use *latest* 4 quarters ---
+# --- Base FCF selection (TTM preferred) ---
+
 def get_base_fcf(cf_annual: pd.DataFrame, cf_quarterly: Optional[pd.DataFrame] = None):
-    """
-    Base FCF preference:
-      (a) TTM from quarterlies: sum last 4 quarters of (OCF - CapEx)
-      (b) else latest annual:   (OCF - CapEx)
-    Normalizes CapEx sign because some Yahoo series report CapEx as a positive outflow.
-    Ensures we take the latest 4 quarters (descending index).
-    """
+    """Return base FCF = OCF - CapEx (TTM from quarterlies preferred, else latest annual)."""
     def pick(df, names):
         for c in names:
             if df is not None and c in df.columns:
@@ -332,14 +340,11 @@ def get_base_fcf(cf_annual: pd.DataFrame, cf_quarterly: Optional[pd.DataFrame] =
             "Purchase Of Property Plant And Equipment",
             "Investments In Property, Plant And Equipment"
         ])
-
         if ocf_q is not None and capex_q is not None:
             ocf_q = ocf_q.dropna().sort_index(ascending=False)
             capex_q = capex_q.dropna().sort_index(ascending=False)
-
             if not capex_q.empty and capex_q.iloc[:8].median() > 0:
                 capex_q = -capex_q
-
             if len(ocf_q) >= 4 and len(capex_q) >= 4:
                 ocf_4   = ocf_q.iloc[:4].sum()
                 capex_4 = capex_q.iloc[:4].sum()
@@ -364,6 +369,7 @@ def get_base_fcf(cf_annual: pd.DataFrame, cf_quarterly: Optional[pd.DataFrame] =
             return float(ocf_latest + capex_latest)
 
     return None
+
 
 def pick_shares(yf_info: dict, inc_annual: pd.DataFrame, bs_annual: pd.DataFrame) -> Optional[int]:
     info_so = None
@@ -406,6 +412,7 @@ def pick_shares(yf_info: dict, inc_annual: pd.DataFrame, bs_annual: pd.DataFrame
         return int(min([stmt_so, info_so], key=lambda x: abs(x - info_so)))
     return int(stmt_so or (info_so or 0)) or None
 
+
 def dcf_two_stage_price(base_fcf, shares_out, net_debt, N, g1, g2, r, fade: bool = True):
     if base_fcf is None or shares_out in (None, 0):
         return None
@@ -429,6 +436,7 @@ def dcf_two_stage_price(base_fcf, shares_out, net_debt, N, g1, g2, r, fade: bool
     eq_v     = ev - (net_debt or 0.0)
     return eq_v / shares_out
 
+
 def _bisect_solve(func, lo, hi, tol=1e-6, max_iter=60):
     f_lo = func(lo); f_hi = func(hi)
     if f_lo is None or f_hi is None:
@@ -448,12 +456,14 @@ def _bisect_solve(func, lo, hi, tol=1e-6, max_iter=60):
             x_lo, f_lo = x_mid, f_mid
     return (x_lo + x_hi) / 2
 
+
 def solve_implied_r(target_px, base_fcf, shares_out, net_debt, N, g1, g2, fade: bool = True):
     lo = max(g2 + 0.001, 0.01); hi = 0.40
     def f(r):
         px = dcf_two_stage_price(base_fcf, shares_out, net_debt, N, g1, g2, r, fade=fade)
         return None if px is None else (px - target_px)
     return _bisect_solve(f, lo, hi)
+
 
 def solve_implied_g1(target_px, base_fcf, shares_out, net_debt, N, r, g2, fade: bool = True):
     lo, hi = -0.50, 0.50
@@ -470,6 +480,7 @@ def detect_is_financials(extras: dict) -> bool:
     tokens = ["financial", "bank", "insurance", "insurer", "capital markets", "credit", "reinsurance", "asset management", "brokerage"]
     return any(t in s for t in tokens) or any(t in i for t in tokens)
 
+
 def estimate_starting_bve_and_roe(inc: pd.DataFrame, bs: pd.DataFrame):
     eq_cols = [c for c in bs.columns if "equity" in c.lower()]
     bve0 = float(bs[eq_cols[0]].iloc[0]) if eq_cols else None
@@ -482,6 +493,7 @@ def estimate_starting_bve_and_roe(inc: pd.DataFrame, bs: pd.DataFrame):
     except Exception:
         roe0 = None
     return bve0, roe0
+
 
 def residual_income_valuation(bv0, shares_out, ke, N, roe_start, payout, fade_to_ke=True, roe_terminal: Optional[float]=None, g_ri: float=0.0):
     """
@@ -555,7 +567,153 @@ def residual_income_valuation(bv0, shares_out, ke, N, roe_start, payout, fade_to
     }
     return implied_price, df, summary
 
-# -------------------- Streamlit UI ------------------------------
+# -------------------- NEW: 3-Statement Model --------------------
+
+def _safe(val, default=0.0):
+    try:
+        return float(val) if pd.notna(val) else default
+    except Exception:
+        return default
+
+
+def _col(df: pd.DataFrame, *names):
+    for n in names:
+        if n in df.columns:
+            return df[n]
+    return pd.Series(dtype='float64')
+
+
+def _latest_val(series: pd.Series, default=0.0):
+    return _safe(series.iloc[0] if (series is not None and not series.empty) else default, default)
+
+
+def derive_default_drivers(inc: pd.DataFrame, bs: pd.DataFrame, cf: pd.DataFrame) -> dict:
+    rev = _col(inc, "Total Revenue")
+    ebit= _col(inc, "Operating Income")
+    dep = _col(cf,  "Depreciation", "Depreciation And Amortization")
+    cap = _col(cf,  "Capital Expenditures", "Capital Expenditure")
+    tca = _col(bs,  "Total Current Assets")
+    tcl = _col(bs,  "Total Current Liabilities")
+    cash= _col(bs,  "Cash And Cash Equivalents", "Cash")
+    sdebt=_col(bs,  "Short Long Term Debt", "Short Term Debt")
+    ldebt=_col(bs,  "Long Term Debt")
+
+    om   = (ebit / rev).dropna()
+    dep_pct   = (dep.abs() / rev).dropna()
+    capex_pct = (cap.abs() / rev).dropna()
+
+    # NWC = (CA - Cash) - (CL - ShortDebt)
+    nwc_amt = (tca - cash) - (tcl - sdebt.fillna(0))
+    nwc_pct = (nwc_amt / rev).dropna()
+
+    # Effective tax rate (approx)
+    tax = _col(inc, "Tax Provision"); ptx = _col(inc, "Pretax Income")
+    eff_tax = (tax.abs() / ptx.abs()).replace([pd.NA, pd.NaT, float('inf')], pd.NA).dropna()
+
+    # Interest rate from history
+    iex = _col(inc, "Interest Expense"); debt_hist = (sdebt.fillna(0) + ldebt.fillna(0)).abs()
+    int_rate = (iex.abs() / debt_hist.replace(0, pd.NA)).dropna()
+
+    drivers = {
+        "rev0": _latest_val(rev),
+        "revg": float(round(rev.pct_change(-1).dropna().head(3).mean(), 4)) if len(rev) > 1 else 0.06,
+        "ebit_margin": float(round(om.head(3).mean(), 4)) if not om.empty else 0.18,
+        "tax_rate": float(min(max(eff_tax.head(3).mean() if not eff_tax.empty else 0.20, 0.0), 0.40)),
+        "dep_pct_rev": float(round(dep_pct.head(3).mean(), 4)) if not dep_pct.empty else 0.04,
+        "capex_pct_rev": float(round(capex_pct.head(3).mean(), 4)) if not capex_pct.empty else 0.05,
+        "nwc_pct_rev": float(round(nwc_pct.head(3).mean(), 4)) if not nwc_pct.empty else 0.05,
+        "interest_rate": float(round(int_rate.head(3).mean(), 4)) if not int_rate.empty else 0.03,
+        "div_payout": 0.0,
+        "cash0": _latest_val(cash),
+        "ppe0": _latest_val(_col(bs, "Property Plant And Equipment Net", "Net Property Plant & Equipment")),
+        "debt0": _latest_val(debt_hist),
+        "equity0": _latest_val(_col(bs, "Total Stockholder Equity", "Total Equity", "Total Equity Gross Minority Interest")),
+        "nwc0": _latest_val(nwc_amt),
+    }
+    for k in ("dep_pct_rev","capex_pct_rev","nwc_pct_rev"):
+        drivers[k] = float(max(drivers[k], 0.0))
+    return drivers
+
+
+def project_three_statements(dr: dict, years: int):
+    """Driver-based 3S build, returning projected Income, Balance, CashFlow and Unlevered FCF series."""
+    N = years
+    rev0 = dr["rev0"]; equity0 = dr["equity0"]; ppe0 = dr["ppe0"]; nwc0 = dr["nwc0"]; cash0 = dr["cash0"]; debt0 = dr["debt0"]
+    g = dr["revg"]; m_ebit = dr["ebit_margin"]; t = dr["tax_rate"]; dep_pct = dr["dep_pct_rev"]; capex_pct = dr["capex_pct_rev"]; nwc_pct = dr["nwc_pct_rev"]
+    r_int = dr["interest_rate"]; payout = dr["div_payout"]
+
+    years_idx = [f"Y{n}" for n in range(1, N+1)]
+    rev = []; ebit=[]; dep=[]; int_exp=[]; ebt=[]; tax=[]; ni=[]
+    capex=[]; nwc_level=[]; dNWC=[]; ppe=[]; cash=[]; divs=[]
+    cfo=[]; cfi=[]; cff=[]; fcf_u=[]; equity=[]
+
+    rev_prev = rev0; ppe_prev = ppe0; nwc_prev = nwc0; cash_prev = cash0; equity_prev = equity0
+    for _ in range(N):
+        r = rev_prev * (1 + g); rev.append(r)
+        d = dep_pct * r; dep.append(d)
+        e = m_ebit * r; ebit.append(e)
+        ii = r_int * debt0; int_exp.append(ii)
+        ebt_i = e - ii
+        tax_i = max(ebt_i, 0.0) * t
+        ni_i = ebt_i - tax_i
+        ebt.append(ebt_i); tax.append(tax_i); ni.append(ni_i)
+        div_i = max(ni_i, 0.0) * payout; divs.append(div_i)
+
+        nwc_i = nwc_pct * r; nwc_level.append(nwc_i)
+        dNWC_i = nwc_i - nwc_prev; dNWC.append(dNWC_i)
+        cap_i = capex_pct * r; capex.append(cap_i)
+
+        ppe_i = ppe_prev + cap_i - d
+        ppe.append(ppe_i)
+
+        cfo_i = ni_i + d - dNWC_i
+        cfi_i = -cap_i
+        cff_i = -div_i
+        cfo.append(cfo_i); cfi.append(cfi_i); cff.append(cff_i)
+
+        cash_i = cash_prev + cfo_i + cfi_i + cff_i
+        cash.append(cash_i)
+
+        equity_i = equity_prev + ni_i - div_i
+        equity.append(equity_i)
+
+        fcf_i = e * (1 - t) + d - cap_i - dNWC_i
+        fcf_u.append(fcf_i)
+
+        rev_prev, ppe_prev, nwc_prev, cash_prev, equity_prev = r, ppe_i, nwc_i, cash_i, equity_i
+
+    income_df = pd.DataFrame({
+        "Year": years_idx, "Revenue": rev, "EBIT": ebit, "Depreciation": dep,
+        "Interest": int_exp, "EBT": ebt, "Taxes": tax, "Net Income": ni
+    })
+    balance_df = pd.DataFrame({
+        "Year": years_idx, "Cash": cash, "NWC": nwc_level, "PP&E": ppe,
+        "Debt (assumed flat)": [debt0]*N, "Equity": equity
+    })
+    cashflow_df = pd.DataFrame({
+        "Year": years_idx, "CFO": cfo, "CFI (CapEx)": cfi, "CFF": cff, "ΔCash": [cfo[i]+cfi[i]+cff[i] for i in range(N)]
+    })
+    fcf_series = pd.Series(fcf_u, index=years_idx, name="Unlevered FCF")
+    equity_series = pd.Series(equity, index=years_idx)
+    return income_df, balance_df, cashflow_df, fcf_series, equity_series, equity0
+
+
+def build_dcf_from_series(fcf_series: pd.Series, r: float, g_term: float, net_debt: float, shares_out: float):
+    if fcf_series is None or fcf_series.empty or r <= g_term:
+        return None, None, None
+    N = len(fcf_series)
+    years = list(range(1, N+1))
+    pv = [float(fcf_series.iloc[i]) / (1+r)**(i+1) for i in range(N)]
+    term_fcf = float(fcf_series.iloc[-1]) * (1 + g_term)
+    term_pv  = term_fcf / (r - g_term) / (1 + r)**N
+    ev = sum(pv) + term_pv
+    eq_v = ev - (net_debt or 0.0)
+    px   = (eq_v / shares_out) if shares_out else None
+    detail = pd.DataFrame({"Year": years + ["Terminal"], "FCF": list(fcf_series.values) + [term_fcf], "PV FCF": pv + [term_pv]})
+    head = pd.Series({"Enterprise Value": ev, "Less: Net Debt": net_debt, "Equity Value": eq_v, "Shares Out": shares_out, "Implied Price": px}).to_frame("Value")
+    return px, detail, head
+
+# -------------------- UI & Styling ------------------------------
 
 st.set_page_config(page_title="📈 Analyst Dashboard", layout="wide")
 
@@ -584,97 +742,19 @@ h2 { font-size: 1.25rem; margin:.35rem 0 .25rem; }
 }
 .stTextInput input::placeholder, .stNumberInput input::placeholder, .stTextArea textarea::placeholder{ color: var(--text-dim) !important; }
 label, .stMarkdown small, .stCaption { color: var(--text-dim) !important; }
-section[data-testid="stSidebar"] .st-expander, .st-expander{
+.st-expander{
   border: 1px solid var(--border); border-radius: 12px !important; overflow: hidden; background: var(--bg-card);
 }
-section[data-testid="stSidebar"] .st-expander{ max-height: 40vh; overflow:auto; }
 .stTable table{ border: 1px solid var(--border); border-radius:10px; overflow:hidden; background: var(--bg-card); }
 .stTable thead tr th{ background: rgba(255,255,255,0.04) !important; color: var(--text) !important; font-weight:700 !important; }
 .stTable tbody td{ color: var(--text) !important; }
 .stTable tbody tr:nth-child(even){ background: rgba(255,255,255,0.02); }
 .stAlert{ border-radius:12px; background: var(--bg-card) !important; color: var(--text) !important; }
 section[data-testid="stSidebar"] > div{ height:100%; display:flex; flex-direction:column; }
-section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"]{
-  width: 100% !important;
-  display: block !important;
-}
-section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] > div{
-  width: 100% !important;
-  display: block !important;
-}
-section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] button{
-  width: 100% !important;
-}
-
-/* Fallbacks for different Streamlit builds */
-section[data-testid="stSidebar"] .stButton > button,
-section[data-testid="stSidebar"] button[data-testid="baseButton-primary"],
-section[data-testid="stSidebar"] button[data-testid="baseButton-secondary"]{
-  width: 100% !important;
-}
-
-/* Keep your sticky-at-bottom behavior */
-section[data-testid="stSidebar"] :is(div.stButton, div[data-testid="stFormSubmitButton"]) button{
-  position: sticky; top: calc(100vh - 72px);
-  width: 100%; margin-top: 12px; padding: 12px 14px;
-  border: 0 !important; border-radius: 12px !important; font-weight: 700;
-  background-image: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
-  background-color: var(--accent) !important; color: #fff !important;
-  box-shadow: 0 8px 22px rgba(46,126,251,0.40) !important;
-  transition: transform .03s, box-shadow .2s, filter .2s;
-  -webkit-appearance: none; appearance: none;
-}
-section[data-testid="stSidebar"] div.stButton > button:hover:not(:disabled){
-  filter: brightness(1.05); box-shadow: 0 10px 26px rgba(46,126,251,0.50) !important;
-}
-section[data-testid="stSidebar"] div.stButton > button:active:not(:disabled){ transform: translateY(1px); }
-section[data-testid="stSidebar"] div.stButton > button:focus-visible{ outline: 2px solid rgba(46,126,251,.65) !important; outline-offset: 2px; }
-section[data-testid="stSidebar"] div.stButton > button:disabled{
-  opacity:.9 !important; cursor:not-allowed !important;
-  background-image: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
-  background-color: var(--accent) !important; color:#fff !important;
-}
-section[data-testid="stSidebar"] :is(div.stButton, div[data-testid="stFormSubmitButton"]){
-  width: 100% !important; display: block !important;
-}
-section[data-testid="stSidebar"] :is(div.stButton, div[data-testid="stFormSubmitButton"]) > div{
-  width: 100% !important; display: block !important;
-}
-/* Creator card */
-section[data-testid="stSidebar"] .creator-card{
-  margin-top:12px; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
-  background: var(--bg-card); display:flex; align-items:center; gap:12px;
-}
-section[data-testid="stSidebar"] .creator-card .avatar{
-  width:36px; height:36px; border-radius:999px; display:grid; place-items:center; font-weight:700; letter-spacing:.4px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff;
-}
-section[data-testid="stSidebar"] .creator-card .meta{ display:flex; flex-direction:column; line-height:1.2; }
-section[data-testid="stSidebar"] .creator-card .meta .label{ font-size:11px; text-transform:uppercase; color:var(--text-dim); }
-section[data-testid="stSidebar"] .creator-card .meta .name{ font-weight:700; color:var(--text); }
-section[data-testid="stSidebar"] .creator-card .actions{ margin-left:auto; }
-section[data-testid="stSidebar"] .creator-card .link-btn{
-  display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:8px;
-  border:1px solid rgba(46,126,251,.35); background:rgba(46,126,251,.08);
-  text-decoration:none; font-size:13px; color:var(--accent); transition: background .2s, transform .02s, box-shadow .2s;
-}
-section[data-testid="stSidebar"] .creator-card .link-btn:hover{ background:rgba(46,126,251,.12); box-shadow:0 6px 16px rgba(46,126,251,.25); }
-section[data-testid="stSidebar"] .creator-card .link-btn svg{ width:16px; height:16px; display:block; }
-            
-
-/* Keep your sticky behavior without affecting width */
-section[data-testid="stSidebar"] :is(div.stButton, div[data-testid="stFormSubmitButton"]) button{
-  position: sticky; top: calc(100vh - 72px);
-}
-
-/* Cards & Header */
+section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] button{ width: 100% !important; position: sticky; top: calc(100vh - 72px); margin-top: 12px; padding: 12px 14px; border: 0 !important; border-radius: 12px !important; font-weight: 700; background-image: linear-gradient(135deg, var(--accent), var(--accent-2)) !important; background-color: var(--accent) !important; color: #fff !important; box-shadow: 0 8px 22px rgba(46,126,251,0.40) !important; }
 .ui-card{ margin:12px 0; padding:16px 18px; border-radius:14px; border:1px solid var(--border); background: var(--bg-card); }
 .ui-card .ui-card-title{ display:flex; align-items:center; gap:8px; margin:0 0 8px; font-weight:700; font-size:1.1rem; color:var(--text); }
-.ui-card .ui-card-sub{ font-size:.9rem; color:var(--text-dim); }
-.app-header{
-  margin:8px 0 10px; padding:14px 16px; border-radius:14px; border:1px solid var(--border); background: var(--bg-card);
-  display:flex; gap:12px; align-items:center;
-}
+.app-header{ margin:8px 0 10px; padding:14px 16px; border-radius:14px; border:1px solid var(--border); background: var(--bg-card); display:flex; gap:12px; align-items:center; }
 .app-header .title{ flex:1; }
 .app-header .title .eyebrow{ font-size:12px; text-transform:uppercase; color:var(--text-dim); }
 .app-header .subtitle{ font-size:13px; color: var(--text-dim); margin-top:2px; }
@@ -693,100 +773,7 @@ with st.sidebar.form("report_form"):
     )
     submitted = st.form_submit_button("Generate Report", type="primary")
 
-st.markdown("""
-<style id="fix-formsubmit-width">
-/* Expand the element-container that Streamlit keys for the form submitter.
-   Cloud sets this to width: fit-content; which clamps the button. */
-section[data-testid="stSidebar"]
-  [data-testid="stElementContainer"][class*="st-key-FormSubmitter-"]{
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  align-self: stretch !important;   /* parent is a flex column */
-  display: block !important;
-}
-
-/* Its immediate wrapper (Emotion div) should also stretch */
-section[data-testid="stSidebar"]
-  [data-testid="stElementContainer"][class*="st-key-FormSubmitter-"] > div{
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
-/* Make the form-submit block and the button fill the stretched container */
-section[data-testid="stSidebar"] .stFormSubmitButton{
-  width: 100% !important;
-  display: block !important;
-}
-section[data-testid="stSidebar"] .stFormSubmitButton > *{
-  width: 100% !important;
-}
-section[data-testid="stSidebar"] .stFormSubmitButton button{
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-}
-
-/* Keep your sticky visuals without touching width */
-section[data-testid="stSidebar"] .stFormSubmitButton button{
-  position: sticky; top: calc(100vh - 72px);
-  margin-top: 12px; padding: 12px 14px;
-  border: 0 !important; border-radius: 12px !important; font-weight: 700;
-  background-image: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
-  background-color: var(--accent) !important; color: #fff !important;
-  box-shadow: 0 8px 22px rgba(46,126,251,0.40) !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ---------- Sidebar: About/Disclaimer ----------
-with st.sidebar.expander("About & Disclaimer", expanded=False):
-    st.markdown(
-        """
-**Status:** This app is an in-progress, student-built passion project.
-
-**What’s inside (top → bottom):**
-- **Generate Report** — Enter a ticker & window; fetches price and financial statements.
-- **Price Performance** — Closing-price line chart.
-- **Financial Statements** — Income, Balance Sheet, Cash Flow (last N years).
-- **Key Metrics & Ratios** — Margins, ROE/ROIC, asset turnover, FCF trends, plus basic market multiples.
-- **Comparable Companies** — Quick peer multiples table. AI Comps & Market Analysis
-- **Cost of Capital (WACC)** — CAPM inputs; optionally used as the DCF discount rate.
-- **Growth Consistency** — Cross-check: g ≈ ROIC × reinvestment.
-- **DCF Valuation (Two-Stage)** — Optional fade g₁ → g₂; can auto-solve for **r** or **g₁** to match market.
-- **Residual Income (Financials)** — Bank/insurer-friendly equity valuation.
-- **Executive Summary (AI Generated)** — Narrative synthesis of your current settings.
-- **Export** — One-click Excel with all tables and model sheets.
-
-**Data & API caveats:** Data is sourced from public APIs (e.g., Yahoo Finance via `yfinance`). Occasional gaps, mapping quirks, or timing differences can create small discrepancies. If something looks off, it’s likely an API field or minor edge case I’m still sanding down.
-
-**How the AI uses your inputs:** The **Executive Summary (AI)** composes analysis based on the full report given with the ticker, timeframe, and every modeling choice you make (WACC/CAPM inputs, growth rates, fade on/off, residual-income params). Change inputs → regenerate to reflect them.
-
-**No investment advice:** For educational/informational use only — **not** financial advice, a recommendation, or a solicitation to buy/sell securities. Do your own research and verify assumptions.
-        """
-    )
-
-# ---------- Sidebar: Creator card ----------
-st.sidebar.markdown("""
-<div class="creator-card">
-  <div class="avatar">EH</div>
-  <div class="meta">
-    <div class="label">Created by</div>
-    <div class="name">Edward Huang</div>
-  </div>
-  <div class="actions">
-    <a class="link-btn" href="https://linkedin.com/in/edwardhuangg" target="_blank" rel="noopener noreferrer">
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M20.45 20.45h-3.57v-5.58c0-1.33-.02-3.04-1.86-3.04-1.86 0-2.14 1.45-2.14 2.95v5.67H9.31V9.75h3.43v1.46h.05c.48-.91 1.64-1.86 3.37-1.86 3.61 0 4.28 2.38 4.28 5.48v5.61zM5.34 8.29a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.13 20.45H3.56V9.75h3.57v10.7zM22 2H2C.9 2 0 2.9 0 4v16c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2z"/>
-      </svg>
-      LinkedIn
-    </a>
-  </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ---------- Top header (main area) ----------
+# ---------- Header ----------
 if st.session_state.get("data_ready"):
     _ticker = st.session_state["ticker"]
     _tf = st.session_state["timeframe"]
@@ -797,7 +784,7 @@ if st.session_state.get("data_ready"):
       <div class="title">
         <div class="eyebrow">Analyst Dashboard</div>
         <h1>📊 Analyst Dashboard & Report Generator</h1>
-        <div class="subtitle">AI-assisted valuation, tailored to your assumptions - Excel export included.</div>
+        <div class="subtitle">AI-assisted valuation, tied 3-statement engine + DCF + RI. Excel export included.</div>
       </div>
       <div class="chips">
         <span class="chip">{_ticker}</span>
@@ -813,7 +800,7 @@ else:
       <div class="title">
         <div class="eyebrow">Analyst Dashboard</div>
         <h1>📊 Analyst Dashboard & Report Generator</h1>
-        <div class="subtitle">AI-assisted valuation, tailored to your assumptions - Excel export included.</div>
+        <div class="subtitle">AI-assisted valuation, tied 3-statement engine + DCF + RI. Excel export included.</div>
       </div>
       <div class="chips">
         <span class="chip">Ready</span>
@@ -821,6 +808,7 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
+# ---------- Fetch on submit ----------
 if submitted:
     price_df, inc, bs, cf, cf_q, extras = fetch_financials(ticker, timeframe)
     st.session_state.update({
@@ -831,9 +819,10 @@ if submitted:
         # DCF defaults (editable)
         "N": 5, "g1": 0.10, "g2": 0.025, "r": 0.09, "fade": True,
         "exec_summary": None,
-        # reset comps analysis on new report
         "comps_analysis": None,
         "peer_input_prev": None,
+        # reset 3S state
+        "three_s": {},
     })
 
 # ---------- Guard ----------
@@ -856,7 +845,7 @@ years_back  = st.session_state["years_back"]
 st.subheader("Price Performance")
 st.line_chart(price_df["Close"], height=300, use_container_width=True)
 
-# ---------- Financial statements ----------
+# ---------- Financial statements (historical) ----------
 desired_inc = ["Total Revenue", "Cost Of Revenue", "Gross Profit", "Operating Income", "Net Income", "Ebitda",
                "Diluted Average Shares","Basic Average Shares","Weighted Average Shs Out Dil","Weighted Average Shs Out"]
 inc_cols = [c for c in desired_inc if c in inc.columns] + [c for c in inc.columns if c not in desired_inc]
@@ -907,13 +896,11 @@ ordered_keys = ["Market Cap ($)", "P/E Ratio", "EV/EBITDA"] + \
                [k for k in fmt_metrics if k not in ("Market Cap ($)", "P/E Ratio", "EV/EBITDA")]
 
 st.subheader("Key Metrics & Ratios")
-st.table(pd.DataFrame.from_dict({k: fmt_metrics[k] for k in ordered_keys},
-                                orient="index", columns=["Value"]))
+st.table(pd.DataFrame.from_dict({k: fmt_metrics[k] for k in ordered_keys}, orient="index", columns=["Value"]))
 
-# ---------- Comparable comps ----------
+# ---------- Comps ----------
 st.subheader("Comparable Companies")
-# NEW: friendly reminder text around comps
-st.caption("You control the comp set. The tickers below are just a gentle auto-set filler—replace/add peers that truly match business model, size, growth, and region.")
+st.caption("You control the comp set. Replace/add true peers by model/size/growth/region.")
 peer_input = st.text_input("Peer tickers (comma-separated)", "MSFT,GOOG,AMZN")
 peers = [p.strip().upper() for p in peer_input.split(",") if p.strip()]
 
@@ -934,17 +921,7 @@ for peer in peers:
 comps_df = pd.DataFrame(rows).set_index("Ticker")
 st.table(comps_df)
 
-# ===== NEW: AI Comps & Market Analysis (auto-trigger) =====
-def _format_float(x, pct=False, multiple=False):
-    try:
-        v = float(x)
-    except Exception:
-        return "—"
-    if pct:
-        return f"{v*100:.2f}%"
-    if multiple:
-        return f"{v:.2f}x"
-    return f"{v:,.2f}"
+# ===== AI Comps & Market Analysis =====
 
 def _prepare_comp_stats(df: pd.DataFrame):
     out = {}
@@ -963,6 +940,7 @@ def _prepare_comp_stats(df: pd.DataFrame):
         else:
             out[col] = None
     return out
+
 
 def _make_comps_prompt(ticker: str, extras: dict, comps_df: pd.DataFrame, stats: dict, timeframe: str, fmt_metrics: dict):
     sector = extras.get("Sector") or "—"
@@ -992,16 +970,16 @@ def _make_comps_prompt(ticker: str, extras: dict, comps_df: pd.DataFrame, stats:
     prompt = (
         "You are an equity analyst. Write a compact analysis of the provided comp set and the market context.\n"
         "Deliver 3 short sections with bullets:\n"
-        "1) Peer Set Sanity Check – Are these peers appropriate? Note any obvious mismatches and suggest 1–3 adjustments.\n"
+        "1) Peer Set Sanity Check – Are these peers appropriate? Note any mismatches and suggest 1–3 adjustments.\n"
         "2) Relative Valuation – Where does the target sit vs comp medians on P/E and EV/EBITDA (cheap/fair/expensive)? Mention P/B or P/S if more relevant.\n"
-        "3) Market Context & Takeaways – Brief comment on sector/industry backdrop implied by the peer set, and 2–3 concrete diligence items.\n"
-        "Keep it crisp, numbers-driven, and avoid hype.\n\n"
+        "3) Market Context & Takeaways – Brief comment on sector backdrop implied by peers, plus 2–3 concrete diligence items.\n"
+        "Keep it crisp and numbers-driven.\n\n"
         f"DATA:\n{ctx}"
     )
     return prompt
 
+
 def generate_comps_analysis_if_needed():
-    # Only run if we have an API key and at least one peer
     if not openai.api_key:
         st.info("Add an OpenAI API key in Secrets to enable AI comps analysis.")
         return
@@ -1016,7 +994,7 @@ def generate_comps_analysis_if_needed():
             resp = _create_chat(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are a rigorous, numbers-first equity analyst looking to identify key takeaways of the comps and surrounding market context/trends"},
+                    {"role": "system", "content": "You are a rigorous, numbers-first equity analyst."},
                     {"role": "user", "content": prompt},
                 ],
                 temperature=0.4,
@@ -1026,13 +1004,11 @@ def generate_comps_analysis_if_needed():
         except Exception as e:
             st.session_state["comps_analysis"] = f"_Comps analysis unavailable_: {e}"
 
-# Trigger on new report or when peer list changes
 comps_changed = (st.session_state.get("peer_input_prev") != peer_input)
 if submitted or comps_changed:
     generate_comps_analysis_if_needed()
 st.session_state["peer_input_prev"] = peer_input
 
-# Show the analysis block
 st.markdown("**Comps & Market Analysis (AI)**")
 colA, colB = st.columns([1, 5])
 with colA:
@@ -1044,12 +1020,55 @@ with colB:
     else:
         st.caption("Edit the peer list above (or click **Refresh**) to generate an AI summary of the comp set and market context.")
 
-# -------------------- DCF (two-stage + inverse) -----------------
+# -------------------- NEW: 3-Statement Model (Driver-based) -----
 
-# ---------- Cost of Capital (WACC) ----------
+st.subheader("3-Statement Model (Driver-based)")
+
+drivers = derive_default_drivers(inc, bs, cf)
+with st.expander("Assumptions (edit to taste)"):
+    c1, c2, c3 = st.columns(3)
+    years_proj  = c1.slider("Projection Years (N)", 3, 10, 5)
+    drivers["revg"]         = c1.number_input("Revenue Growth (g, dec.)", value=float(drivers["revg"]), step=0.005, format="%.3f")
+    drivers["ebit_margin"]  = c1.number_input("EBIT Margin (dec.)", value=float(drivers["ebit_margin"]), step=0.005, format="%.3f")
+    drivers["tax_rate"]     = c1.number_input("Tax Rate (dec.)", value=float(drivers["tax_rate"]), step=0.005, format="%.3f")
+
+    drivers["dep_pct_rev"]  = c2.number_input("Depreciation / Revenue (dec.)", value=float(drivers["dep_pct_rev"]), step=0.005, format="%.3f")
+    drivers["capex_pct_rev"]= c2.number_input("CapEx / Revenue (dec.)", value=float(drivers["capex_pct_rev"]), step=0.005, format="%.3f")
+    drivers["nwc_pct_rev"]  = c2.number_input("NWC / Revenue (dec.)", value=float(drivers["nwc_pct_rev"]), step=0.005, format="%.3f")
+
+    drivers["interest_rate"]= c3.number_input("Interest Rate on Debt (dec.)", value=float(drivers["interest_rate"]), step=0.005, format="%.3f")
+    drivers["div_payout"]   = c3.number_input("Dividend Payout (of NI, dec.)", value=float(drivers["div_payout"]), step=0.01, format="%.2f", min_value=0.0, max_value=1.0)
+
+inc_p, bs_p, cf_p, fcf_series_3s, equity_path_3s, equity0_3s = project_three_statements(drivers, years_proj)
+
+st.markdown("**Income Statement (Projected)**")
+st.dataframe( format_statement( inc_p.set_index("Year"), decimals=0 ), use_container_width=True )
+
+st.markdown("**Balance Sheet (Projected)**")
+st.dataframe( format_statement( bs_p.set_index("Year"), decimals=0 ), use_container_width=True )
+
+st.markdown("**Cash Flow (Projected)**")
+st.dataframe( format_statement( cf_p.set_index("Year"), decimals=0 ), use_container_width=True )
+
+st.markdown("**Unlevered FCF from 3S**")
+st.table( fcf_series_3s.reset_index().rename(columns={"index":"Year"}).style.format({"Unlevered FCF":"${:,.0f}"}) )
+
+# cache to session for later sections/export
+st.session_state["three_s"] = {
+    "drivers": drivers,
+    "inc": inc_p,
+    "bs": bs_p,
+    "cf": cf_p,
+    "fcf": fcf_series_3s,
+    "equity_path": equity_path_3s,
+    "equity0": equity0_3s,
+}
+
+# -------------------- WACC & Growth Consistency -----------------
+
 st.subheader("Cost of Capital (WACC)")
 with st.expander("Fundamentals-based WACC (CAPM)", expanded=False):
-    rf  = st.number_input("Risk-free rate (rf, decimal)", key="rf",  value=st.session_state.get("rf", 0.04),  step=0.005, format="%.3f")
+    rf  = st.number_input("Risk-free rate (rf, dec.)", key="rf",  value=st.session_state.get("rf", 0.04),  step=0.005, format="%.3f")
     erp = st.number_input("Equity risk premium (ERP, dec.)", key="erp", value=st.session_state.get("erp", 0.05), step=0.005, format="%.3f")
     beta = st.number_input("Equity beta (levered)", key="beta", value=st.session_state.get("beta", 1.20), step=0.05, format="%.2f")
     kd  = st.number_input("Cost of debt (pre-tax, dec.)", key="kd",  value=st.session_state.get("kd", 0.05),  step=0.005, format="%.3f")
@@ -1065,10 +1084,8 @@ with st.expander("Fundamentals-based WACC (CAPM)", expanded=False):
     wacc = ke_capm * E + kd_after * D
 
     st.metric("WACC (derived)", f"{wacc*100:.2f}%")
-    use_wacc = st.checkbox("Use WACC as discount rate in DCF", key="use_wacc",
-                           value=st.session_state.get("use_wacc", False))
+    use_wacc = st.checkbox("Use WACC as discount rate in DCF", key="use_wacc", value=st.session_state.get("use_wacc", False))
 
-# ---------- Growth Consistency ----------
 st.subheader("Growth Consistency (g ≈ ROIC × Reinvestment)")
 with st.expander("Cross-check sustainable growth and reinvestment", expanded=False):
     roic_guess = 0.12
@@ -1080,61 +1097,47 @@ with st.expander("Cross-check sustainable growth and reinvestment", expanded=Fal
     except Exception:
         pass
 
-    roic = st.number_input("ROIC (after-tax, dec.)", key="roic", value=st.session_state.get("roic", roic_guess),
-                           step=0.005, format="%.3f")
-    reinvest = st.number_input("Reinvestment rate (dec.)", key="reinvest",
-                               value=st.session_state.get("reinvest", 0.00), step=0.05, format="%.2f",
-                               help="Portion of NOPAT reinvested into the business.")
+    roic = st.number_input("ROIC (after-tax, dec.)", key="roic", value=st.session_state.get("roic", roic_guess), step=0.005, format="%.3f")
+    reinvest = st.number_input("Reinvestment rate (dec.)", key="reinvest", value=st.session_state.get("reinvest", 0.00), step=0.05, format="%.2f")
     implied_g = float(roic) * float(reinvest)
     st.write(f"Implied sustainable growth g ≈ **{implied_g*100:.2f}%**")
-    try:
-        req_reinvest = (float(st.session_state["g1"]) / max(float(roic), 1e-9))
-        if roic > 0:
-            st.write(f"To support your stage-1 g₁ = **{st.session_state['g1']*100:.2f}%**, "
-                     f"required reinvestment ≈ **{req_reinvest*100:.1f}%** of NOPAT.")
-        else:
-            st.info("Enter ROIC > 0 to see required reinvestment for your g₁.")
-    except Exception:
-        pass
 
-st.subheader("Discounted Cash-Flow (DCF) Valuation – Two-Stage")
+# -------------------- DCF (two-stage + 3S-driven) --------------
+
+st.subheader("Discounted Cash-Flow (DCF) Valuation")
 
 last_close = float(price_df["Close"].iloc[-1])
-
-# Better shares and net debt
 shares_out = pick_shares(extras.get("_info", {}), inc, bs)
 if shares_out is None and extras.get("Market Cap ($)"):
     try:
         shares_out = int(extras["Market Cap ($)"] / last_close)
     except Exception:
         shares_out = extras.get("Shares Outstanding (raw)")
-
 net_debt = extras.get("Net Debt ($)") or 0.0
-
-# Base FCF (TTM preferred)
 base_fcf = get_base_fcf(cf, cf_quarterly=cf_q)
 
-# Store inputs
 st.session_state.setdefault("base_fcf", base_fcf)
 st.session_state.setdefault("shares_out", shares_out)
 st.session_state.setdefault("net_debt", net_debt)
 st.session_state.setdefault("last_close", last_close)
 
-# DCF widgets (values are decimals; labels show % to keep UI compact)
-st.number_input("Stage-1 FCF Growth (g₁, %)", key="g1",
-                value=st.session_state.get("g1", 0.10), step=0.1, format="%.2f")
-st.number_input("Terminal Growth (g₂, %)",   key="g2",
-                value=st.session_state.get("g2", 0.025), step=0.1, format="%.2f",
-                help="Must be below r.")
-st.number_input("Discount Rate (r, %)",      key="r",
-                value=st.session_state.get("r", 0.09),  step=0.1, format="%.2f")
-st.slider("Projection Years (N)", min_value=1, max_value=20, key="N",
-          value=st.session_state.get("N", 5))
+# Controls
+colm1, colm2 = st.columns([1.2, 1])
+with colm1:
+    dcf_method = st.radio("DCF method", ["Two-Stage (Simple)", "3S-Driven (from model)"], horizontal=True, key="dcf_choice")
+with colm2:
+    st.caption("Two-Stage grows a single FCF; 3S-Driven discounts the unlevered FCFs produced by the 3-statement model.")
+
+# Two-Stage inputs
+st.number_input("Stage-1 FCF Growth (g₁, %)", key="g1", value=st.session_state.get("g1", 0.10), step=0.1, format="%.2f")
+st.number_input("Terminal Growth (g₂, %)",   key="g2", value=st.session_state.get("g2", 0.025), step=0.1, format="%.2f")
+st.number_input("Discount Rate (r, %)",      key="r",  value=st.session_state.get("r", 0.09),  step=0.1, format="%.2f")
+st.slider("Projection Years (N)", min_value=1, max_value=20, key="N", value=st.session_state.get("N", 5))
 st.checkbox("Fade g₁ → g₂ across N (more realistic)", key="fade", value=st.session_state.get("fade", True))
 
-st.radio("Calibrate to current price by solving for:",
-         ["Discount rate (r)", "Stage-1 growth (g₁)"],
-         key="calib_mode", horizontal=True)
+st.radio("Calibrate to current price by solving for:", ["Discount rate (r)", "Stage-1 growth (g₁)"], key="calib_mode", horizontal=True)
+
+# Calibrate button
 
 def _calibrate_callback():
     s = st.session_state
@@ -1165,90 +1168,231 @@ st.button("📐 Auto-calibrate to market", on_click=_calibrate_callback)
 if st.session_state.get("calib_error"):
     st.warning(st.session_state["calib_error"])
 
-def _to_float(x):
-    try: return float(x)
-    except Exception: return 0.0
-g1 = _to_float(st.session_state["g1"])
-g2 = _to_float(st.session_state["g2"])
-r_manual = _to_float(st.session_state["r"])
-r = float(wacc) if st.session_state.get("use_wacc") else r_manual
+# Resolve inputs
+_g1 = float(st.session_state["g1"])
+_g2 = float(st.session_state["g2"])
+_r_manual = float(st.session_state["r"])
+r_eff = float(wacc) if st.session_state.get("use_wacc") else _r_manual
+N  = int(st.session_state["N"]) ; fade = bool(st.session_state.get("fade", True))
 
-N  = int(st.session_state["N"])
-fade = bool(st.session_state.get("fade", True))
+# Compute both DCF flavors
+implied_px_two = None; dcf_df_two = None; dcf_head_two = None
+implied_px_3s  = None; dcf_df_3s  = None; dcf_head_3s  = None
 
-# DCF compute and display
 try:
-    implied_px = dcf_two_stage_price(base_fcf, shares_out, net_debt, N, g1, g2, r, fade=fade)
-    if implied_px is None:
-        raise ValueError("DCF unavailable – check FCF, r > g₂, and shares outstanding.")
-    years = list(range(1, N + 1))
+    implied_px_two = dcf_two_stage_price(base_fcf, shares_out, net_debt, N, _g1, _g2, r_eff, fade=fade)
+    if implied_px_two is not None:
+        # build detail for display
+        years = list(range(1, N + 1))
+        if fade:
+            growth_path = [_g1 + (_g2 - _g1) * (y - 1) / (N - 1 if N > 1 else 1) for y in years]
+            proj_fcf = []
+            f = base_fcf
+            for gr in growth_path:
+                f = f * (1 + gr)
+                proj_fcf.append(f)
+        else:
+            growth_path = [_g1 for _ in years]
+            proj_fcf = [base_fcf * (1 + _g1) ** y for y in years]
+        pv_fcf   = [fcf / (1 + r_eff) ** y for y, fcf in zip(years, proj_fcf)]
+        fcf_N1   = proj_fcf[-1] * (1 + _g2)
+        term_val = fcf_N1 / (r_eff - _g2)
+        term_pv  = term_val / (1 + r_eff) ** N
+        ev       = sum(pv_fcf) + term_pv
+        eq_v     = ev - (net_debt or 0.0)
+        dcf_df_two = pd.DataFrame({"Year": years + ["Terminal"], "FCF": proj_fcf + [fcf_N1], "PV FCF": pv_fcf + [term_pv]})
+        term_pct = term_pv / ev if ev else None
+        y1_pv = pv_fcf[0] if pv_fcf else None
+        pv_mult = (sum(pv_fcf) / y1_pv) if (y1_pv and y1_pv != 0) else None
+        dcf_head_two = pd.Series({
+            "Enterprise Value": ev,
+            "Less: Net Debt":   net_debt,
+            "Equity Value":     eq_v,
+            "Shares Out":       shares_out,
+            "Implied Price":    implied_px_two,
+            "Current Price":    last_close,
+            "Base FCF (latest)":  base_fcf,
+            "g₁ (stage-1)":       _g1,
+            "g₂ (terminal)":      _g2,
+            "r (discount)":       r_eff,
+            "N (years)":          N,
+            "Fade g₁→g₂":         fade,
+            "Terminal PV / EV":   f"{term_pct:.1%}" if term_pct is not None else "—",
+            "PV(Years 1..N) / PV(Year1) (x)": f"{pv_mult:.1f}x" if pv_mult is not None else "—",
+        }).to_frame("Value")
+        dcf_head_two.loc["N (years)", "Value"] = f"{int(N)}"
+except Exception as e:
+    pass
 
-    if fade:
-        growth_path = [g1 + (g2 - g1) * (y - 1) / (N - 1 if N > 1 else 1) for y in years]
-        proj_fcf = []
-        f = base_fcf
-        for gr in growth_path:
-            f = f * (1 + gr)
-            proj_fcf.append(f)
+try:
+    implied_px_3s, dcf_df_3s, dcf_head_3s = build_dcf_from_series(st.session_state["three_s"].get("fcf"), r=r_eff, g_term=_g2, net_debt=net_debt, shares_out=shares_out)
+except Exception:
+    pass
+
+# Show both in tabs
+_tab_two, _tab_3s = st.tabs(["Two-Stage (Simple)", "3S-Driven (from model)"])
+with _tab_two:
+    if dcf_df_two is not None:
+        st.table(dcf_df_two.style.format({"FCF": "${:,.0f}", "PV FCF": "${:,.0f}"}).hide(axis="index"))
+        st.table(dcf_head_two.style.format({"Value": lambda x: f"${x:,.0f}" if isinstance(x,(int,float)) else x}))
     else:
-        growth_path = [g1 for _ in years]
-        proj_fcf = [base_fcf * (1 + g1) ** y for y in years]
+        st.info("Two-stage DCF unavailable – check inputs (r > g₂, base FCF, shares).")
+with _tab_3s:
+    if dcf_df_3s is not None:
+        st.table(dcf_df_3s.style.format({"FCF": "${:,.0f}", "PV FCF": "${:,.0f}"}).hide(axis="index"))
+        st.table(dcf_head_3s.style.format({"Value": lambda x: f"${x:,.0f}" if isinstance(x,(int,float)) else x}))
+    else:
+        st.info("3S-driven DCF unavailable – ensure the 3-statement model produced FCFs and r > g₂.")
 
-    pv_fcf   = [fcf / (1 + r) ** y for y, fcf in zip(years, proj_fcf)]
-    fcf_N1   = proj_fcf[-1] * (1 + g2)
-    term_val = fcf_N1 / (r - g2)
-    term_pv  = term_val / (1 + r) ** N
-    ev       = sum(pv_fcf) + term_pv
-    eq_v     = ev - (net_debt or 0.0)
+# Choose implied_px for downstream sections
+if dcf_method == "3S-Driven (from model)" and (implied_px_3s is not None):
+    implied_px_chosen = implied_px_3s
+else:
+    implied_px_chosen = implied_px_two
 
-    dcf_df = pd.DataFrame({
-        "Year": years + ["Terminal"],
-        "FCF": proj_fcf + [fcf_N1],
-        "PV FCF": pv_fcf + [term_pv],
-    })
+# -------------------- Sensitivity Analysis ----------------------
 
-    upside_frac = (implied_px/last_close - 1.0) if last_close else None
+st.subheader("Sensitivity Analysis")
 
-    terminal_pct = term_pv / ev if ev else None
-    y1_pv = pv_fcf[0] if pv_fcf else None
-    pv_multiple = (sum(pv_fcf) / y1_pv) if (y1_pv and y1_pv != 0) else None
+with st.expander("Two-Stage DCF Sensitivities (Price & Upside)"):
+    if base_fcf is None or not shares_out:
+        st.info("Two-stage DCF sensitivities require Base FCF and Shares Out.")
+    else:
+        c1, c2, c3 = st.columns(3)
+        r_min  = c1.number_input("Discount rate r (min, dec.)", value=0.06, step=0.005, format="%.3f")
+        r_max  = c1.number_input("Discount rate r (max, dec.)", value=0.14, step=0.005, format="%.3f")
+        r_step = c1.number_input("r step", value=0.01, step=0.005, format="%.3f")
 
-    term_pct_disp = f"{terminal_pct:.1%}" if terminal_pct is not None else "—"
-    pv_mult_disp = f"{pv_multiple:.1f}x" if pv_multiple is not None else "—"
+        g1_min  = c2.number_input("Stage-1 growth g₁ (min, dec.)", value=max(_g1 - 0.05, -0.10), step=0.005, format="%.3f")
+        g1_max  = c2.number_input("Stage-1 growth g₁ (max, dec.)", value=_g1 + 0.05, step=0.005, format="%.3f")
+        g1_step = c2.number_input("g₁ step", value=0.01, step=0.005, format="%.3f")
 
-    dcf_head = pd.Series({
-        "Enterprise Value": ev,
-        "Less: Net Debt":   net_debt,
-        "Equity Value":     eq_v,
-        "Shares Out":       shares_out,
-        "Implied Price":    implied_px,
-        "Current Price":    last_close,
-        "Upside (Downside)": upside_frac,
-        "Base FCF (latest)":  base_fcf,
-        "g₁ (stage-1)":       g1,
-        "g₂ (terminal)":      g2,
-        "r (discount)":       r,
-        "N (years)":          N,
-        "Fade g₁→g₂":         fade,
-        "Terminal PV / EV":   term_pct_disp,
-        "PV(Year1..N) / PV(Year1) (x)": pv_mult_disp,
-    }).to_frame("Value")
-    dcf_head.loc["N (years)", "Value"] = f"{int(N)}"
+        g2_min  = c3.number_input("Terminal growth g₂ (min, dec.)", value=max(_g2 - 0.01, 0.00), step=0.005, format="%.3f")
+        g2_max  = c3.number_input("Terminal growth g₂ (max, dec.)", value=_g2 + 0.01, step=0.005, format="%.3f")
+        g2_step = c3.number_input("g₂ step", value=0.005, step=0.005, format="%.3f")
 
-    st.table(dcf_df.style.format({"FCF": "${:,.0f}", "PV FCF": "${:,.0f}"}).hide(axis="index"))
-    def _fmt_any(x):
-        if isinstance(x, (int, float)):
-            if -0.5 < x < 0.5 and x != 0:
-                return f"{x:.2%}"
-            return f"${x:,.0f}"
-        return x
-    st.table(dcf_head.style.format({"Value": _fmt_any}))
+        # Helpers to build grids
+        def _frange(lo, hi, step):
+            arr = []
+            x = float(lo)
+            hi = float(hi) + 1e-12
+            while x <= hi:
+                arr.append(round(x, 6))
+                x += float(step)
+            return arr if arr else [lo]
 
-except ValueError as e:
-    st.warning(str(e))
-    dcf_df, dcf_head, implied_px = None, None, None
+        r_vals  = _frange(r_min,  r_max,  r_step)
+        g1_vals = _frange(g1_min, g1_max, g1_step)
+        g2_vals = _frange(g2_min, g2_max, g2_step)
 
-# -------------------- Financials (Residual Income) --------------
+        # Price table: rows=r, cols=g1 (g2 fixed)
+        tbl_price_g1 = pd.DataFrame(index=[f"r={rv:.3f}" for rv in r_vals],
+                                    columns=[f"g₁={gv:.3f}" for gv in g1_vals])
+        for ir, rv in enumerate(r_vals):
+            for ig, gv in enumerate(g1_vals):
+                px = dcf_two_stage_price(base_fcf, shares_out, net_debt, N, gv, _g2, rv, fade=fade)
+                tbl_price_g1.iat[ir, ig] = None if px is None else float(px)
+
+        # Upside table vs current price
+        tbl_upside_g1 = tbl_price_g1.copy()
+        for ir in range(len(r_vals)):
+            for ig in range(len(g1_vals)):
+                v = tbl_price_g1.iat[ir, ig]
+                tbl_upside_g1.iat[ir, ig] = None if (v is None or not last_close) else (v/last_close - 1.0)
+
+        # Price table: rows=r, cols=g2 (g1 fixed)
+        tbl_price_g2 = pd.DataFrame(index=[f"r={rv:.3f}" for rv in r_vals],
+                                    columns=[f"g₂={gv:.3f}" for gv in g2_vals])
+        for ir, rv in enumerate(r_vals):
+            for ig, gv in enumerate(g2_vals):
+                px = dcf_two_stage_price(base_fcf, shares_out, net_debt, N, _g1, gv, rv, fade=fade)
+                tbl_price_g2.iat[ir, ig] = None if px is None else float(px)
+
+        tbl_upside_g2 = tbl_price_g2.copy()
+        for ir in range(len(r_vals)):
+            for ig in range(len(g2_vals)):
+                v = tbl_price_g2.iat[ir, ig]
+                tbl_upside_g2.iat[ir, ig] = None if (v is None or not last_close) else (v/last_close - 1.0)
+
+        st.markdown("**Price ($) – vary r × g₁ (g₂ fixed)**")
+        st.table(tbl_price_g1.style.format("${:,.2f}"))
+
+        st.markdown("**Upside (%) – vary r × g₁ (g₂ fixed)**")
+        st.table(tbl_upside_g1.style.format("{:.1%}").background_gradient(axis=None))
+
+        st.markdown("**Price ($) – vary r × g₂ (g₁ fixed)**")
+        st.table(tbl_price_g2.style.format("${:,.2f}"))
+
+        st.markdown("**Upside (%) – vary r × g₂ (g₁ fixed)**")
+        st.table(tbl_upside_g2.style.format("{:.1%}").background_gradient(axis=None))
+
+with st.expander("3S-Driven DCF Sensitivities (Price & Upside)"):
+    fcf_series = st.session_state.get("three_s", {}).get("fcf")
+    if fcf_series is None or fcf_series.empty or not shares_out:
+        st.info("3S-driven sensitivities require 3S FCF series and Shares Out.")
+    else:
+        c1, c2 = st.columns(2)
+        r_min_3s  = c1.number_input("Discount rate r (min, dec.) – 3S", value=max(r_eff - 0.03, 0.04), step=0.005, format="%.3f")
+        r_max_3s  = c1.number_input("Discount rate r (max, dec.) – 3S", value=r_eff + 0.03, step=0.005, format="%.3f")
+        r_step_3s = c1.number_input("r step – 3S", value=0.01, step=0.005, format="%.3f")
+
+        g2_min_3s  = c2.number_input("Terminal growth g₂ (min, dec.) – 3S", value=max(_g2 - 0.01, 0.00), step=0.005, format="%.3f")
+        g2_max_3s  = c2.number_input("Terminal growth g₂ (max, dec.) – 3S", value=_g2 + 0.01, step=0.005, format="%.3f")
+        g2_step_3s = c2.number_input("g₂ step – 3S", value=0.005, step=0.005, format="%.3f")
+
+        r_vals3  = _frange(r_min_3s,  r_max_3s,  r_step_3s)
+        g2_vals3 = _frange(g2_min_3s, g2_max_3s, g2_step_3s)
+
+        tbl_price_3s = pd.DataFrame(index=[f"r={rv:.3f}" for rv in r_vals3],
+                                    columns=[f"g₂={gv:.3f}" for gv in g2_vals3])
+        for ir, rv in enumerate(r_vals3):
+            for ig, gv in enumerate(g2_vals3):
+                px, _, _ = build_dcf_from_series(fcf_series, r=rv, g_term=gv, net_debt=net_debt, shares_out=shares_out)
+                tbl_price_3s.iat[ir, ig] = None if px is None else float(px)
+
+        tbl_upside_3s = tbl_price_3s.copy()
+        for ir in range(len(r_vals3)):
+            for ig in range(len(g2_vals3)):
+                v = tbl_price_3s.iat[ir, ig]
+                tbl_upside_3s.iat[ir, ig] = None if (v is None or not last_close) else (v/last_close - 1.0)
+
+        st.markdown("**3S-Driven Price ($) – vary r × g₂**")
+        st.table(tbl_price_3s.style.format("${:,.2f}"))
+
+        st.markdown("**3S-Driven Upside (%) – vary r × g₂**")
+        st.table(tbl_upside_3s.style.format("{:.1%}").background_gradient(axis=None))
+
+
+# -------------------- Housekeeping ------------------------------
+
+st.subheader("Housekeeping")
+c1, c2 = st.columns(2)
+if c1.button("🔄 Clear cached data (yfinance + metrics)"):
+    try:
+        st.cache_data.clear()
+        st.success("Cleared cached data.")
+    except Exception as e:
+        st.warning(f"Could not clear cache: {e}")
+
+if c2.button("🧹 Reset AI summaries"):
+    st.session_state["exec_summary"] = None
+    st.session_state["comps_analysis"] = None
+    st.success("AI summaries reset.")
+
+
+# -------------------- Notes & Disclaimer -----------------------
+
+st.markdown("""
+---
+**Notes & Disclaimer**
+
+- This tool uses public data from Yahoo Finance via `yfinance`. Figures may differ from company filings.
+- Models (Two-Stage DCF, 3S-driven DCF, and Residual Income) are simplified and for educational/research use.
+- Nothing herein is investment advice. Always verify assumptions against primary sources (10-K/10-Q).
+""")
+
+
+# -------------------- Residual Income (Financials) --------------
 
 st.subheader("Financials (Residual Income) – Recommended for Banks/Insurers")
 
@@ -1264,8 +1408,7 @@ with col1:
     bve0 = st.number_input("Book Value of Equity (BV₀, $)", value=float(bve0_guess or 0.0), step=1_000_000.0, format="%.0f")
     ri_shares = st.number_input("Shares Outstanding", value=float(shares_out or 0), step=1_000.0, format="%.0f")
     ri_N = st.slider("Projection Years (N, RI)", min_value=1, max_value=20, value=st.session_state.get("ri_N", 5))
-    payout = st.number_input("Dividend Payout Ratio (dec.)", value=0.00, step=0.05, format="%.2f",
-                             help="For many growth insurtechs, use 0.00")
+    payout = st.number_input("Dividend Payout Ratio (dec.)", value=0.00, step=0.05, format="%.2f")
 with col2:
     ke_in = st.number_input("Cost of Equity kₑ (dec.)", value=float(ke_default), step=0.005, format="%.3f")
     roe_start = st.number_input("Starting ROE (dec.)", value=float(roe0_guess or 0.10), step=0.01, format="%.3f")
@@ -1291,7 +1434,7 @@ if ri_price:
         "PV RI": "${:,.0f}"
     }), use_container_width=True)
 
-# Store RI context for export
+# Persist RI context for export
 st.session_state["ri_params"] = {
     "use_financials_mode": bool(use_financials_mode),
     "bv0": float(bve0 or 0.0),
@@ -1306,47 +1449,46 @@ st.session_state["ri_params"] = {
     "ri_price": float(ri_price or 0.0),
 }
 
-# -------------------- Executive Summary (manual) -----------------
+# -------------------- Executive Summary (AI) --------------------
 
 st.subheader("Executive Summary (AI)")
 st.caption("Click the button to (re)generate using the current valuation settings.")
 
-def _fmt(v):
-    if v is None: return "—"
-    if isinstance(v, (int, float)): return f"${v:,.0f}"
-    return str(v)
-
 if st.button("🧠 Generate / Refresh AI Summary"):
     try:
         upside_pct = None
-        implied_pick = ri_price if use_financials_mode and ri_price else implied_px
+        # Choose method: RI for financials; else DCF (user choice between two-stage vs 3S)
+        implied_pick = ri_price if use_financials_mode and ri_price else implied_px_chosen
         if implied_pick and st.session_state.get("last_close"):
             upside_pct = (implied_pick / st.session_state["last_close"] - 1.0) * 100.0
 
+        # Summaries
+        dcf_two_line = f"DCF Two-Stage Implied Price: ${implied_px_two:,.2f}" if implied_px_two else "DCF Two-Stage Implied Price: —"
+        dcf_3s_line  = f"DCF 3S-Driven Implied Price: ${implied_px_3s:,.2f}" if implied_px_3s else "DCF 3S-Driven Implied Price: —"
+
         context_lines = [
             f"Ticker: {ticker}",
-            f"Current Price: {_fmt(st.session_state['last_close'])}",
-            f"Market Cap: {_fmt(extras.get('Market Cap ($)'))}",
-            f"Net Debt: {_fmt(st.session_state['net_debt'])}  |  Shares Out: {st.session_state['shares_out'] or '—'}",
-            f"Base FCF (latest): {_fmt(st.session_state['base_fcf'])}",
-            f"DCF (two-stage) inputs: N={N}, g1={g1:.2%}, g2={g2:.2%}, r={r:.2%}, fade={fade}",
-            f"RI inputs: BV0={_fmt(st.session_state['ri_params']['bv0'])}, k_e={st.session_state['ri_params']['ke']:.2%}, "
-            f"ROE_start={st.session_state['ri_params']['roe_start']:.2%}, payout={st.session_state['ri_params']['payout']:.2%}, "
-            f"N={st.session_state['ri_params']['N']}, fade_to_ke={st.session_state['ri_params']['fade_to_ke']}",
-            f"DCF Implied Price: {_fmt(implied_px)}",
-            f"RI Implied Price: {_fmt(ri_price)}",
+            f"Current Price: ${st.session_state['last_close']:,.2f}",
+            f"Market Cap: {fmt_metrics.get('Market Cap ($)','—')}",
+            f"Net Debt: ${st.session_state['net_debt']:,.0f}  |  Shares Out: {st.session_state['shares_out'] or '—'}",
+            f"Base FCF (latest): ${st.session_state['base_fcf']:,.0f}",
+            f"DCF method chosen: {dcf_method}",
+            dcf_two_line,
+            dcf_3s_line,
+            f"RI Implied Price: ${ri_price:,.2f}" if ri_price else "RI Implied Price: —",
             f"Upside/Downside (chosen method): {upside_pct:.2f}% vs. market" if upside_pct is not None else "Upside/Downside: —",
             f"P/E: {fmt_metrics.get('P/E Ratio','—')} | EV/EBITDA: {fmt_metrics.get('EV/EBITDA','—')}",
         ]
         what_true = [
-            "Stage-1 FCF must compound at ~{:.2%} for {} years (fading to {:.2%}).".format(g1, N, g2) if fade
-            else "Stage-1 FCF must compound at ~{:.2%} for {} years.".format(g1, N),
-            "Residual income adds value only when ROE exceeds kₑ; we fade excess ROE toward kₑ over the horizon.",
+            "For 3S: margins, CapEx%Rev, and NWC%Rev drive FCF shape; stress test sensitivities.",
+            "For two-stage: Stage-1 FCF must compound at ~{:.2%} for {} years (fading to {:.2%}).".format(_g1, N, _g2) if fade else "For two-stage: Stage-1 FCF must compound at ~{:.2%} for {} years.".format(_g1, N),
+            "Residual income adds value only when ROE exceeds kₑ; fading ROE → kₑ dampens terminal contribution.",
         ]
 
         summary_prompt = (
             "You are a buy-side partner reviewing an analyst's report.\n"
-            "Write a crisp executive summary that integrates both DCF and Residual Income, choosing RI for financials.\n"
+            "Write a crisp executive summary that integrates 3-Statement projections with DCF and Residual Income.\n"
+            "Prefer RI for financials; otherwise use the user's DCF selection (two-stage vs 3S-driven).\n"
             "Structure as: 1) Key Strengths  2) Key Risks  3) Valuation (DCF & RI)  4) What-Must-Be-True  5) Bottom Line.\n\n"
             "Data points:\n" + "\n".join("- " + line for line in context_lines) +
             "\n\nWhat-must-be-true:\n" + "\n".join("- " + line for line in what_true) +
@@ -1370,9 +1512,10 @@ if st.button("🧠 Generate / Refresh AI Summary"):
 if st.session_state["exec_summary"]:
     st.markdown(st.session_state["exec_summary"])
 else:
-    st.info("Click **Generate / Refresh AI Summary** to produce the write-up including the calibrated DCF and RI.")
+    st.info("Click **Generate / Refresh AI Summary** to produce the write-up including the calibrated DCF/RI and 3S context.")
 
-# -------------------- Excel Report ------------
+# -------------------- Excel Report (extended with 3S) -----------
+
 def build_excel_report(
     ticker: str,
     timeframe: str,
@@ -1402,7 +1545,7 @@ def build_excel_report(
     dv: float = 0.00,
     roic: float = 0.12,
     reinvest: float = 0.00,
-    # NEW: Residual Income params
+    # Residual Income params
     fin_mode: bool = False,
     ri_bv0: float = 0.0,
     ri_shares: int = 0,
@@ -1413,6 +1556,11 @@ def build_excel_report(
     ri_fade_to_ke: bool = True,
     ri_roe_terminal: Optional[float] = None,
     ri_g: float = 0.00,
+    # NEW: 3S projections
+    proj_income_df: Optional[pd.DataFrame] = None,
+    proj_balance_df: Optional[pd.DataFrame] = None,
+    proj_cash_df: Optional[pd.DataFrame] = None,
+    proj_fcf_series: Optional[pd.Series] = None,
 ):
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
@@ -1466,52 +1614,63 @@ def build_excel_report(
                     ws.set_column(c_idx, c_idx, width, fmt_money)
             return ws
 
-        # Income
+        # Historical statements
         income_priority = ["Total Revenue", "Cost Of Revenue", "Gross Profit", "Operating Income", "Net Income", "Ebitda",
                            "Diluted Average Shares","Basic Average Shares","Weighted Average Shs Out Dil","Weighted Average Shs Out"]
         income_cols = [c for c in income_priority if c in inc_df.columns] + [c for c in inc_df.columns if c not in income_priority]
-        write_df("Income",  inc_df[income_cols],
-                 money_col_idxs=[i for i,_ in enumerate(income_cols, start=1)])
+        write_df("Income",  inc_df[income_cols], money_col_idxs=[i for i,_ in enumerate(income_cols, start=1)])
 
-        # Balance
         eq_cols = [c for c in bs_df.columns if "equity" in c.lower()]
         bs_priority = ["Total Assets","Total Current Assets","Total Liab","Total Current Liabilities","Total Debt","Cash","Cash And Cash Equivalents","Short Term Investments"] + eq_cols
         bs_cols_x = [c for c in bs_priority if c in bs_df.columns] + [c for c in bs_df.columns if c not in bs_priority]
-        write_df("Balance", bs_df[bs_cols_x],
-                 money_col_idxs=[i for i,_ in enumerate(bs_cols_x, start=1)])
+        write_df("Balance", bs_df[bs_cols_x], money_col_idxs=[i for i,_ in enumerate(bs_cols_x, start=1)])
 
-        # CashFlow
         cf_priority = ["Total Cash From Operating Activities","Capital Expenditures"]
         cf_cols_x = [c for c in cf_priority if c in cf_df.columns] + [c for c in cf_df.columns if c not in cf_priority]
-        write_df("CashFlow", cf_df[cf_cols_x],
-                 money_col_idxs=[i for i,_ in enumerate(cf_cols_x, start=1)])
+        write_df("CashFlow", cf_df[cf_cols_x], money_col_idxs=[i for i,_ in enumerate(cf_cols_x, start=1)])
 
-        # Comps
+        # 3S projections
+        if proj_income_df is not None and not proj_income_df.empty:
+            write_df("Proj_Income", proj_income_df.set_index("Year"))
+        else:
+            wb.add_worksheet("Proj_Income").write("A1", "No projected income", fmt_note)
+        if proj_balance_df is not None and not proj_balance_df.empty:
+            write_df("Proj_Balance", proj_balance_df.set_index("Year"))
+        else:
+            wb.add_worksheet("Proj_Balance").write("A1", "No projected balance", fmt_note)
+        if proj_cash_df is not None and not proj_cash_df.empty:
+            write_df("Proj_CashFlow", proj_cash_df.set_index("Year"))
+        else:
+            wb.add_worksheet("Proj_CashFlow").write("A1", "No projected cash flow", fmt_note)
+        if proj_fcf_series is not None and not proj_fcf_series.empty:
+            fcf_df = proj_fcf_series.reset_index(); fcf_df.columns = ["Year","Unlevered FCF"]
+            fcf_df.to_excel(writer, sheet_name="Proj_FCF", index=False)
+            ws = writer.sheets["Proj_FCF"]; ws.write_row("A1", ["Year","Unlevered FCF"], fmt_hdr)
+            ws.set_column(0, 0, 10); ws.set_column(1, 1, 20, fmt_usd)
+        else:
+            wb.add_worksheet("Proj_FCF").write("A1", "No 3S FCF", fmt_note)
+
+        # Comps & metrics
         comps_out = comps_df.reset_index(drop=True) if (comps_df is not None and not comps_df.empty) else pd.DataFrame()
         if comps_out.empty:
-            ws = wb.add_worksheet("Comps")
-            ws.write("A1", "No comps data", fmt_note)
+            wb.add_worksheet("Comps").write("A1", "No comps data", fmt_note)
         else:
             comps_out.to_excel(writer, sheet_name="Comps", index=False)
             ws = writer.sheets["Comps"]
             for c in range(len(comps_out.columns)):
                 ws.write(0, c, comps_out.columns[c], fmt_hdr)
-            ws.freeze_panes(1, 1)
-            ws.set_column(0, len(comps_out.columns)-1, 18)
+            ws.freeze_panes(1, 1); ws.set_column(0, len(comps_out.columns)-1, 18)
 
-        # Key Metrics
         if metrics_df is None or metrics_df.empty:
-            ws = wb.add_worksheet("Key Metrics")
-            ws.write("A1", "No key metrics", fmt_note)
+            wb.add_worksheet("Key Metrics").write("A1", "No key metrics", fmt_note)
         else:
             metrics_df.to_excel(writer, sheet_name="Key Metrics", index=False)
             ws = writer.sheets["Key Metrics"]
             for c in range(len(metrics_df.columns)):
                 ws.write(0, c, metrics_df.columns[c], fmt_hdr)
-            ws.freeze_panes(1, 1)
-            ws.set_column(0, len(metrics_df.columns)-1, 24)
+            ws.freeze_panes(1, 1); ws.set_column(0, len(metrics_df.columns)-1, 24)
 
-        # -------- Price (with chart, tz-naive) --------
+        # Price with chart
         price_ws = wb.add_worksheet("Price")
         price_ws.write_row("A1", ["Date","Close"], fmt_hdr)
         px = price_df.reset_index()[["Date","Close"]].copy()
@@ -1527,25 +1686,14 @@ def build_excel_report(
         price_ws.set_column(0, 0, 14); price_ws.set_column(1, 1, 14)
         npx = len(px)
         chart = wb.add_chart({"type": "line"})
-        chart.add_series({
-            "name":       "Close",
-            "categories": ["Price", 1, 0, npx, 0],
-            "values":     ["Price", 1, 1, npx, 1],
-        })
-        chart.set_title({"name": f"{ticker} Price"})
-        chart.set_y_axis({"num_format": "$#,##0"})
-        chart.set_legend({"position": "bottom"})
+        chart.add_series({"name": "Close", "categories": ["Price", 1, 0, npx, 0], "values": ["Price", 1, 1, npx, 1]})
+        chart.set_title({"name": f"{ticker} Price"}); chart.set_y_axis({"num_format": "$#,##0"}); chart.set_legend({"position": "bottom"})
         price_ws.insert_chart("D2", chart, {"x_scale": 1.4, "y_scale": 1.2})
 
-        # -------- DCF Model (interactive) --------
+        # DCF Model (interactive, two-stage)
         dcf = wb.add_worksheet("DCF Model")
-        dcf.set_column("A:A", 10)
-        dcf.set_column("B:C", 20)
-        dcf.set_column("D:D", 16)
-        dcf.set_column("E:E", 24)
+        dcf.set_column("A:A", 10); dcf.set_column("B:C", 20); dcf.set_column("D:D", 16); dcf.set_column("E:E", 24)
         dcf.write("A1", "Two-Stage DCF Model", fmt_title)
-
-        # Inputs
         dcf.write("A3", "Inputs", fmt_bold)
         dcf.write("A4", "Base FCF (latest)", fmt_txt);  dcf.write_number("B4", float(base_fcf or 0.0), fmt_usd)
         dcf.write("A5", "Stage-1 Growth (g₁)", fmt_txt); dcf.write_number("B5", float(g1 or 0.0), fmt_pct4)
@@ -1559,7 +1707,6 @@ def build_excel_report(
         dcf.write("A13", "Use WACC (0/1)", fmt_txt);      dcf.write_number("B13", 1 if use_wacc else 0, fmt_num)
         dcf.write("A14", "Discount Rate (r_eff)", fmt_txt)
 
-        # WACC inputs & derived
         dcf.write("D3",  "WACC (Fundamentals)", fmt_bold)
         dcf.write("D4",  "Risk-free (rf)", fmt_txt);                 dcf.write_number("E4",  float(rf or 0.0),  fmt_pct4)
         dcf.write("D5",  "Equity Risk Premium (ERP)", fmt_txt);      dcf.write_number("E5",  float(erp or 0.0), fmt_pct4)
@@ -1567,32 +1714,20 @@ def build_excel_report(
         dcf.write("D7",  "Cost of Debt (pre-tax)", fmt_txt);         dcf.write_number("E7",  float(kd or 0.0),  fmt_pct4)
         dcf.write("D8",  "Tax Rate", fmt_txt);                       dcf.write_number("E8",  float(tax or 0.0), fmt_pct4)
         dcf.write("D9",  "Target D/V", fmt_txt);                     dcf.write_number("E9",  float(dv or 0.0),  fmt_pct4)
-
         dcf.write("D10", "Equity Weight (E/V)", fmt_txt);            dcf.write_formula("E10", "=1-E9")
         dcf.write("D11", "After-tax Kd", fmt_txt);                   dcf.write_formula("E11", "=E7*(1-E8)", fmt_pct4)
         dcf.write("D12", "Ke (CAPM)", fmt_txt);                      dcf.write_formula("E12", "=E4 + E6*E5", fmt_pct4)
         dcf.write("D13", "WACC", fmt_bold);                          dcf.write_formula("E13", "=E12*(1-E9)+E11*E9", fmt_pct4)
-
         dcf.write_formula("B14", "=IF($B$13=1, E13, $B$7)", fmt_pct4)
 
-        dcf.data_validation("B5", {"validate": "decimal", "criteria": "between", "minimum": -0.5,  "maximum": 0.5})
-        dcf.data_validation("B6", {"validate": "decimal", "criteria": "between", "minimum": -0.01, "maximum": 0.05})
-        dcf.data_validation("B7", {"validate": "decimal", "criteria": "between", "minimum": 0.01, "maximum": 0.5})
-        dcf.data_validation("B8", {"validate": "integer", "criteria": "between", "minimum": 1, "maximum": 20})
-        dcf.data_validation("B9", {"validate": "integer", "criteria": "greater than", "value": 0})
-        dcf.data_validation("B12", {"validate": "integer", "criteria": "between", "minimum": 0, "maximum": 1})
-        fmt_bad = wb.add_format({"bg_color": "#FDEDEF", "font_color": "#9C0006"})
-        dcf.conditional_format("B14", {"type": "formula", "criteria": "=$B$14<=$B$6", "format": fmt_bad})
-
+        # table body
         start_row = 16
         dcf.write(start_row-1, 0, "Year", fmt_hdr)
         dcf.write(start_row-1, 1, "FCF", fmt_hdr)
         dcf.write(start_row-1, 2, "PV FCF", fmt_hdr)
         dcf.write(start_row-1, 3, "g(y)", fmt_hdr)
-
         volatile_tail = "+0*($B$4+$B$5+$B$6+$B$7+$B$8+$B$9+$B$10+$B$11+$B$12+$B$13+$B$14+E13)"
-
-        for i in range(1, 20+1):
+        for i in range(1, 21):
             r0 = start_row + i - 1
             dcf.write_number(r0, 0, i, fmt_num)
             dcf.write_formula(r0, 3, f'=IF($B$8>={i}, IF($B$12=1, $B$5 + ($B$6-$B$5)*({i}-1)/MAX($B$8-1,1), $B$5), NA()){volatile_tail}')
@@ -1601,17 +1736,12 @@ def build_excel_report(
             else:
                 dcf.write_formula(r0, 1, f'=IF($B$8>={i}, B{r0}*(1+D{r0+1}), NA()){volatile_tail}', fmt_usd)
             dcf.write_formula(r0, 2, f'=IF($B$8>={i}, B{r0+1}/POWER(1+$B$14,{i}), NA()){volatile_tail}', fmt_usd)
-
         term_row = start_row + 21
         dcf.write(term_row-1, 0, "Terminal", fmt_hdr)
         dcf.write(term_row-1, 1, "FCF_(N+1)", fmt_hdr)
         dcf.write(term_row-1, 2, "Terminal PV", fmt_hdr)
-
-        dcf.write_formula(term_row, 1,
-            f'=IF($B$8>0, INDEX(B{start_row+1}:B{start_row+20}, $B$8)*(1+$B$6), NA()){volatile_tail}', fmt_usd)
-        dcf.write_formula(term_row, 2,
-            f'=IF($B$14>$B$6, B{term_row+1}/($B$14-$B$6)/POWER(1+$B$14,$B$8), NA()){volatile_tail}', fmt_usd)
-
+        dcf.write_formula(term_row, 1, f'=IF($B$8>0, INDEX(B{start_row+1}:B{start_row+20}, $B$8)*(1+$B$6), NA()){volatile_tail}', fmt_usd)
+        dcf.write_formula(term_row, 2, f'=IF($B$14>$B$6, B{term_row+1}/($B$14-$B$6)/POWER(1+$B$14,$B$8), NA()){volatile_tail}', fmt_usd)
         sum_row = term_row + 3
         dcf.write(sum_row,   0, "Enterprise Value",   fmt_bold)
         dcf.write(sum_row+1, 0, "Less: Net Debt",     fmt_txt)
@@ -1621,32 +1751,24 @@ def build_excel_report(
         dcf.write(sum_row+5, 0, "Upside vs Current",  fmt_txt)
         dcf.write(sum_row+6, 0, "Terminal PV / EV",   fmt_txt)
         dcf.write(sum_row+7, 0, "PV(Year1..N) / PV(Year1) (x)", fmt_txt)
-
-        dcf.write_formula(
-            sum_row, 1,
-            f'=SUM(INDEX(C{start_row+1}:C{start_row+20},1):INDEX(C{start_row+1}:C{start_row+20},$B$8)) + C{term_row+1}{volatile_tail}',
-            fmt_usd
-        )
+        dcf.write_formula(sum_row, 1, f'=SUM(INDEX(C{start_row+1}:C{start_row+20},1):INDEX(C{start_row+1}:C{start_row+20},$B$8)) + C{term_row+1}{volatile_tail}', fmt_usd)
         dcf.write_formula(sum_row+1, 1, f'=$B$10', fmt_usd)
-        dcf.write_formula(sum_row+2, 1, f'=B{sum_row+1}-B{sum_row+2}', fmt_usd)  # EV - Net Debt
+        dcf.write_formula(sum_row+2, 1, f'=B{sum_row+1}-B{sum_row+2}', fmt_usd)
         dcf.write_formula(sum_row+3, 1, f'=N($B$9)', fmt_num)
         dcf.write_formula(sum_row+4, 1, f'=IF(N(B{sum_row+3+1})>0, B{sum_row+2+1}/N(B{sum_row+3+1}), NA())', fmt_usd)
         dcf.write_formula(sum_row+5, 1, f'=IF(N($B$11)>0, B{sum_row+4+1}/N($B$11)-1, NA())', fmt_pct2)
         dcf.write_formula(sum_row+6, 1, f'=IF(B{sum_row+1}>0, C{term_row+1}/B{sum_row+1}, NA())', fmt_pct2)
-        dcf.write_formula(sum_row+7, 1,
-            f'=IF(INDEX(C{start_row+1}:C{start_row+20},1)>0, '
-            f'SUM(INDEX(C{start_row+1}:C{start_row+20},1):INDEX(C{start_row+1}:C{start_row+20},$B$8))/'
-            f'INDEX(C{start_row+1}:C{start_row+20},1), NA())', fmt_num)
-
+        dcf.write_formula(sum_row+7, 1, f'=IF(INDEX(C{start_row+1}:C{start_row+20},1)>0, SUM(INDEX(C{start_row+1}:C{start_row+20},1):INDEX(C{start_row+1}:C{start_row+20},$B$8))/INDEX(C{start_row+1}:C{start_row+20},1), NA())', fmt_num)
         dcf.set_column("B:C", 20)
         wb.define_name("IMPLIED_PRICE_DCF", f"='DCF Model'!$B${(sum_row+4)+1}")
 
-        # -------- Residual Income --------
+        # Residual Income sheet (financials)
         ri = wb.add_worksheet("Residual Income")
-        ri.set_column("A:A", 10)
+        ri.set_column("A:A", 10);
         ri.set_column("B:H", 18)
         ri.write("A1", "Residual Income (Financials)", fmt_title)
 
+                # Inputs
         ri.write("A3", "Inputs", fmt_bold)
         ri.write("A4", "BV₀ (Book Value of Equity)", fmt_txt); ri.write_number("B4", float(ri_bv0 or 0.0), fmt_usd)
         ri.write("A5", "Shares Outstanding", fmt_txt);         ri.write_number("B5", float(ri_shares or 0), fmt_num)
@@ -1658,6 +1780,7 @@ def build_excel_report(
         ri.write("A11","Terminal ROE (if fade=0)", fmt_txt);   ri.write_number("B11", float(ri_roe_terminal or 0.0), fmt_pct4)
         ri.write("A12","Terminal g (if fade=0)", fmt_txt);     ri.write_number("B12", float(ri_g or 0.0), fmt_pct4)
 
+        # CAPM helper for k_e
         ri.write("D3",  "CAPM for kₑ (optional)", fmt_bold)
         ri.write("D4",  "Risk-free (rf)", fmt_txt);           ri.write_number("E4", float(rf or 0.0), fmt_pct4)
         ri.write("D5",  "Equity Risk Premium", fmt_txt);      ri.write_number("E5", float(erp or 0.0), fmt_pct4)
@@ -1665,10 +1788,12 @@ def build_excel_report(
         ri.write("D8",  "kₑ (CAPM)", fmt_txt);                ri.write_formula("E8", "=E4+E6*E5", fmt_pct4)
         ri.write_formula("B6", "=E8", fmt_pct4)
 
+        # Table header
         ri_start = 16
         for idx, h in enumerate(["Year","BV_Beg","ROE","Earnings","Dividends","BV_End","Residual Income","PV RI"]):
             ri.write(ri_start-1, idx, h, fmt_hdr)
 
+        # Table body (20 rows; show N rows via IF)
         for i in range(1, 20+1):
             r0 = ri_start + i - 1
             ri.write_number(r0, 0, i, fmt_num)
@@ -1676,25 +1801,28 @@ def build_excel_report(
                 ri.write_formula(r0, 1, f'=$B$4')
             else:
                 ri.write_formula(r0, 1, f'=F{r0}')
+            # ROE path: fade to k_e if flag=1; else fade to Terminal ROE
             ri.write_formula(r0, 2, f'=IF($B$7>={i}, IF($B$10=1, $B$8 + ($B$6-$B$8)*({i}-1)/MAX($B$7-1,1), $B$8 + ($B$11-$B$8)*({i}-1)/MAX($B$7-1,1)), NA())', fmt_pct4)
-            ri.write_formula(r0, 3, f'=B{r0+1}*C{r0+1}', fmt_usd)
-            ri.write_formula(r0, 4, f'=$B$9*D{r0+1}', fmt_usd)
-            ri.write_formula(r0, 5, f'=B{r0+1}+D{r0+1}-E{r0+1}', fmt_usd)
-            ri.write_formula(r0, 6, f'=(C{r0+1}-$B$6)*B{r0+1}', fmt_usd)
-            ri.write_formula(r0, 7, f'=IF($B$7>={i}, G{r0+1}/POWER(1+$B$6,{i}), NA())', fmt_usd)
+            ri.write_formula(r0, 3, f'=B{r0+1}*C{r0+1}', fmt_usd)                 # Earnings
+            ri.write_formula(r0, 4, f'=$B$9*D{r0+1}', fmt_usd)                    # Dividends
+            ri.write_formula(r0, 5, f'=B{r0+1}+D{r0+1}-E{r0+1}', fmt_usd)         # BV_End
+            ri.write_formula(r0, 6, f'=(C{r0+1}-$B$6)*B{r0+1}', fmt_usd)          # Residual Income
+            ri.write_formula(r0, 7, f'=IF($B$7>={i}, G{r0+1}/POWER(1+$B$6,{i}), NA())', fmt_usd)  # PV RI
 
+        # Terminal component (only if fade_to_ke = 0)
         ri_term_row = ri_start + 21
         ri.write(ri_term_row-1, 0, "Terminal", fmt_hdr)
         ri.write(ri_term_row-1, 6, "Terminal PV (RI)", fmt_hdr)
-        ri.write_formula(ri_term_row, 6,
+        ri.write_formula(
+            ri_term_row, 6,
             f'=IF($B$10=0, ((INDEX(C{ri_start+1}:C{ri_start+20},$B$7)-$B$6)*INDEX(F{ri_start+1}:F{ri_start+20},$B$7))/($B$6-$B$12)/POWER(1+$B$6,$B$7), 0)',
             fmt_usd
         )
 
+        # Sum & implied price
         ri_sum = ri_term_row + 3
         ri.write(ri_sum,   0, "Equity Value = BV₀ + ΣPV(RI) + Terminal", fmt_bold)
         ri.write(ri_sum+1, 0, "Implied Price (per share)", fmt_bold)
-
         ri.write_formula(
             ri_sum, 1,
             f'=$B$4 + SUM(INDEX(H{ri_start+1}:H{ri_start+20},1):INDEX(H{ri_start+1}:H{ri_start+20},$B$7)) + G{ri_term_row+1}',
@@ -1702,16 +1830,19 @@ def build_excel_report(
         )
         ri.write_formula(ri_sum+1, 1, f'=IF($B$5>0, B{ri_sum+1}/$B$5, NA())', fmt_usd)
 
+        # Named ranges for Overview
         wb.define_name("IMPLIED_PRICE_RI", f"='Residual Income'!$B${(ri_sum+1)+1}")
         wb.define_name("CHOOSE_RI", f"={ 'TRUE' if fin_mode else 'FALSE' }")
 
+        # Charts
         pv_chart = wb.add_chart({"type": "column"})
         pv_chart.add_series({
             "name":       "PV of RI",
             "categories": ["Residual Income", ri_start, 0, ri_start+19, 0],
             "values":     ["Residual Income", ri_start, 7, ri_start+19, 7],
         })
-        pv_chart.set_title({"name": "PV of Residual Income"}); pv_chart.set_legend({"none": True})
+        pv_chart.set_title({"name": "PV of Residual Income"})
+        pv_chart.set_legend({"none": True})
         ri.insert_chart("J4", pv_chart, {"x_scale": 1.0, "y_scale": 1.0})
 
         pv_chart2 = wb.add_chart({"type": "column"})
@@ -1720,7 +1851,8 @@ def build_excel_report(
             "categories": ["DCF Model", start_row, 0, start_row+19, 0],
             "values":     ["DCF Model", start_row, 2, start_row+19, 2],
         })
-        pv_chart2.set_title({"name": "PV FCFs (Years 1..N)"}); pv_chart2.set_legend({"none": True})
+        pv_chart2.set_title({"name": "PV FCFs (Years 1..N)"})
+        pv_chart2.set_legend({"none": True})
         dcf.insert_chart("E4", pv_chart2, {"x_scale": 1.0, "y_scale": 1.0})
 
         fcf_chart = wb.add_chart({"type": "line"})
@@ -1734,59 +1866,67 @@ def build_excel_report(
             "categories": ["DCF Model", start_row, 0, start_row+19, 0],
             "values":     ["DCF Model", start_row, 2, start_row+19, 2],
         })
-        fcf_chart.set_title({"name": "FCF vs PV FCF"}); fcf_chart.set_legend({"position": "bottom"})
+        fcf_chart.set_title({"name": "FCF vs PV FCF"})
+        fcf_chart.set_legend({"position": "bottom"})
         dcf.insert_chart("E20", fcf_chart, {"x_scale": 1.0, "y_scale": 1.0})
 
     return buffer.getvalue()
 
-# -------------------- Export ------------------
+
+# Export
 
 st.subheader("Export")
+
 if st.button("📥 Download Excel Report"):
     metrics_df = pd.DataFrame(fmt_metrics.items(), columns=["Metric", "Value"])
     ri_params = st.session_state.get("ri_params", {})
     excel_bytes = build_excel_report(
-        ticker=ticker,
-        timeframe=timeframe,
-        price_df=price_df,
-        inc_df=inc,
-        bs_df=bs,
-        cf_df=cf,
-        comps_df=comps_df.reset_index(),
-        metrics_df=metrics_df,
-        base_fcf=st.session_state.get("base_fcf") or 0.0,
-        shares_out=st.session_state.get("shares_out") or 0,
-        net_debt=st.session_state.get("net_debt") or 0.0,
-        g1=g1,
-        g2=g2,
-        r=r_manual,               # keep manual r as an input in the sheet
-        N=N,
-        current_price=st.session_state.get("last_close") or 0.0,
-        fade_flag=fade,
-        use_wacc=st.session_state.get("use_wacc", False),
-        rf=st.session_state.get("rf", 0.04),
-        erp=st.session_state.get("erp", 0.05),
-        beta=st.session_state.get("beta", 1.20),
-        kd=st.session_state.get("kd", 0.05),
-        tax=st.session_state.get("tax", 0.21),
-        dv=st.session_state.get("dv", 0.00),
-        roic=st.session_state.get("roic", 0.12),
-        reinvest=st.session_state.get("reinvest", 0.00),
-        fin_mode=bool(ri_params.get("use_financials_mode", False)),
-        ri_bv0=float(ri_params.get("bv0", 0.0)),
-        ri_shares=int(ri_params.get("shares", 0)),
-        ri_ke=float(ri_params.get("ke", 0.10)),
-        ri_N=int(ri_params.get("N", 5)),
-        ri_roe_start=float(ri_params.get("roe_start", 0.10)),
-        ri_payout=float(ri_params.get("payout", 0.00)),
-        ri_fade_to_ke=bool(ri_params.get("fade_to_ke", True)),
-        ri_roe_terminal=(ri_params.get("roe_terminal", None)),
-        ri_g=float(ri_params.get("g_ri", 0.00)),
-    )
+    ticker=ticker,
+    timeframe=timeframe,
+    price_df=price_df,
+    inc_df=inc,
+    bs_df=bs,
+    cf_df=cf,
+    comps_df=comps_df.reset_index(),
+    metrics_df=metrics_df,
+    base_fcf=st.session_state.get("base_fcf") or 0.0,
+    shares_out=st.session_state.get("shares_out") or 0,
+    net_debt=st.session_state.get("net_debt") or 0.0,
+    g1=_g1,
+    g2=_g2,
+    r=_r_manual, # keep manual r as an input in the sheet
+    N=N,
+    current_price=st.session_state.get("last_close") or 0.0,
+    fade_flag=fade,
+    use_wacc=st.session_state.get("use_wacc", False),
+    rf=st.session_state.get("rf", 0.04),
+    erp=st.session_state.get("erp", 0.05),
+    beta=st.session_state.get("beta", 1.20),
+    kd=st.session_state.get("kd", 0.05),
+    tax=st.session_state.get("tax", 0.21),
+    dv=st.session_state.get("dv", 0.00),
+    roic=st.session_state.get("roic", 0.12),
+    reinvest=st.session_state.get("reinvest", 0.00),
+    fin_mode=bool(ri_params.get("use_financials_mode", False)),
+    ri_bv0=float(ri_params.get("bv0", 0.0)),
+    ri_shares=int(ri_params.get("shares", 0)),
+    ri_ke=float(ri_params.get("ke", 0.10)),
+    ri_N=int(ri_params.get("N", 5)),
+    ri_roe_start=float(ri_params.get("roe_start", 0.10)),
+    ri_payout=float(ri_params.get("payout", 0.00)),
+    ri_fade_to_ke=bool(ri_params.get("fade_to_ke", True)),
+    ri_roe_terminal=(ri_params.get("roe_terminal", None)),
+    ri_g=float(ri_params.get("g_ri", 0.00)),
+    # 3S projections
+    proj_income_df=st.session_state.get("three_s", {}).get("inc"),
+    proj_balance_df=st.session_state.get("three_s", {}).get("bs"),
+    proj_cash_df=st.session_state.get("three_s", {}).get("cf"),
+    proj_fcf_series=st.session_state.get("three_s", {}).get("fcf"),
+)
 
-    st.download_button(
-        "Click to download",
-        data=excel_bytes,
-        file_name=f"{ticker}_analyst_report.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
+st.download_button(
+    "Click to download",
+    data=excel_bytes,
+    file_name=f"{ticker}_analyst_report.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+)
