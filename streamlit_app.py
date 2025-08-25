@@ -12,6 +12,33 @@ from typing import Optional, List
 
 # -------------------- Configuration -----------------------------
 openai.api_key = st.secrets.get("OPENAI_API_KEY", "")
+CREATED_BY = st.secrets.get("CREATED_BY", "Your Name / Org")
+APP_VERSION = "1.0.0"
+BUILD_TS = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+
+DISCLAIMER_MD = (
+    """
+**Disclaimer**  
+This tool and the generated report are for **educational and informational purposes only** and do not constitute investment advice or a recommendation to buy or sell any security. The data is sourced from third parties (e.g., Yahoo Finance via `yfinance`) and may contain inaccuracies, delays, or omissions. All models (3-statement, DCF, Residual Income) are simplified and depend on user inputs and assumptions. **Do your own research** and consult a qualified financial professional before making investment decisions.
+
+**Data/Model Notes**  
+- Historical statements are taken as-reported and lightly normalized.  
+- Cash flow convention: FCF ≈ OCF − CapEx; signs normalized to standard corporate finance conventions.  
+- Two-stage DCF assumes either a fade from g₁ → g₂ or a constant g₁, with a standard Gordon Growth terminal value.  
+- Residual Income is most appropriate for financials (banks/insurers) where book equity and ROE are primary drivers.  
+- WACC inputs (rf, ERP, beta, D/V, Kd, tax) are user-editable and can materially change results.
+    """
+)
+
+ABOUT_MD = (
+    f"""
+**Created by:** {CREATED_BY}  
+**App version:** {APP_VERSION}  
+**Build:** {BUILD_TS}
+
+Questions or feedback? Add your contact info to Streamlit Secrets as `CREATED_BY` or edit this string in code.
+    """
+)
 
 # ---- OpenAI compatibility shim (new v1 client OR legacy 0.x) ---
 def _make_create_chat():
@@ -717,7 +744,8 @@ def build_dcf_from_series(fcf_series: pd.Series, r: float, g_term: float, net_de
 
 st.set_page_config(page_title="📈 Analyst Dashboard", layout="wide")
 
-st.markdown("""
+st.markdown(
+"""
 <style>
 :root{
   --accent:#2e7efb; --accent-2:#5ad1ff;
@@ -760,8 +788,38 @@ section[data-testid="stSidebar"] [data-testid="stFormSubmitButton"] button{ widt
 .app-header .subtitle{ font-size:13px; color: var(--text-dim); margin-top:2px; }
 .app-header .chips{ display:flex; gap:8px; flex-wrap:wrap; }
 .app-header .chip{ padding:6px 10px; border-radius:999px; border:1px solid rgba(46,126,251,.35); background:rgba(46,126,251,.10); font-size:12px; color:var(--text); }
+.section-break{ height:1px; background: var(--border); margin: 18px 0; }
+.section-label{ font-size:12px; opacity:.85; text-transform:uppercase; letter-spacing:.08em; margin: 4px 0 6px; color: var(--text-dim); }
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+st.markdown("""
+<style>
+/* ---------- Creator card (sidebar) ---------- */
+section[data-testid="stSidebar"] .creator-card{
+  margin-top:12px; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
+  background: var(--bg-card); display:flex; align-items:center; gap:12px;
+}
+section[data-testid="stSidebar"] .creator-card .avatar{
+  width:36px; height:36px; border-radius:999px; display:grid; place-items:center; font-weight:700; letter-spacing:.4px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff;
+}
+section[data-testid="stSidebar"] .creator-card .meta{ display:flex; flex-direction:column; line-height:1.2; }
+section[data-testid="stSidebar"] .creator-card .meta .label{ font-size:11px; text-transform:uppercase; color:var(--text-dim); }
+section[data-testid="stSidebar"] .creator-card .meta .name{ font-weight:700; color:var(--text); }
+section[data-testid="stSidebar"] .creator-card .actions{ margin-left:auto; }
+section[data-testid="stSidebar"] .creator-card .link-btn{
+  display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:8px;
+  border:1px solid rgba(46,126,251,.35); background:rgba(46,126,251,.08);
+  text-decoration:none; font-size:13px; color:var(--accent); transition: background .2s, transform .02s, box-shadow .2s;
+}
+section[data-testid="stSidebar"] .creator-card .link-btn:hover{ background:rgba(46,126,251,.12); box-shadow:0 6px 16px rgba(46,126,251,.25); }
+section[data-testid="stSidebar"] .creator-card .link-btn svg{ width:16px; height:16px; display:block; }
 </style>
 """, unsafe_allow_html=True)
+
 
 # ---------- Sidebar form ----------
 with st.sidebar.form("report_form"):
@@ -772,6 +830,60 @@ with st.sidebar.form("report_form"):
         index=["1y", "3y", "5y", "max"].index(st.session_state.get("timeframe", "5y")),
     )
     submitted = st.form_submit_button("Generate Report", type="primary")
+
+
+# ---------- Sidebar: About/Disclaimer ----------
+with st.sidebar.expander("About & Disclaimer", expanded=False):
+    st.markdown(
+        """
+**Status:** Current version includes a driver-based 3-Statement model, Two-Stage & 3S-Driven DCF, Residual Income for financials, AI write-ups, and Excel export.
+
+**What’s inside (top → bottom):**
+- **Generate Report** — Enter a ticker & window; fetches price and annual statements (pads with quarterly where needed).
+- **Price Performance** — Closing-price line chart.
+- **Financial Statements** — Income, Balance Sheet, Cash Flow (last N years).
+- **Key Metrics & Ratios** — Margins, ROE/ROIC, asset turnover, FCF trends, and basic market multiples.
+- **Comparable Companies** — Quick peer multiples table **+ AI Comps & Market Analysis**.
+- **3-Statement Model (Driver-based)** — Edit growth/margins/CapEx/NWC/taxes; produces projected IS/BS/CF and **Unlevered FCF**.
+- **Cost of Capital (WACC & CAPM)** — rf, ERP, beta, D/V, Kd, tax. You can use WACC as the DCF discount rate or keep a manual **r**.
+- **Growth Consistency** — Cross-check: **g ≈ ROIC × reinvestment**.
+- **DCF Valuation** — Two modes:
+  - *Two-Stage (Simple):* optional fade **g₁ → g₂**; can auto-solve for **r** or **g₁** to match market.
+  - *3S-Driven:* discounts the Unlevered FCFs produced by the 3-Statement model.
+- **Residual Income (Financials)** — Bank/insurer-friendly equity valuation using BV₀, ROE path, payout, and **kₑ** (with optional terminal RI if you don’t fade ROE → kₑ).
+- **Executive Summary (AI)** — Concise narrative reflecting your current settings and outputs.
+- **Export** — One-click Excel workbook with **Overview, Price (chart), Income, Balance, CashFlow, Proj_Income, Proj_Balance, Proj_CashFlow, Proj_FCF, DCF Model, Residual Income, Comps, Key Metrics**. Interactive formulas & charts included.
+
+**Data & model notes:** Data comes from public sources (e.g., Yahoo Finance via `yfinance`) and may have gaps or mapping quirks. FCF ≈ OCF − CapEx (TTM from quarterlies when available, else latest annual). Shares are inferred from Yahoo and statements. Net debt = total debt − (cash + STI). Models are simplified and sensitive to assumptions.
+
+**How AI uses your inputs:**  
+- **AI Comps & Market Analysis** summarizes relative valuation using your peer set and observed multiples.  
+- **Executive Summary (AI)** synthesizes the full context (ticker, timeframe, 3S drivers, DCF/RI settings, WACC/CAPM inputs, fade options, etc.). Change inputs → regenerate.
+
+**No investment advice:** For educational/informational use only — **not** financial advice, a recommendation, or a solicitation to buy/sell securities. Always do your own research and verify assumptions.
+        """
+    )
+
+    # ---------- Sidebar: Creator card ----------
+st.sidebar.markdown("""
+<div class="creator-card">
+  <div class="avatar">EH</div>
+  <div class="meta">
+    <div class="label">Created by</div>
+    <div class="name">Edward Huang</div>
+  </div>
+  <div class="actions">
+    <a class="link-btn" href="https://linkedin.com/in/edwardhuangg" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M20.45 20.45h-3.57v-5.58c0-1.33-.02-3.04-1.86-3.04-1.86 0-2.14 1.45-2.14 2.95v5.67H9.31V9.75h3.43v1.46h.05c.48-.91 1.64-1.86 3.37-1.86 3.61 0 4.28 2.38 4.28 5.48v5.61zM5.34 8.29a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.13 20.45H3.56V9.75h3.57v10.7zM22 2H2C.9 2 0 2.9 0 4v16c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2z"/>
+      </svg>
+      LinkedIn
+    </a>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+
 
 # ---------- Header ----------
 if st.session_state.get("data_ready"):
@@ -795,7 +907,8 @@ if st.session_state.get("data_ready"):
     </div>
     """, unsafe_allow_html=True)
 else:
-    st.markdown("""
+    st.markdown(
+        """
     <div class="app-header">
       <div class="title">
         <div class="eyebrow">Analyst Dashboard</div>
@@ -806,7 +919,9 @@ else:
         <span class="chip">Ready</span>
       </div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 # ---------- Fetch on submit ----------
 if submitted:
@@ -841,9 +956,25 @@ cf_q        = st.session_state.get("cf_q")
 extras      = st.session_state["extras"]
 years_back  = st.session_state["years_back"]
 
+# ---------- Information (Added back) ----------
+st.subheader("Information")
+st.caption("Quick pointers on how the app works and where things are:")
+st.markdown(
+    "- Use the sidebar to set the ticker and period, then Generate Report.\n"
+    "- **3-Statement Model** lets you edit drivers; outputs feed the 3S-Driven DCF.\n"
+    "- **WACC / CAPM** inputs drive discount rates (or keep a manual r).\n"
+    "- **DCF** includes both a Two-Stage and a 3S-Driven approach.\n"
+    "- **Residual Income (Financials)** is recommended for banks/insurers.\n"
+    "- **Export** builds an Excel workbook with interactive tabs and charts.\n"
+)
+
+st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
+
 # ---------- Price chart ----------
 st.subheader("Price Performance")
 st.line_chart(price_df["Close"], height=300, use_container_width=True)
+
+st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
 
 # ---------- Financial statements (historical) ----------
 desired_inc = ["Total Revenue", "Cost Of Revenue", "Gross Profit", "Operating Income", "Net Income", "Ebitda",
@@ -1020,8 +1151,11 @@ with colB:
     else:
         st.caption("Edit the peer list above (or click **Refresh**) to generate an AI summary of the comp set and market context.")
 
+st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
+
 # -------------------- NEW: 3-Statement Model (Driver-based) -----
 
+st.markdown('<div class="section-label">Modeling</div>', unsafe_allow_html=True)
 st.subheader("3-Statement Model (Driver-based)")
 
 drivers = derive_default_drivers(inc, bs, cf)
@@ -1064,8 +1198,11 @@ st.session_state["three_s"] = {
     "equity0": equity0_3s,
 }
 
+st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
+
 # -------------------- WACC & Growth Consistency -----------------
 
+st.markdown('<div class="section-label">Valuation Inputs</div>', unsafe_allow_html=True)
 st.subheader("Cost of Capital (WACC)")
 with st.expander("Fundamentals-based WACC (CAPM)", expanded=False):
     rf  = st.number_input("Risk-free rate (rf, dec.)", key="rf",  value=st.session_state.get("rf", 0.04),  step=0.005, format="%.3f")
@@ -1102,8 +1239,11 @@ with st.expander("Cross-check sustainable growth and reinvestment", expanded=Fal
     implied_g = float(roic) * float(reinvest)
     st.write(f"Implied sustainable growth g ≈ **{implied_g*100:.2f}%**")
 
+st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
+
 # -------------------- DCF (two-stage + 3S-driven) --------------
 
+st.markdown('<div class="section-label">Valuation Models</div>', unsafe_allow_html=True)
 st.subheader("Discounted Cash-Flow (DCF) Valuation")
 
 last_close = float(price_df["Close"].iloc[-1])
@@ -1218,14 +1358,17 @@ try:
             "N (years)":          N,
             "Fade g₁→g₂":         fade,
             "Terminal PV / EV":   f"{term_pct:.1%}" if term_pct is not None else "—",
-            "PV(Years 1..N) / PV(Year1) (x)": f"{pv_mult:.1f}x" if pv_mult is not None else "—",
+                        "PV(Years 1..N) / PV(Year1) (x)": f"{pv_mult:.1f}x" if pv_mult is not None else "—",
         }).to_frame("Value")
         dcf_head_two.loc["N (years)", "Value"] = f"{int(N)}"
 except Exception as e:
     pass
 
 try:
-    implied_px_3s, dcf_df_3s, dcf_head_3s = build_dcf_from_series(st.session_state["three_s"].get("fcf"), r=r_eff, g_term=_g2, net_debt=net_debt, shares_out=shares_out)
+    implied_px_3s, dcf_df_3s, dcf_head_3s = build_dcf_from_series(
+        st.session_state["three_s"].get("fcf"),
+        r=r_eff, g_term=_g2, net_debt=net_debt, shares_out=shares_out
+    )
 except Exception:
     pass
 
@@ -1245,163 +1388,29 @@ with _tab_3s:
         st.info("3S-driven DCF unavailable – ensure the 3-statement model produced FCFs and r > g₂.")
 
 # Choose implied_px for downstream sections
-if dcf_method == "3S-Driven (from model)" and (implied_px_3s is not None):
+if st.session_state["dcf_choice"] == "3S-Driven (from model)" and (implied_px_3s is not None):
     implied_px_chosen = implied_px_3s
 else:
     implied_px_chosen = implied_px_two
 
-# -------------------- Sensitivity Analysis ----------------------
-
-st.subheader("Sensitivity Analysis")
-
-with st.expander("Two-Stage DCF Sensitivities (Price & Upside)"):
-    if base_fcf is None or not shares_out:
-        st.info("Two-stage DCF sensitivities require Base FCF and Shares Out.")
-    else:
-        c1, c2, c3 = st.columns(3)
-        r_min  = c1.number_input("Discount rate r (min, dec.)", value=0.06, step=0.005, format="%.3f")
-        r_max  = c1.number_input("Discount rate r (max, dec.)", value=0.14, step=0.005, format="%.3f")
-        r_step = c1.number_input("r step", value=0.01, step=0.005, format="%.3f")
-
-        g1_min  = c2.number_input("Stage-1 growth g₁ (min, dec.)", value=max(_g1 - 0.05, -0.10), step=0.005, format="%.3f")
-        g1_max  = c2.number_input("Stage-1 growth g₁ (max, dec.)", value=_g1 + 0.05, step=0.005, format="%.3f")
-        g1_step = c2.number_input("g₁ step", value=0.01, step=0.005, format="%.3f")
-
-        g2_min  = c3.number_input("Terminal growth g₂ (min, dec.)", value=max(_g2 - 0.01, 0.00), step=0.005, format="%.3f")
-        g2_max  = c3.number_input("Terminal growth g₂ (max, dec.)", value=_g2 + 0.01, step=0.005, format="%.3f")
-        g2_step = c3.number_input("g₂ step", value=0.005, step=0.005, format="%.3f")
-
-        # Helpers to build grids
-        def _frange(lo, hi, step):
-            arr = []
-            x = float(lo)
-            hi = float(hi) + 1e-12
-            while x <= hi:
-                arr.append(round(x, 6))
-                x += float(step)
-            return arr if arr else [lo]
-
-        r_vals  = _frange(r_min,  r_max,  r_step)
-        g1_vals = _frange(g1_min, g1_max, g1_step)
-        g2_vals = _frange(g2_min, g2_max, g2_step)
-
-        # Price table: rows=r, cols=g1 (g2 fixed)
-        tbl_price_g1 = pd.DataFrame(index=[f"r={rv:.3f}" for rv in r_vals],
-                                    columns=[f"g₁={gv:.3f}" for gv in g1_vals])
-        for ir, rv in enumerate(r_vals):
-            for ig, gv in enumerate(g1_vals):
-                px = dcf_two_stage_price(base_fcf, shares_out, net_debt, N, gv, _g2, rv, fade=fade)
-                tbl_price_g1.iat[ir, ig] = None if px is None else float(px)
-
-        # Upside table vs current price
-        tbl_upside_g1 = tbl_price_g1.copy()
-        for ir in range(len(r_vals)):
-            for ig in range(len(g1_vals)):
-                v = tbl_price_g1.iat[ir, ig]
-                tbl_upside_g1.iat[ir, ig] = None if (v is None or not last_close) else (v/last_close - 1.0)
-
-        # Price table: rows=r, cols=g2 (g1 fixed)
-        tbl_price_g2 = pd.DataFrame(index=[f"r={rv:.3f}" for rv in r_vals],
-                                    columns=[f"g₂={gv:.3f}" for gv in g2_vals])
-        for ir, rv in enumerate(r_vals):
-            for ig, gv in enumerate(g2_vals):
-                px = dcf_two_stage_price(base_fcf, shares_out, net_debt, N, _g1, gv, rv, fade=fade)
-                tbl_price_g2.iat[ir, ig] = None if px is None else float(px)
-
-        tbl_upside_g2 = tbl_price_g2.copy()
-        for ir in range(len(r_vals)):
-            for ig in range(len(g2_vals)):
-                v = tbl_price_g2.iat[ir, ig]
-                tbl_upside_g2.iat[ir, ig] = None if (v is None or not last_close) else (v/last_close - 1.0)
-
-        st.markdown("**Price ($) – vary r × g₁ (g₂ fixed)**")
-        st.table(tbl_price_g1.style.format("${:,.2f}"))
-
-        st.markdown("**Upside (%) – vary r × g₁ (g₂ fixed)**")
-        st.table(tbl_upside_g1.style.format("{:.1%}").background_gradient(axis=None))
-
-        st.markdown("**Price ($) – vary r × g₂ (g₁ fixed)**")
-        st.table(tbl_price_g2.style.format("${:,.2f}"))
-
-        st.markdown("**Upside (%) – vary r × g₂ (g₁ fixed)**")
-        st.table(tbl_upside_g2.style.format("{:.1%}").background_gradient(axis=None))
-
-with st.expander("3S-Driven DCF Sensitivities (Price & Upside)"):
-    fcf_series = st.session_state.get("three_s", {}).get("fcf")
-    if fcf_series is None or fcf_series.empty or not shares_out:
-        st.info("3S-driven sensitivities require 3S FCF series and Shares Out.")
-    else:
-        c1, c2 = st.columns(2)
-        r_min_3s  = c1.number_input("Discount rate r (min, dec.) – 3S", value=max(r_eff - 0.03, 0.04), step=0.005, format="%.3f")
-        r_max_3s  = c1.number_input("Discount rate r (max, dec.) – 3S", value=r_eff + 0.03, step=0.005, format="%.3f")
-        r_step_3s = c1.number_input("r step – 3S", value=0.01, step=0.005, format="%.3f")
-
-        g2_min_3s  = c2.number_input("Terminal growth g₂ (min, dec.) – 3S", value=max(_g2 - 0.01, 0.00), step=0.005, format="%.3f")
-        g2_max_3s  = c2.number_input("Terminal growth g₂ (max, dec.) – 3S", value=_g2 + 0.01, step=0.005, format="%.3f")
-        g2_step_3s = c2.number_input("g₂ step – 3S", value=0.005, step=0.005, format="%.3f")
-
-        r_vals3  = _frange(r_min_3s,  r_max_3s,  r_step_3s)
-        g2_vals3 = _frange(g2_min_3s, g2_max_3s, g2_step_3s)
-
-        tbl_price_3s = pd.DataFrame(index=[f"r={rv:.3f}" for rv in r_vals3],
-                                    columns=[f"g₂={gv:.3f}" for gv in g2_vals3])
-        for ir, rv in enumerate(r_vals3):
-            for ig, gv in enumerate(g2_vals3):
-                px, _, _ = build_dcf_from_series(fcf_series, r=rv, g_term=gv, net_debt=net_debt, shares_out=shares_out)
-                tbl_price_3s.iat[ir, ig] = None if px is None else float(px)
-
-        tbl_upside_3s = tbl_price_3s.copy()
-        for ir in range(len(r_vals3)):
-            for ig in range(len(g2_vals3)):
-                v = tbl_price_3s.iat[ir, ig]
-                tbl_upside_3s.iat[ir, ig] = None if (v is None or not last_close) else (v/last_close - 1.0)
-
-        st.markdown("**3S-Driven Price ($) – vary r × g₂**")
-        st.table(tbl_price_3s.style.format("${:,.2f}"))
-
-        st.markdown("**3S-Driven Upside (%) – vary r × g₂**")
-        st.table(tbl_upside_3s.style.format("{:.1%}").background_gradient(axis=None))
-
-
-# -------------------- Housekeeping ------------------------------
-
-st.subheader("Housekeeping")
-c1, c2 = st.columns(2)
-if c1.button("🔄 Clear cached data (yfinance + metrics)"):
-    try:
-        st.cache_data.clear()
-        st.success("Cleared cached data.")
-    except Exception as e:
-        st.warning(f"Could not clear cache: {e}")
-
-if c2.button("🧹 Reset AI summaries"):
-    st.session_state["exec_summary"] = None
-    st.session_state["comps_analysis"] = None
-    st.success("AI summaries reset.")
-
-
-# -------------------- Notes & Disclaimer -----------------------
-
-st.markdown("""
----
-**Notes & Disclaimer**
-
-- This tool uses public data from Yahoo Finance via `yfinance`. Figures may differ from company filings.
-- Models (Two-Stage DCF, 3S-driven DCF, and Residual Income) are simplified and for educational/research use.
-- Nothing herein is investment advice. Always verify assumptions against primary sources (10-K/10-Q).
-""")
-
+st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
 
 # -------------------- Residual Income (Financials) --------------
 
-st.subheader("Financials (Residual Income) – Recommended for Banks/Insurers")
+st.markdown('<div class="section-label">Financials Valuation</div>', unsafe_allow_html=True)
+st.subheader("Residual Income (Banks/Insurers)")
 
 auto_fin = detect_is_financials(extras)
-use_financials_mode = st.checkbox("Use Financials (Residual Income) mode", value=auto_fin,
-                                  help=f"Auto-detected financials: {auto_fin} (Sector: {extras.get('Sector')}, Industry: {extras.get('Industry')})")
+use_financials_mode = st.checkbox(
+    "Use Financials (Residual Income) mode",
+    value=auto_fin,
+    help=f"Auto-detected financials: {auto_fin} (Sector: {extras.get('Sector')}, Industry: {extras.get('Industry')})"
+)
 
 bve0_guess, roe0_guess = estimate_starting_bve_and_roe(inc, bs)
-ke_default = float((st.session_state.get("rf", 0.04) + st.session_state.get("beta", 1.20) * st.session_state.get("erp", 0.05)))
+ke_default = float(
+    (st.session_state.get("rf", 0.04) + st.session_state.get("beta", 1.20) * st.session_state.get("erp", 0.05))
+)
 
 col1, col2 = st.columns(2)
 with col1:
@@ -1449,6 +1458,8 @@ st.session_state["ri_params"] = {
     "ri_price": float(ri_price or 0.0),
 }
 
+st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
+
 # -------------------- Executive Summary (AI) --------------------
 
 st.subheader("Executive Summary (AI)")
@@ -1472,7 +1483,7 @@ if st.button("🧠 Generate / Refresh AI Summary"):
             f"Market Cap: {fmt_metrics.get('Market Cap ($)','—')}",
             f"Net Debt: ${st.session_state['net_debt']:,.0f}  |  Shares Out: {st.session_state['shares_out'] or '—'}",
             f"Base FCF (latest): ${st.session_state['base_fcf']:,.0f}",
-            f"DCF method chosen: {dcf_method}",
+            f"DCF method chosen: {st.session_state['dcf_choice']}",
             dcf_two_line,
             dcf_3s_line,
             f"RI Implied Price: ${ri_price:,.2f}" if ri_price else "RI Implied Price: —",
@@ -1513,6 +1524,8 @@ if st.session_state["exec_summary"]:
     st.markdown(st.session_state["exec_summary"])
 else:
     st.info("Click **Generate / Refresh AI Summary** to produce the write-up including the calibrated DCF/RI and 3S context.")
+
+st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
 
 # -------------------- Excel Report (extended with 3S) -----------
 
@@ -1578,6 +1591,7 @@ def build_excel_report(
         fmt_txt   = wb.add_format({"align": "left"})
         fmt_note  = wb.add_format({"italic": True, "font_color": "#666"})
         fmt_title = wb.add_format({"bold": True, "font_size": 14})
+        fmt_wrap  = wb.add_format({"text_wrap": True, "valign": "top"})
 
         # -------- Overview --------
         ov = wb.add_worksheet("Overview")
@@ -1764,11 +1778,11 @@ def build_excel_report(
 
         # Residual Income sheet (financials)
         ri = wb.add_worksheet("Residual Income")
-        ri.set_column("A:A", 10);
+        ri.set_column("A:A", 10)
         ri.set_column("B:H", 18)
         ri.write("A1", "Residual Income (Financials)", fmt_title)
 
-                # Inputs
+        # Inputs
         ri.write("A3", "Inputs", fmt_bold)
         ri.write("A4", "BV₀ (Book Value of Equity)", fmt_txt); ri.write_number("B4", float(ri_bv0 or 0.0), fmt_usd)
         ri.write("A5", "Shares Outstanding", fmt_txt);         ri.write_number("B5", float(ri_shares or 0), fmt_num)
@@ -1870,63 +1884,77 @@ def build_excel_report(
         fcf_chart.set_legend({"position": "bottom"})
         dcf.insert_chart("E20", fcf_chart, {"x_scale": 1.0, "y_scale": 1.0})
 
+        # About & Disclaimer sheet
+        about = wb.add_worksheet("About & Disclaimer")
+        about.set_column("A:A", 120)
+        about.write("A1", f"Created by: {CREATED_BY}", fmt_bold)
+        about.write("A2", f"App version: {APP_VERSION}   |   Build: {BUILD_TS}")
+        about.write("A4", "Disclaimer", fmt_bold)
+        about.write("A5", DISCLAIMER_MD, fmt_wrap)
+        about.write("A12", "Notes", fmt_bold)
+        about.write("A13", "Historical data sourced via yfinance; values may differ from company filings.", fmt_wrap)
+
     return buffer.getvalue()
 
-
-# Export
+# -------------------- Export --------------------
 
 st.subheader("Export")
+st.caption("Generate an Excel workbook with all statements, models, charts, and the About/Disclaimer sheet.")
 
-if st.button("📥 Download Excel Report"):
+if st.button("📥 Build Excel Report"):
     metrics_df = pd.DataFrame(fmt_metrics.items(), columns=["Metric", "Value"])
     ri_params = st.session_state.get("ri_params", {})
     excel_bytes = build_excel_report(
-    ticker=ticker,
-    timeframe=timeframe,
-    price_df=price_df,
-    inc_df=inc,
-    bs_df=bs,
-    cf_df=cf,
-    comps_df=comps_df.reset_index(),
-    metrics_df=metrics_df,
-    base_fcf=st.session_state.get("base_fcf") or 0.0,
-    shares_out=st.session_state.get("shares_out") or 0,
-    net_debt=st.session_state.get("net_debt") or 0.0,
-    g1=_g1,
-    g2=_g2,
-    r=_r_manual, # keep manual r as an input in the sheet
-    N=N,
-    current_price=st.session_state.get("last_close") or 0.0,
-    fade_flag=fade,
-    use_wacc=st.session_state.get("use_wacc", False),
-    rf=st.session_state.get("rf", 0.04),
-    erp=st.session_state.get("erp", 0.05),
-    beta=st.session_state.get("beta", 1.20),
-    kd=st.session_state.get("kd", 0.05),
-    tax=st.session_state.get("tax", 0.21),
-    dv=st.session_state.get("dv", 0.00),
-    roic=st.session_state.get("roic", 0.12),
-    reinvest=st.session_state.get("reinvest", 0.00),
-    fin_mode=bool(ri_params.get("use_financials_mode", False)),
-    ri_bv0=float(ri_params.get("bv0", 0.0)),
-    ri_shares=int(ri_params.get("shares", 0)),
-    ri_ke=float(ri_params.get("ke", 0.10)),
-    ri_N=int(ri_params.get("N", 5)),
-    ri_roe_start=float(ri_params.get("roe_start", 0.10)),
-    ri_payout=float(ri_params.get("payout", 0.00)),
-    ri_fade_to_ke=bool(ri_params.get("fade_to_ke", True)),
-    ri_roe_terminal=(ri_params.get("roe_terminal", None)),
-    ri_g=float(ri_params.get("g_ri", 0.00)),
-    # 3S projections
-    proj_income_df=st.session_state.get("three_s", {}).get("inc"),
-    proj_balance_df=st.session_state.get("three_s", {}).get("bs"),
-    proj_cash_df=st.session_state.get("three_s", {}).get("cf"),
-    proj_fcf_series=st.session_state.get("three_s", {}).get("fcf"),
-)
+        ticker=ticker,
+        timeframe=timeframe,
+        price_df=price_df,
+        inc_df=inc,
+        bs_df=bs,
+        cf_df=cf,
+        comps_df=comps_df.reset_index(),
+        metrics_df=metrics_df,
+        base_fcf=st.session_state.get("base_fcf") or 0.0,
+        shares_out=st.session_state.get("shares_out") or 0,
+        net_debt=st.session_state.get("net_debt") or 0.0,
+        g1=_g1,
+        g2=_g2,
+        r=_r_manual,  # keep manual r as an input in the sheet
+        N=N,
+        current_price=st.session_state.get("last_close") or 0.0,
+        fade_flag=fade,
+        use_wacc=st.session_state.get("use_wacc", False),
+        rf=st.session_state.get("rf", 0.04),
+        erp=st.session_state.get("erp", 0.05),
+        beta=st.session_state.get("beta", 1.20),
+        kd=st.session_state.get("kd", 0.05),
+        tax=st.session_state.get("tax", 0.21),
+        dv=st.session_state.get("dv", 0.00),
+        roic=st.session_state.get("roic", 0.12),
+        reinvest=st.session_state.get("reinvest", 0.00),
+        fin_mode=bool(ri_params.get("use_financials_mode", False)),
+        ri_bv0=float(ri_params.get("bv0", 0.0)),
+        ri_shares=int(ri_params.get("shares", 0)),
+        ri_ke=float(ri_params.get("ke", 0.10)),
+        ri_N=int(ri_params.get("N", 5)),
+        ri_roe_start=float(ri_params.get("roe_start", 0.10)),
+        ri_payout=float(ri_params.get("payout", 0.00)),
+        ri_fade_to_ke=bool(ri_params.get("fade_to_ke", True)),
+        ri_roe_terminal=(ri_params.get("roe_terminal", None)),
+        ri_g=float(ri_params.get("g_ri", 0.00)),
+        # 3S projections
+        proj_income_df=st.session_state.get("three_s", {}).get("inc"),
+        proj_balance_df=st.session_state.get("three_s", {}).get("bs"),
+        proj_cash_df=st.session_state.get("three_s", {}).get("cf"),
+        proj_fcf_series=st.session_state.get("three_s", {}).get("fcf"),
+    )
+    st.session_state["excel_bytes"] = excel_bytes
 
-st.download_button(
-    "Click to download",
-    data=excel_bytes,
-    file_name=f"{ticker}_analyst_report.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-)
+if st.session_state.get("excel_bytes"):
+    st.download_button(
+        "Click to download",
+        data=st.session_state["excel_bytes"],
+        file_name=f"{ticker}_analyst_report.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
