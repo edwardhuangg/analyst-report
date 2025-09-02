@@ -3,4 +3,5 @@ pandas
 yfinance
 openai
 requests
-
+numpy
+xlsxwriter
