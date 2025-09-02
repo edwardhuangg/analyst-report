@@ -9,6 +9,7 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from http.client import RemoteDisconnected
 import numpy as np
 from typing import Optional, List
+import re
 
 # -------------------- Configuration -----------------------------
 openai.api_key = st.secrets.get("OPENAI_API_KEY", "")
@@ -39,6 +40,40 @@ ABOUT_MD = (
 Questions or feedback? Add your contact info to Streamlit Secrets as `CREATED_BY` or edit this string in code.
     """
 )
+
+# -------------------- Info panel (always visible) ----------------
+INFO_PANEL_MD = """
+> **Heads-up: inputs matter.** The dashboard scaffolds a financial model for you, but it does **not** know the numbers in your head. The defaults are auto-filled from recent history and generic assumptions. If you don’t tweak them, it’s totally normal to see strange or extreme results at first.
+
+**What to adjust right away**
+- **3-Statement drivers:** Revenue growth, EBIT margin, CapEx/Rev, NWC/Rev, tax.
+- **Discount rate:** Use the **WACC/CAPM** helper or set a manual **r**.
+- **Terminal & stage growth:** Keep **g₂ < r**; pick a realistic **g₁** horizon.
+- **Capital structure:** Shares outstanding & net debt (pulled from Yahoo—verify).
+- **Comps:** Replace peer tickers with true like-for-like companies.
+
+**Quick troubleshooting**
+- Check **Analysis Window** and **Quarterly backfill** (short windows can be noisy).
+- If CapEx sign looks odd, remember it’s often reported negative; the app normalizes, but verify.
+- If valuation explodes, sanity-check **r**, **g₂**, and **Shares/Net Debt**.
+"""
+
+def render_info_panel():
+    st.subheader("Information")
+    st.caption("Quick pointers on how the app works and why early results may look wild until you tune inputs.")
+    # Core how-to bullets (kept from your original copy)
+    st.markdown(
+        "- Use the sidebar to set the ticker and period, then **Generate Report**.\n"
+        "- **3-Statement Model** lets you edit drivers; outputs feed the 3S-Driven DCF.\n"
+        "- **WACC / CAPM** inputs drive discount rates (or keep a manual r).\n"
+        "- **DCF** includes both a Two-Stage and a 3S-Driven approach.\n"
+        "- **Residual Income (Financials)** is recommended for banks/insurers.\n"
+        "- **Export** builds an Excel workbook with interactive tabs and charts.\n"
+    )
+    # The “why results may look odd” box
+    st.info(INFO_PANEL_MD)
+    st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
+
 
 # ---- OpenAI compatibility shim (new v1 client OR legacy 0.x) ---
 def _make_create_chat():
@@ -94,13 +129,20 @@ if "dcf_choice" not in st.session_state:
 
 def _cagr(series: pd.Series):
     try:
-        start, end = series.iloc[-1], series.iloc[0]  # newest first
-        yrs = (series.index[0] - series.index[-1]).days / 365
-        if yrs <= 0 or end == 0:
+        s = pd.to_datetime(series.index, errors="coerce")
+        ser = pd.Series(series.values, index=s).dropna()
+        ser = ser.sort_index()  # oldest → newest
+        if ser.empty or len(ser) < 2:
             return None
-        return ((start / end) ** (1 / yrs) - 1) * 100
+        start = float(ser.iloc[0])   # oldest
+        end   = float(ser.iloc[-1])  # newest
+        yrs = (ser.index[-1] - ser.index[0]).days / 365.25
+        if yrs <= 0 or start <= 0:
+            return None
+        return ((end / start) ** (1 / yrs) - 1) * 100.0
     except Exception:
         return None
+
 
 @st.cache_data(show_spinner=False)
 def compute_metrics(inc: pd.DataFrame, bs: pd.DataFrame, cf: pd.DataFrame, years: int):
@@ -241,6 +283,67 @@ def format_statement(df: pd.DataFrame, decimals: int = 0):
     styler = out.style.format({c: fmt for c in num_cols}, na_rep="")
     return styler
 
+# -------------------- UI helpers: flexible % inputs -----------------
+
+def _parse_percent(s, default=0.0):
+    """Return a *decimal* (e.g., '2.5%' -> 0.025). Accepts '2.5', '2.5%', '0.025', '25bp'."""
+    try:
+        if s is None: 
+            return float(default)
+        # handle numeric directly
+        if isinstance(s, (int, float)):
+            v = float(s)
+            return v/100.0 if abs(v) >= 1.0 else v
+        t = str(s).strip().lower().replace(",", "")
+        if t == "":
+            return float(default)
+        # basis points
+        if t.endswith("bp") or t.endswith("bps"):
+            num = re.findall(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?", t)
+            return float(num[0]) / 10000.0 if num else float(default)
+        had_pct = t.endswith("%")
+        if had_pct:
+            t = t[:-1]
+        v = float(t)
+        if had_pct or abs(v) >= 1.0:
+            return v / 100.0
+        return v
+    except Exception:
+        return float(default)
+
+
+def percent_input(label, key, default=0.0, *, min_pct=None, max_pct=None, help=None, placeholder="e.g., 2.5 or 2.5% or 25bp"):
+    """
+    Text input that shows/accepts a percentage but returns & stores a decimal in st.session_state[key].
+    Keeps the text box in-sync even if code changes the underlying decimal (e.g., after calibration).
+    """
+    txt_key = f"{key}__pctstr"
+    cur_dec = float(st.session_state.get(key, default))
+
+    # initialize / sync display string
+    desired = f"{cur_dec*100:.3f}".rstrip("0").rstrip(".")
+    if txt_key not in st.session_state:
+        st.session_state[txt_key] = desired
+    else:
+        try:
+            parsed_from_str = _parse_percent(st.session_state[txt_key], cur_dec)
+            if abs(parsed_from_str - cur_dec) > 1e-9:
+                st.session_state[txt_key] = desired
+        except Exception:
+            st.session_state[txt_key] = desired
+
+    s = st.text_input(f"{label} (%)", key=txt_key, help=help, placeholder=placeholder)
+    dec = _parse_percent(s, default)
+
+    if min_pct is not None:
+        dec = max(dec, float(min_pct) / 100.0)
+    if max_pct is not None:
+        dec = min(dec, float(max_pct) / 100.0)
+
+    st.session_state[key] = dec
+    return dec
+
+
 # -------------------- Data fetch ------------
 
 def _try_once_then_retry(fn):
@@ -262,7 +365,7 @@ def _has_rows(df: pd.DataFrame) -> bool:
 
 
 @st.cache_data(ttl=3600, show_spinner="⏳ Fetching data …")
-def fetch_financials(ticker: str, period: str = "5y"):
+def fetch_financials(ticker: str, period: str = "5y", allow_quarterly_backfill: bool = False):
     try:
         yt = yf.Ticker(ticker)
 
@@ -289,7 +392,18 @@ def fetch_financials(ticker: str, period: str = "5y"):
         except Exception:
             target_n = 5
 
-        inc, bs, cf = _pad_annual_with_quarterly_if_needed(yt, inc, bs, cf, target_n)
+            # 🔒 If backfill is OFF, cap N to the annual rows we truly have (no quarterly padding)
+        if not allow_quarterly_backfill:
+            existing_n = min([len(df.index) for df in (inc, bs, cf) if _has_rows(df)] or [0])
+            if existing_n > 0:
+                target_n = min(target_n, existing_n)
+
+        # Only pad if explicitly allowed
+        if allow_quarterly_backfill:
+            inc, bs, cf = _pad_annual_with_quarterly_if_needed(yt, inc, bs, cf, target_n)
+        else:
+            # keep only the most recent target_n annual rows
+            inc, bs, cf = inc.head(target_n), bs.head(target_n), cf.head(target_n)
 
         try:
             cf_q = yt.quarterly_cashflow.T
@@ -858,6 +972,11 @@ with st.sidebar.form("report_form"):
         ["1y", "3y", "5y", "max"],
         index=["1y", "3y", "5y", "max"].index(st.session_state.get("timeframe", "5y")),
     )
+    allow_q_backfill = st.checkbox(
+        "Allow quarterly backfill when annuals < N",
+        value=st.session_state.get("allow_q_backfill", False),
+        help="If off, show only as-reported annual rows (no quarterly padding)."
+    )
     submitted = st.form_submit_button("Generate Report", type="primary")
 
 
@@ -950,11 +1069,15 @@ else:
         unsafe_allow_html=True,
     )
 
+# ---------- Always-on Information (show before any data is fetched) ----------
+render_info_panel()
+
 # ---------- Fetch on submit ----------
 if submitted:
-    price_df, inc, bs, cf, cf_q, extras = fetch_financials(ticker, timeframe)
+    price_df, inc, bs, cf, cf_q, extras = fetch_financials(ticker, timeframe, allow_quarterly_backfill=allow_q_backfill)
     st.session_state.update({
         "ticker": ticker, "timeframe": timeframe,
+        "allow_quarterly_backfill": allow_q_backfill,
         "price_df": price_df, "inc": inc, "bs": bs, "cf": cf, "cf_q": cf_q, "extras": extras,
         "data_ready": price_df is not None,
         "years_back": int(timeframe.replace("y", "")) if timeframe != "max" else 5,
@@ -982,20 +1105,6 @@ cf          = st.session_state["cf"]
 cf_q        = st.session_state.get("cf_q")
 extras      = st.session_state["extras"]
 years_back  = st.session_state["years_back"]
-
-# ---------- Information (Added back) ----------
-st.subheader("Information")
-st.caption("Quick pointers on how the app works and where things are:")
-st.markdown(
-    "- Use the sidebar to set the ticker and period, then Generate Report.\n"
-    "- **3-Statement Model** lets you edit drivers; outputs feed the 3S-Driven DCF.\n"
-    "- **WACC / CAPM** inputs drive discount rates (or keep a manual r).\n"
-    "- **DCF** includes both a Two-Stage and a 3S-Driven approach.\n"
-    "- **Residual Income (Financials)** is recommended for banks/insurers.\n"
-    "- **Export** builds an Excel workbook with interactive tabs and charts.\n"
-)
-
-st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
 
 # ---------- Price chart ----------
 st.subheader("Price Performance")
@@ -1128,10 +1237,10 @@ def _make_comps_prompt(ticker: str, extras: dict, comps_df: pd.DataFrame, stats:
     prompt = (
         "You are an equity analyst. Write a compact analysis of the provided comp set and the market context.\n"
         "Deliver 3 short sections with bullets:\n"
-        "1) Peer Set Sanity Check – Are these peers appropriate? Note any mismatches and suggest 1–3 adjustments.\n"
+        "1) Peer Set Sanity Check – Are these peers appropriate? Note any mismatches and suggest 1–3 adjustments. However, don't overcritique, if the comps chosen are somewhat relevant, only suggest a new company if significantly needed\n"
         "2) Relative Valuation – Where does the target sit vs comp medians on P/E and EV/EBITDA (cheap/fair/expensive)? Mention P/B or P/S if more relevant.\n"
         "3) Market Context & Takeaways – Brief comment on sector backdrop implied by peers, plus 2–3 concrete diligence items.\n"
-        "Keep it crisp and numbers-driven.\n\n"
+        "Keep it crisp, numbers-driven, and readable\n\n"
         f"DATA:\n{ctx}"
     )
     return prompt
@@ -1188,17 +1297,21 @@ st.subheader("3-Statement Model (Driver-based)")
 drivers = derive_default_drivers(inc, bs, cf)
 with st.expander("Assumptions (edit to taste)"):
     c1, c2, c3 = st.columns(3)
-    years_proj  = c1.slider("Projection Years (N)", 3, 10, 5)
-    drivers["revg"]         = c1.number_input("Revenue Growth (g, dec.)", value=float(drivers["revg"]), step=0.005, format="%.3f")
-    drivers["ebit_margin"]  = c1.number_input("EBIT Margin (dec.)", value=float(drivers["ebit_margin"]), step=0.005, format="%.3f")
-    drivers["tax_rate"]     = c1.number_input("Tax Rate (dec.)", value=float(drivers["tax_rate"]), step=0.005, format="%.3f")
 
-    drivers["dep_pct_rev"]  = c2.number_input("Depreciation / Revenue (dec.)", value=float(drivers["dep_pct_rev"]), step=0.005, format="%.3f")
-    drivers["capex_pct_rev"]= c2.number_input("CapEx / Revenue (dec.)", value=float(drivers["capex_pct_rev"]), step=0.005, format="%.3f")
-    drivers["nwc_pct_rev"]  = c2.number_input("NWC / Revenue (dec.)", value=float(drivers["nwc_pct_rev"]), step=0.005, format="%.3f")
+    with c1:
+        years_proj = st.slider("Projection Years (N)", 3, 10, 5)
+        drivers["revg"]        = percent_input("Revenue Growth (g)", key="drv_revg",        default=float(drivers["revg"]))
+        drivers["ebit_margin"] = percent_input("EBIT Margin",         key="drv_ebit_m",      default=float(drivers["ebit_margin"]))
+        drivers["tax_rate"]    = percent_input("Tax Rate",            key="drv_tax",         default=float(drivers["tax_rate"]))
 
-    drivers["interest_rate"]= c3.number_input("Interest Rate on Debt (dec.)", value=float(drivers["interest_rate"]), step=0.005, format="%.3f")
-    drivers["div_payout"]   = c3.number_input("Dividend Payout (of NI, dec.)", value=float(drivers["div_payout"]), step=0.01, format="%.2f", min_value=0.0, max_value=1.0)
+    with c2:
+        drivers["dep_pct_rev"]   = percent_input("Depreciation / Revenue", key="drv_dep_pct",   default=float(drivers["dep_pct_rev"]))
+        drivers["capex_pct_rev"] = percent_input("CapEx / Revenue",        key="drv_capex_pct", default=float(drivers["capex_pct_rev"]))
+        drivers["nwc_pct_rev"]   = percent_input("NWC / Revenue",          key="drv_nwc_pct",   default=float(drivers["nwc_pct_rev"]))
+
+    with c3:
+        drivers["interest_rate"] = percent_input("Interest Rate on Debt",  key="drv_int_rate",  default=float(drivers["interest_rate"]))
+        drivers["div_payout"]    = percent_input("Dividend Payout (of NI)",key="drv_payout",    default=float(drivers["div_payout"]), min_pct=0, max_pct=100)
 
 inc_p, bs_p, cf_p, fcf_series_3s, equity_path_3s, equity0_3s = project_three_statements(drivers, years_proj)
 
@@ -1232,14 +1345,12 @@ st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
 st.markdown('<div class="section-label">Valuation Inputs</div>', unsafe_allow_html=True)
 st.subheader("Cost of Capital (WACC)")
 with st.expander("Fundamentals-based WACC (CAPM)", expanded=False):
-    rf  = st.number_input("Risk-free rate (rf, dec.)", key="rf",  value=st.session_state.get("rf", 0.04),  step=0.005, format="%.3f")
-    erp = st.number_input("Equity risk premium (ERP, dec.)", key="erp", value=st.session_state.get("erp", 0.05), step=0.005, format="%.3f")
-    beta = st.number_input("Equity beta (levered)", key="beta", value=st.session_state.get("beta", 1.20), step=0.05, format="%.2f")
-    kd  = st.number_input("Cost of debt (pre-tax, dec.)", key="kd",  value=st.session_state.get("kd", 0.05),  step=0.005, format="%.3f")
-    tax = st.number_input("Tax rate (effective, dec.)",   key="tax", value=st.session_state.get("tax", 0.21), step=0.005, format="%.3f")
-    dv  = st.number_input("Target D/V (debt share of capital, dec.)", key="dv",
-                           value=st.session_state.get("dv", 0.00), step=0.05, format="%.2f",
-                           help="0.00 means all-equity; 0.30 means 30% debt / 70% equity.")
+    rf   = percent_input("Risk-free rate (rf)",          key="rf",   default=st.session_state.get("rf", 0.04))
+    erp  = percent_input("Equity risk premium (ERP)",    key="erp",  default=st.session_state.get("erp", 0.05))
+    beta = st.number_input("Equity beta (levered)",      key="beta", value=st.session_state.get("beta", 1.20), step=0.05, format="%.2f")
+    kd   = percent_input("Cost of debt (pre-tax)",       key="kd",   default=st.session_state.get("kd", 0.05))
+    tax  = percent_input("Tax rate (effective)",         key="tax",  default=st.session_state.get("tax", 0.21))
+    dv   = percent_input("Target D/V (debt share of capital)", key="dv", default=st.session_state.get("dv", 0.00), min_pct=0, max_pct=100)
 
     D = max(0.0, min(1.0, float(dv)))
     E = 1.0 - D
@@ -1261,8 +1372,8 @@ with st.expander("Cross-check sustainable growth and reinvestment", expanded=Fal
     except Exception:
         pass
 
-    roic = st.number_input("ROIC (after-tax, dec.)", key="roic", value=st.session_state.get("roic", roic_guess), step=0.005, format="%.3f")
-    reinvest = st.number_input("Reinvestment rate (dec.)", key="reinvest", value=st.session_state.get("reinvest", 0.00), step=0.05, format="%.2f")
+    roic = percent_input("ROIC (after-tax)",        key="roic",     default=st.session_state.get("roic", roic_guess))
+    reinvest = percent_input("Reinvestment rate",   key="reinvest", default=st.session_state.get("reinvest", 0.00), min_pct=0, max_pct=100)
     implied_g = float(roic) * float(reinvest)
     st.write(f"Implied sustainable growth g ≈ **{implied_g*100:.2f}%**")
 
@@ -1296,9 +1407,9 @@ with colm2:
     st.caption("Two-Stage grows a single FCF; 3S-Driven discounts the unlevered FCFs produced by the 3-statement model.")
 
 # Two-Stage inputs
-st.number_input("Stage-1 FCF Growth (g₁, %)", key="g1", value=st.session_state.get("g1", 0.10), step=0.1, format="%.2f")
-st.number_input("Terminal Growth (g₂, %)",   key="g2", value=st.session_state.get("g2", 0.025), step=0.1, format="%.2f")
-st.number_input("Discount Rate (r, %)",      key="r",  value=st.session_state.get("r", 0.09),  step=0.1, format="%.2f")
+percent_input("Stage-1 FCF Growth (g₁)", key="g1", default=st.session_state.get("g1", 0.10))
+percent_input("Terminal Growth (g₂)",    key="g2", default=st.session_state.get("g2", 0.025))
+percent_input("Discount Rate (r)",       key="r",  default=st.session_state.get("r", 0.09))
 st.slider("Projection Years (N)", min_value=1, max_value=20, key="N", value=st.session_state.get("N", 5))
 st.checkbox("Fade g₁ → g₂ across N (more realistic)", key="fade", value=st.session_state.get("fade", True))
 
@@ -1404,9 +1515,32 @@ _tab_two, _tab_3s = st.tabs(["Two-Stage (Simple)", "3S-Driven (from model)"])
 with _tab_two:
     if dcf_df_two is not None:
         st.table(dcf_df_two.style.format({"FCF": "${:,.0f}", "PV FCF": "${:,.0f}"}).hide(axis="index"))
-        st.table(dcf_head_two.style.format({"Value": lambda x: f"${x:,.0f}" if isinstance(x,(int,float)) else x}))
+
+        # custom per-field formatting
+        def _fmt_val(k, v):
+            if v is None: return "—"
+            if k in {"Enterprise Value","Less: Net Debt","Equity Value","Implied Price","Current Price","Base FCF (latest)"}:
+                return f"${v:,.0f}"
+            if k in {"g₁ (stage-1)","g₂ (terminal)","r (discount)","Terminal PV / EV"}:
+                try: return f"{float(v)*100:.2f}%"
+                except: return str(v)
+            if k in {"PV(Years 1..N) / PV(Year1) (x)"}:
+                try: return f"{float(v):.1f}x"
+                except: return str(v)
+            if k in {"N (years)","Shares Out"}:
+                try: return f"{int(v):,}"
+                except: return str(v)
+            if k == "Fade g₁→g₂":
+                return "Yes" if bool(v) else "No"
+            return f"{v}"
+
+        _df = pd.DataFrame(
+            {"Metric": list(dcf_head_two.index), "Value": [ _fmt_val(k, dcf_head_two.loc[k, "Value"]) for k in dcf_head_two.index ]}
+        )
+        st.table(_df)
     else:
         st.info("Two-stage DCF unavailable – check inputs (r > g₂, base FCF, shares).")
+
 with _tab_3s:
     if dcf_df_3s is not None:
         st.table(dcf_df_3s.style.format({"FCF": "${:,.0f}", "PV FCF": "${:,.0f}"}).hide(axis="index"))
@@ -1444,14 +1578,14 @@ with col1:
     bve0 = st.number_input("Book Value of Equity (BV₀, $)", value=float(bve0_guess or 0.0), step=1_000_000.0, format="%.0f")
     ri_shares = st.number_input("Shares Outstanding", value=float(shares_out or 0), step=1_000.0, format="%.0f")
     ri_N = st.slider("Projection Years (N, RI)", min_value=1, max_value=20, value=st.session_state.get("ri_N", 5))
-    payout = st.number_input("Dividend Payout Ratio (dec.)", value=0.00, step=0.05, format="%.2f")
+    payout = percent_input("Dividend Payout Ratio", key="ri_payout", default=0.00, min_pct=0, max_pct=100)
 with col2:
-    ke_in = st.number_input("Cost of Equity kₑ (dec.)", value=float(ke_default), step=0.005, format="%.3f")
-    roe_start = st.number_input("Starting ROE (dec.)", value=float(roe0_guess or 0.10), step=0.01, format="%.3f")
+    ke_in     = percent_input("Cost of Equity kₑ", key="ke_in",     default=float(ke_default))
+    roe_start = percent_input("Starting ROE",      key="roe_start", default=float(roe0_guess or 0.10))
     fade_to_ke = st.checkbox("Fade ROE → kₑ by year N (Terminal RI ≈ 0)", value=True)
     if not fade_to_ke:
-        roe_terminal = st.number_input("Terminal ROE (dec.)", value=float(roe0_guess or 0.10), step=0.01, format="%.3f")
-        g_ri = st.number_input("Terminal g (dec., for continuing RI)", value=0.00, step=0.005, format="%.3f")
+        roe_terminal = percent_input("Terminal ROE", key="ri_roe_terminal", default=float(roe0_guess or 0.10))
+        g_ri = percent_input("Terminal g (for continuing RI)", key="ri_g", default=0.00)
     else:
         roe_terminal, g_ri = None, 0.0
 
@@ -1494,15 +1628,40 @@ st.caption("Click the button to (re)generate using the current valuation setting
 
 if st.button("🧠 Generate / Refresh AI Summary"):
     try:
+        # decide which valuation “counts”
+        implied_pick = None
+        method_label = None
+
+        if use_financials_mode and ri_price:
+            implied_pick = ri_price
+            method_label = "Residual Income"
+        else:
+            # prefer whichever DCF tab is chosen and available
+            if st.session_state["dcf_choice"] == "3S-Driven (from model)" and (implied_px_3s is not None):
+                implied_pick = implied_px_3s
+                method_label = "DCF (3S-Driven)"
+            elif implied_px_two is not None:
+                implied_pick = implied_px_two
+                method_label = "DCF (Two-Stage)"
+
         upside_pct = None
-        # Choose method: RI for financials; else DCF (user choice between two-stage vs 3S)
-        implied_pick = ri_price if use_financials_mode and ri_price else implied_px_chosen
         if implied_pick and st.session_state.get("last_close"):
             upside_pct = (implied_pick / st.session_state["last_close"] - 1.0) * 100.0
 
-        # Summaries
-        dcf_two_line = f"DCF Two-Stage Implied Price: ${implied_px_two:,.2f}" if implied_px_two else "DCF Two-Stage Implied Price: —"
-        dcf_3s_line  = f"DCF 3S-Driven Implied Price: ${implied_px_3s:,.2f}" if implied_px_3s else "DCF 3S-Driven Implied Price: —"
+        method_label = (
+            "Residual Income" if (use_financials_mode and ri_price)
+            else ("DCF (3S-Driven)" if (st.session_state["dcf_choice"] == "3S-Driven (from model)" and implied_px_3s)
+                else "DCF (Two-Stage)")
+        )
+
+        lines_used = []
+        if method_label == "DCF (Two-Stage)" and implied_px_two:
+            lines_used.append(f"DCF Two-Stage Implied Price: ${implied_px_two:,.2f}")
+        elif method_label == "DCF (3S-Driven)" and implied_px_3s:
+            lines_used.append(f"DCF 3S-Driven Implied Price: ${implied_px_3s:,.2f}")
+        elif method_label == "Residual Income" and ri_price:
+            lines_used.append(f"RI Implied Price: ${ri_price:,.2f}")
+
 
         context_lines = [
             f"Ticker: {ticker}",
@@ -1510,27 +1669,29 @@ if st.button("🧠 Generate / Refresh AI Summary"):
             f"Market Cap: {fmt_metrics.get('Market Cap ($)','—')}",
             f"Net Debt: ${st.session_state['net_debt']:,.0f}  |  Shares Out: {st.session_state['shares_out'] or '—'}",
             f"Base FCF (latest): ${st.session_state['base_fcf']:,.0f}",
-            f"DCF method chosen: {st.session_state['dcf_choice']}",
-            dcf_two_line,
-            dcf_3s_line,
-            f"RI Implied Price: ${ri_price:,.2f}" if ri_price else "RI Implied Price: —",
-            f"Upside/Downside (chosen method): {upside_pct:.2f}% vs. market" if upside_pct is not None else "Upside/Downside: —",
-            f"P/E: {fmt_metrics.get('P/E Ratio','—')} | EV/EBITDA: {fmt_metrics.get('EV/EBITDA','—')}",
-        ]
-        what_true = [
-            "For 3S: margins, CapEx%Rev, and NWC%Rev drive FCF shape; stress test sensitivities.",
-            "For two-stage: Stage-1 FCF must compound at ~{:.2%} for {} years (fading to {:.2%}).".format(_g1, N, _g2) if fade else "For two-stage: Stage-1 FCF must compound at ~{:.2%} for {} years.".format(_g1, N),
-            "Residual income adds value only when ROE exceeds kₑ; fading ROE → kₑ dampens terminal contribution.",
-        ]
+            f"Chosen Valuation Method: {method_label or '—'}",
+        ] + lines_used + ([
+            f"Upside/Downside (chosen): {upside_pct:.2f}% vs. market"
+        ] if upside_pct is not None else [])
+
+        what_true = []
+        if st.session_state["dcf_choice"] == "3S-Driven (from model)" and implied_px_3s is not None:
+            what_true.append("For 3S: margins, CapEx%Rev, and NWC%Rev drive FCF shape; stress test sensitivities.")
+        if implied_px_two is not None:
+            if fade:
+                what_true.append(f"For two-stage: Stage-1 FCF must compound at ~{_g1:.2%} for {N} years (fading to {_g2:.2%}).")
+            else:
+                what_true.append(f"For two-stage: Stage-1 FCF must compound at ~{_g1:.2%} for {N} years.")
+        if use_financials_mode and ri_price:
+            what_true.append("Residual income adds value only when ROE exceeds kₑ; fading ROE → kₑ dampens terminal contribution.")
 
         summary_prompt = (
             "You are a buy-side partner reviewing an analyst's report.\n"
-            "Write a crisp executive summary that integrates 3-Statement projections with DCF and Residual Income.\n"
-            "Prefer RI for financials; otherwise use the user's DCF selection (two-stage vs 3S-driven).\n"
-            "Structure as: 1) Key Strengths  2) Key Risks  3) Valuation (DCF & RI)  4) What-Must-Be-True  5) Bottom Line.\n\n"
-            "Data points:\n" + "\n".join("- " + line for line in context_lines) +
-            "\n\nWhat-must-be-true:\n" + "\n".join("- " + line for line in what_true) +
-            "\n\nUse plain language, quantify where possible, avoid fluff."
+            "Write a crisp executive summary using ONLY the models provided in DATA.\n"
+            "Do not mention models that are not listed.\n"
+            "Structure: 1) Key Strengths  2) Key Risks  3) Valuation  4) What-Must-Be-True  5) Bottom Line.\n\n"
+            "DATA:\n" + "\n".join("- " + line for line in context_lines) +
+            ("\n\nWhat-must-be-true:\n" + "\n".join("- " + line for line in what_true) if what_true else "")
         )
 
         with st.spinner("✍️  Writing summary …"):
@@ -1635,21 +1796,46 @@ def build_excel_report(
         ov.write_formula("B13", "=(IF(CHOOSE_RI, IMPLIED_PRICE_RI, IMPLIED_PRICE_DCF)/B4)-1", fmt_pct2)
         ov.set_column("A:A", 22); ov.set_column("B:B", 18)
 
+        # ---- FIXED & HARDENED ----
+        def _index_looks_date_like(idx: pd.Index) -> bool:
+            # True for Datetime/Period indexes or if most values parse to dates
+            if isinstance(idx, (pd.DatetimeIndex, pd.PeriodIndex)):
+                return True
+            try:
+                s = pd.Series(idx)
+                parsed = pd.to_datetime(s, errors="coerce")
+                return parsed.notna().mean() >= 0.6  # majority are valid dates
+            except Exception:
+                return False
+
         def write_df(sheetname, df, money_col_idxs=None, width=22):
+            """Write any DataFrame to a sheet, with a robust 'Period' column."""
+            ws = wb.add_worksheet(sheetname)
             if df is None or df.empty:
-                ws = wb.add_worksheet(sheetname)
                 ws.write("A1", f"No data for {sheetname}", fmt_note)
                 return ws
-            out = df.reset_index().rename(columns={"index": "Period"})
-            out["Period"] = pd.to_datetime(out["Period"], errors="coerce").dt.date
+
+            out = df.reset_index()
+
+            # Ensure the first column is named 'Period' (regardless of prior name)
+            first_col = out.columns[0]
+            if first_col != "Period":
+                out = out.rename(columns={first_col: "Period"})
+
+            # Only coerce to dates if the *original* index looked date-like
+            if _index_looks_date_like(df.index):
+                out["Period"] = pd.to_datetime(out["Period"], errors="coerce").dt.date
+
             out = out.fillna("")
             out.to_excel(writer, sheet_name=sheetname, index=False)
+
             ws = writer.sheets[sheetname]
             for c in range(len(out.columns)):
                 ws.write(0, c, out.columns[c], fmt_hdr)
             ws.freeze_panes(1, 1)
             ws.set_column(0, 0, 16)
             ws.set_column(1, len(out.columns)-1, width)
+
             if money_col_idxs:
                 for c_idx in money_col_idxs:
                     ws.set_column(c_idx, c_idx, width, fmt_money)
