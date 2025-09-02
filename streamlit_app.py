@@ -45,7 +45,7 @@ Questions or feedback? Add your contact info to Streamlit Secrets as `CREATED_BY
 INFO_PANEL_MD = """
 > **Heads-up: inputs matter.** The dashboard scaffolds a financial model for you, but it does **not** know the numbers in your head. The defaults are auto-filled from recent history and generic assumptions. If you don’t tweak them, it’s totally normal to see strange or extreme results at first.
 
-**What to adjust right away**
+**What to adjust**
 - **3-Statement drivers:** Revenue growth, EBIT margin, CapEx/Rev, NWC/Rev, tax.
 - **Discount rate:** Use the **WACC/CAPM** helper or set a manual **r**.
 - **Terminal & stage growth:** Keep **g₂ < r**; pick a realistic **g₁** horizon.
@@ -58,21 +58,23 @@ INFO_PANEL_MD = """
 - If valuation explodes, sanity-check **r**, **g₂**, and **Shares/Net Debt**.
 """
 
-def render_info_panel():
-    st.subheader("Information")
-    st.caption("Quick pointers on how the app works and why early results may look wild until you tune inputs.")
-    # Core how-to bullets (kept from your original copy)
-    st.markdown(
-        "- Use the sidebar to set the ticker and period, then **Generate Report**.\n"
-        "- **3-Statement Model** lets you edit drivers; outputs feed the 3S-Driven DCF.\n"
-        "- **WACC / CAPM** inputs drive discount rates (or keep a manual r).\n"
-        "- **DCF** includes both a Two-Stage and a 3S-Driven approach.\n"
-        "- **Residual Income (Financials)** is recommended for banks/insurers.\n"
-        "- **Export** builds an Excel workbook with interactive tabs and charts.\n"
-    )
-    # The “why results may look odd” box
-    st.info(INFO_PANEL_MD)
+# -------------------- Info panel (collapsible) ----------------
+def render_info_panel(*, expanded: bool = True):
+    with st.expander("Information", expanded=expanded):
+        st.caption("Quick pointers on how the app works and why early results may look wild until you tune inputs.")
+        # Core how-to bullets (kept from your original copy)
+        st.markdown(
+            "- Use the sidebar to set the ticker and period, then **Generate Report**.\n"
+            "- **3-Statement Model** lets you edit drivers; outputs feed the 3S-Driven DCF.\n"
+            "- **WACC / CAPM** inputs drive discount rates (or keep a manual r).\n"
+            "- **DCF** includes both a Two-Stage and a 3S-Driven approach.\n"
+            "- **Residual Income (Financials)** is recommended for banks/insurers.\n"
+            "- **Export** builds an Excel workbook with interactive tabs and charts.\n"
+        )
+        # The “why results may look odd” box
+        st.info(INFO_PANEL_MD)
     st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
+
 
 
 # ---- OpenAI compatibility shim (new v1 client OR legacy 0.x) ---
@@ -1069,8 +1071,9 @@ else:
         unsafe_allow_html=True,
     )
 
-# ---------- Always-on Information (show before any data is fetched) ----------
-render_info_panel()
+# ---------- Information panel (collapsible) ----------
+# Starts open; after you click Generate (submitted=True) or once data is ready, it starts closed.
+render_info_panel(expanded=not (submitted or st.session_state.get("data_ready", False)))
 
 # ---------- Fetch on submit ----------
 if submitted:
