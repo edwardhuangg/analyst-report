@@ -1670,7 +1670,7 @@ with st.expander("3-Statement Model (Driver-based)", expanded=True):
         c1, c2, c3 = st.columns(3)
 
         with c1:
-            years_proj = st.slider("Projection Years (N)", 3, 10, 5)
+            years_proj = st.slider("Projection Years (3S)", 3, 10, st.session_state.get("years_proj_3s", 5), key="years_proj_3s")
             drivers["revg"]        = percent_input("Revenue Growth (g)", key="drv_revg",        default=float(drivers["revg"]))
             drivers["ebit_margin"] = percent_input("EBIT Margin",         key="drv_ebit_m",      default=float(drivers["ebit_margin"]))
             drivers["tax_rate"]    = percent_input("Tax Rate",            key="drv_tax",         default=float(drivers["tax_rate"]))
@@ -1877,6 +1877,12 @@ with st.expander("Discounted Cash-Flow (DCF)", expanded=True):
             horizontal=True,
             key="dcf_choice"
         )
+
+        if st.session_state["dcf_choice"] == "3S-Driven (from model)":
+            st.caption("Using **3S-Driven** DCF for the headline/summary. The Two-Stage inputs (g₁, N, etc.) won’t affect the chosen headline unless you switch the selector above.")
+        else:
+            st.caption("Using **Two-Stage** DCF for the headline/summary. The 3S Projection Years affect only the 3S-Driven tab.")
+
     with colm2:
         st.caption("Two-Stage grows a single FCF; 3S-Driven discounts the unlevered FCFs produced by the 3-statement model.")
 
