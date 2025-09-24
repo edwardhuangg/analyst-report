@@ -9,7 +9,7 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from http.client import RemoteDisconnected
 import numpy as np
 from typing import Optional, List
-import re
+
 
 # -------------------- Configuration -----------------------------
 openai.api_key = st.secrets.get("OPENAI_API_KEY", "")
