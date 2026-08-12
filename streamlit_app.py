@@ -3,7 +3,7 @@ import pandas as pd
 import yfinance as yf
 import openai
 import io
-from datetime import datetime
+from datetime import datetime, timezone
 import requests
 from requests.exceptions import ConnectionError as RequestsConnectionError
 from http.client import RemoteDisconnected
@@ -15,7 +15,7 @@ import re
 openai.api_key = st.secrets.get("OPENAI_API_KEY", "")
 CREATED_BY = st.secrets.get("CREATED_BY", "Your Name / Org")
 APP_VERSION = "1.0.0"
-BUILD_TS = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+BUILD_TS = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
 DISCLAIMER_MD = (
     """
@@ -127,6 +127,11 @@ if "three_s" not in st.session_state:
 # default to 3S-Driven as the primary DCF
 if "dcf_choice" not in st.session_state:
     st.session_state["dcf_choice"] = "3S-Driven (from model)"
+# Widget-backed defaults. Keyed widgets read these from session state directly;
+# passing a `value=` as well would trigger Streamlit's double-default warning.
+for _k, _v in (("N", 5), ("fade", True), ("years_proj_3s", 5), ("use_wacc", False)):
+    if _k not in st.session_state:
+        st.session_state[_k] = _v
 
 
 # -------------------- Helpers: metrics & padding -----------------
@@ -148,13 +153,57 @@ def _cagr(series: pd.Series):
         return None
 
 
+def _first_present_series(df: Optional[pd.DataFrame], names: List[str]) -> Optional[pd.Series]:
+    if df is None or df.empty:
+        return None
+    for name in names:
+        if name in df.columns:
+            return df[name]
+    return None
+
+
+def _coerce_numeric_series(series: Optional[pd.Series]) -> pd.Series:
+    if series is None:
+        return pd.Series(dtype="float64")
+    return pd.to_numeric(series, errors="coerce")
+
+
+def _latest_numeric_value(df: Optional[pd.DataFrame], names: List[str]) -> Optional[float]:
+    s = _coerce_numeric_series(_first_present_series(df, names)).dropna()
+    if s.empty:
+        return None
+    return float(s.iloc[0])
+
+
+def _total_debt_series(df: Optional[pd.DataFrame]) -> Optional[pd.Series]:
+    total = _first_present_series(df, ["Total Debt", "TotalDebt", "Short Long Term Debt Total"])
+    if total is not None:
+        return _coerce_numeric_series(total)
+    current = _coerce_numeric_series(_first_present_series(df, [
+        "Current Debt", "Short Term Debt", "Short Long Term Debt", "Current Debt And Capital Lease Obligation",
+    ]))
+    long_term = _coerce_numeric_series(_first_present_series(df, [
+        "Long Term Debt", "Long Term Debt And Capital Lease Obligation",
+    ]))
+    if current.empty and long_term.empty:
+        return None
+    return current.reindex(df.index, fill_value=0.0).fillna(0.0) + long_term.reindex(df.index, fill_value=0.0).fillna(0.0)
+
+
 @st.cache_data(show_spinner=False)
 def compute_metrics(inc: pd.DataFrame, bs: pd.DataFrame, cf: pd.DataFrame, years: int):
-    cutoff = datetime.today().replace(year=datetime.today().year - years)
+    cutoff = pd.Timestamp.today() - pd.DateOffset(years=years)
     inc_p, bs_p, cf_p = inc[inc.index >= cutoff], bs[bs.index >= cutoff], cf[cf.index >= cutoff]
 
-    eq_cols = [c for c in bs_p.columns if "equity" in c.lower()]
-    eq_col = eq_cols[0] if eq_cols else None
+    eq = _first_present_series(bs_p, [
+        "Total Stockholder Equity",
+        "Stockholders Equity",
+        "Total Equity Gross Minority Interest",
+        "Common Stock Equity",
+        "Total Equity",
+    ])
+    debt = _total_debt_series(bs_p)
+    cash = _first_present_series(bs_p, ["Cash And Cash Equivalents", "Cash", "Cash Cash Equivalents And Short Term Investments"])
 
     m, rev, cogs = {}, inc_p.get("Total Revenue"), inc_p.get("Cost Of Revenue")
     if rev is not None and cogs is not None:
@@ -166,30 +215,51 @@ def compute_metrics(inc: pd.DataFrame, bs: pd.DataFrame, cf: pd.DataFrame, years
             m[f"Net Margin ({years}yr avg %)"] = (inc_p.get("Net Income") / rev * 100).mean()
         m[f"Revenue CAGR ({years}yr %)"] = _cagr(rev)
 
-    if eq_col:
+    if eq is not None:
         if inc_p.get("Net Income") is not None:
             try:
                 # Simple ROE approx: NI / avg equity
-                eq = bs_p[eq_col]
                 avg_eq = (eq.shift(-1).fillna(eq) + eq) / 2
                 m[f"ROE ({years}yr avg %)"] = (inc_p.get("Net Income") / avg_eq * 100).mean()
             except Exception:
                 pass
-        invested = (bs_p.get("Total Liab", 0) + bs_p[eq_col]) if eq_col in bs_p.columns else None
-        if invested is not None and inc_p.get("Net Income") is not None:
-            m[f"ROIC ({years}yr avg %)"] = (inc_p.get("Net Income") * 0.8 / invested * 100).mean()
+        ebit = _first_present_series(inc_p, ["Operating Income", "EBIT"])
+        tax = _first_present_series(inc_p, ["Tax Provision", "Income Tax Expense"])
+        ptx = _first_present_series(inc_p, ["Pretax Income", "Income Before Tax"])
+        if ebit is not None and debt is not None:
+            try:
+                tax_rate = (_coerce_numeric_series(tax).abs() / _coerce_numeric_series(ptx).abs()).replace([np.inf, -np.inf], np.nan)
+                tax_rate = tax_rate.clip(lower=0.0, upper=0.50).fillna(0.21)
+                invested = _coerce_numeric_series(debt).fillna(0.0) + _coerce_numeric_series(eq).fillna(0.0)
+                if cash is not None:
+                    invested = invested - _coerce_numeric_series(cash).fillna(0.0)
+                avg_invested = (invested.shift(-1).fillna(invested) + invested) / 2
+                roic = (_coerce_numeric_series(ebit) * (1.0 - tax_rate)) / avg_invested.replace(0, np.nan)
+                m[f"ROIC ({years}yr avg %)"] = (roic.replace([np.inf, -np.inf], np.nan) * 100).mean()
+            except Exception:
+                pass
 
-    if {"Total Cash From Operating Activities", "Capital Expenditures"}.issubset(cf_p.columns):
-        fcf = cf_p["Total Cash From Operating Activities"] + cf_p["Capital Expenditures"]
+    cfo = _first_present_series(cf_p, [
+        "Total Cash From Operating Activities", "Operating Cash Flow",
+        "Net Cash Provided By Operating Activities", "Cash Flow From Operations",
+    ])
+    capex = _first_present_series(cf_p, [
+        "Capital Expenditures", "Capital Expenditure",
+        "Purchase Of Property Plant And Equipment",
+        "Investments In Property Plant And Equipment",
+        "Investments In Property, Plant And Equipment",
+    ])
+    if cfo is not None and capex is not None:
+        fcf = _coerce_numeric_series(cfo) + _coerce_numeric_series(capex)
         m[f"FCF CAGR ({years}yr %)"] = _cagr(fcf)
 
     assets = bs_p.get("Total Assets")
     if rev is not None and assets is not None:
         m[f"Asset Turnover ({years}yr avg x)"] = (rev / assets).mean()
 
-    if {"Total Liab", eq_col}.issubset(bs_p.columns):
+    if debt is not None and eq is not None:
         try:
-            m["Debt/Equity (latest)"] = (bs_p["Total Liab"] / bs_p[eq_col]).iloc[0]
+            m["Debt/Equity (latest)"] = (_coerce_numeric_series(debt) / _coerce_numeric_series(eq).replace(0, np.nan)).iloc[0]
         except Exception:
             pass
 
@@ -197,11 +267,11 @@ def compute_metrics(inc: pd.DataFrame, bs: pd.DataFrame, cf: pd.DataFrame, years
 
 # ---------- Quarterly → Annual padding ----------
 
-def _annualize_quarterly(qdf: pd.DataFrame, kind: str, fy_alias: str = None) -> pd.DataFrame:
+def _annualize_quarterly(qdf: pd.DataFrame, kind: str, fy_alias: Optional[str] = None) -> pd.DataFrame:
     """
-    Aggregate quarterlies into fiscal-year annuals using the provided FY alias (e.g., 'A-SEP').
+    Aggregate quarterlies into fiscal-year annuals using the provided FY alias (e.g., 'YE-SEP').
     kind: 'flow' -> sum; 'stock' -> last.
-    If fy_alias is None, default to calendar 'A-DEC'.
+    If fy_alias is None, default to calendar 'YE-DEC'.
     """
     if qdf is None or qdf.empty:
         return pd.DataFrame()
@@ -209,7 +279,7 @@ def _annualize_quarterly(qdf: pd.DataFrame, kind: str, fy_alias: str = None) -> 
     df.index = pd.to_datetime(df.index, errors="coerce")
     df = df[~df.index.isna()].sort_index()  # oldest → newest for resample stability
 
-    rule = fy_alias or "A-DEC"  # fiscal-year-end alias (A-JAN ... A-DEC)
+    rule = fy_alias or "YE-DEC"  # fiscal-year-end alias (YE-JAN ... YE-DEC)
 
     if kind == "flow":
         ann = df.resample(rule, label="right", closed="right").sum(numeric_only=True)
@@ -299,7 +369,10 @@ def format_statement(df: pd.DataFrame, decimals: int = 0):
     out = df.copy()
     for c in out.columns:
         if out[c].dtype == "object":
-            out[c] = pd.to_numeric(out[c], errors="ignore")
+            try:
+                out[c] = pd.to_numeric(out[c])
+            except (ValueError, TypeError):
+                pass  # leave non-numeric columns as-is
     num_cols = out.select_dtypes(include=["number"]).columns
     fmt = _make_accounting_formatter(decimals=decimals, parens_for_neg=True)
     styler = out.style.format({c: fmt for c in num_cols}, na_rep="")
@@ -366,8 +439,7 @@ def _reported_fcff_ttm(cf_quarterly: Optional[pd.DataFrame],
     def _capex_outflow_positive(series: pd.Series) -> pd.Series:
         if series is None:
             return pd.Series(dtype="float64")
-        s = pd.to_numeric(series, errors="coerce").dropna()
-        return s.apply(lambda x: -x if x < 0 else x)  # outflow magnitude
+        return pd.to_numeric(series, errors="coerce").dropna().abs()  # outflow magnitude
 
     tax_rate = (float(tax_rate_hint) if tax_rate_hint is not None
                 else (_effective_tax_rate_from_is(inc_annual) or 0.21))
@@ -380,6 +452,7 @@ def _reported_fcff_ttm(cf_quarterly: Optional[pd.DataFrame],
     capex_q = pick(cf_quarterly, [
         "Capital Expenditures", "Capital Expenditure",
         "Purchase Of Property Plant And Equipment",
+        "Investments In Property Plant And Equipment",
         "Investments In Property, Plant And Equipment"
     ])
     int_is = pick(inc_annual, ["Interest Expense"])
@@ -406,6 +479,7 @@ def _reported_fcff_ttm(cf_quarterly: Optional[pd.DataFrame],
     capex_a = pick(cf_annual, [
         "Capital Expenditures", "Capital Expenditure",
         "Purchase Of Property Plant And Equipment",
+        "Investments In Property Plant And Equipment",
         "Investments In Property, Plant And Equipment"
     ])
     if cfo_a is not None and capex_a is not None:
@@ -449,9 +523,10 @@ def percent_input(label, key, default=0.0, *, min_pct=None, max_pct=None, help=N
 
 def _infer_fy_alias_from_info(info: dict) -> str:
     """
-    Map Yahoo's fiscalYearEnd to a pandas year-end alias 'A-XXX'.
-    Accepts ints like 1231 or 930; strings like '12-31', 'Sep', 'September 30', etc.
-    Fallback = A-DEC.
+    Map Yahoo's fiscal year-end to a pandas year-end alias 'YE-XXX'.
+    Accepts ints like 1231 or 930; strings like '12-31', 'Sep', 'September 30';
+    or the epoch-seconds 'lastFiscalYearEnd' field from newer yfinance.
+    Fallback = YE-DEC.
     """
     month_map = {1:"JAN",2:"FEB",3:"MAR",4:"APR",5:"MAY",6:"JUN",
                  7:"JUL",8:"AUG",9:"SEP",10:"OCT",11:"NOV",12:"DEC"}
@@ -481,10 +556,19 @@ def _infer_fy_alias_from_info(info: dict) -> str:
                 except Exception:
                     mm = None
 
+    # Newer yfinance: 'lastFiscalYearEnd' is epoch seconds
+    if mm is None:
+        lfye = (info or {}).get("lastFiscalYearEnd", None)
+        if isinstance(lfye, (int, float)) and lfye > 10_000:
+            try:
+                mm = datetime.fromtimestamp(float(lfye), tz=timezone.utc).month
+            except Exception:
+                mm = None
+
     # sanity
     if not mm or mm < 1 or mm > 12:
-        return "A-DEC"
-    return f"A-{month_map[mm]}"
+        return "YE-DEC"
+    return f"YE-{month_map[mm]}"
 
 
 def _try_once_then_retry(fn):
@@ -519,6 +603,10 @@ def fetch_financials(ticker: str, period: str = "5y", allow_quarterly_backfill: 
             price_df = yf.download(ticker, period=period, auto_adjust=False, progress=False)
             if not _has_rows(price_df):
                 raise RuntimeError("Empty price via download()")
+            # yf.download returns MultiIndex columns (field, ticker) for single tickers
+            # on newer yfinance; flatten so price_df["Close"] is a plain Series.
+            if isinstance(price_df.columns, pd.MultiIndex):
+                price_df.columns = price_df.columns.get_level_values(0)
 
         # Annual statements
         inc = _try_once_then_retry(lambda: yt.financials.T)
@@ -557,17 +645,23 @@ def fetch_financials(ticker: str, period: str = "5y", allow_quarterly_backfill: 
             info = {}
 
         def compute_net_debt(bs_df: pd.DataFrame, info_fallback: dict) -> float:
-            def first(df, cols):
-                for c in cols:
-                    if c in df.columns:
-                        return df[c].iloc[0]
-                return None
             if bs_df is not None and not bs_df.empty:
-                total_debt = first(bs_df, ["Total Debt","TotalDebt","Short Long Term Debt","Long Term Debt"])
-                cash = first(bs_df, ["Cash And Cash Equivalents","Cash","CashAndCashEquivalents"])
-                sti  = first(bs_df, ["Short Term Investments","ShortTermInvestments"])
-                if total_debt is not None and (cash is not None or sti is not None):
-                    return float((total_debt or 0.0) - ((cash or 0.0) + (sti or 0.0)))
+                total_debt = _latest_numeric_value(bs_df, ["Total Debt", "TotalDebt", "Short Long Term Debt Total"])
+                if total_debt is None:
+                    current_debt = _latest_numeric_value(bs_df, [
+                        "Current Debt", "Short Term Debt", "Short Long Term Debt", "Current Debt And Capital Lease Obligation",
+                    ]) or 0.0
+                    long_debt = _latest_numeric_value(bs_df, [
+                        "Long Term Debt", "Long Term Debt And Capital Lease Obligation",
+                    ]) or 0.0
+                    total_debt = current_debt + long_debt
+                cash_and_sti = _latest_numeric_value(bs_df, ["Cash Cash Equivalents And Short Term Investments"])
+                if cash_and_sti is None:
+                    cash = _latest_numeric_value(bs_df, ["Cash And Cash Equivalents", "Cash", "CashAndCashEquivalents"]) or 0.0
+                    sti = _latest_numeric_value(bs_df, ["Short Term Investments", "ShortTermInvestments"]) or 0.0
+                    cash_and_sti = cash + sti
+                if total_debt is not None:
+                    return float((total_debt or 0.0) - (cash_and_sti or 0.0))
             td = (info_fallback.get("totalDebt") or 0.0)
             c  = (info_fallback.get("cash") or 0.0)
             sti = (info_fallback.get("shortTermInvestments") or 0.0)
@@ -642,8 +736,7 @@ def get_base_fcf(cf_annual: pd.DataFrame,
     def _capex_outflow_positive(series: pd.Series) -> pd.Series:
         if series is None:
             return pd.Series(dtype="float64")
-        s = pd.to_numeric(series, errors="coerce").dropna()
-        return s.apply(lambda x: -x if x < 0 else x)
+        return pd.to_numeric(series, errors="coerce").dropna().abs()
 
     tax_rate = _effective_tax_rate_from_is(inc_annual) or 0.21
 
@@ -655,6 +748,7 @@ def get_base_fcf(cf_annual: pd.DataFrame,
     capex_a = pick(cf_annual, [
         "Capital Expenditures", "Capital Expenditure",
         "Purchase Of Property Plant And Equipment",
+        "Investments In Property Plant And Equipment",
         "Investments In Property, Plant And Equipment"
     ])
     int_is = pick(inc_annual, ["Interest Expense"])
@@ -675,6 +769,7 @@ def get_base_fcf(cf_annual: pd.DataFrame,
         dep  = pick(cf_annual,  ["Depreciation", "Depreciation And Amortization"])
         cap  = pick(cf_annual,  ["Capital Expenditures", "Capital Expenditure",
                                  "Purchase Of Property Plant And Equipment",
+                                 "Investments In Property Plant And Equipment",
                                  "Investments In Property, Plant And Equipment"])
         ca   = pick(bs_annual, ["Total Current Assets"])
         cl   = pick(bs_annual, ["Total Current Liabilities"])
@@ -918,13 +1013,13 @@ def _latest_val(series: pd.Series, default=0.0):
 def derive_default_drivers(inc: pd.DataFrame, bs: pd.DataFrame, cf: pd.DataFrame) -> dict:
     rev = _col(inc, "Total Revenue")
     ebit= _col(inc, "Operating Income")
-    dep = _col(cf,  "Depreciation", "Depreciation And Amortization")
-    cap = _col(cf,  "Capital Expenditures", "Capital Expenditure")
+    dep = _col(cf,  "Depreciation", "Depreciation And Amortization", "Depreciation Amortization Depletion")
+    cap = _col(cf,  "Capital Expenditures", "Capital Expenditure", "Purchase Of Property Plant And Equipment", "Investments In Property Plant And Equipment", "Investments In Property, Plant And Equipment")
     tca = _col(bs,  "Total Current Assets")
     tcl = _col(bs,  "Total Current Liabilities")
     cash= _col(bs,  "Cash And Cash Equivalents", "Cash")
-    sdebt=_col(bs,  "Short Long Term Debt", "Short Term Debt")
-    ldebt=_col(bs,  "Long Term Debt")
+    sdebt=_col(bs,  "Current Debt", "Short Long Term Debt", "Short Term Debt", "Current Debt And Capital Lease Obligation")
+    ldebt=_col(bs,  "Long Term Debt", "Long Term Debt And Capital Lease Obligation")
 
     om   = (ebit / rev).dropna()
     dep_pct   = (dep.abs() / rev).dropna()
@@ -936,11 +1031,11 @@ def derive_default_drivers(inc: pd.DataFrame, bs: pd.DataFrame, cf: pd.DataFrame
 
     # Effective tax rate (approx)
     tax = _col(inc, "Tax Provision"); ptx = _col(inc, "Pretax Income")
-    eff_tax = (tax.abs() / ptx.abs()).replace([pd.NA, pd.NaT, float('inf')], pd.NA).dropna()
+    eff_tax = (tax.abs() / ptx.abs()).replace([np.inf, -np.inf], np.nan).dropna()
 
     # Interest rate from history
     iex = _col(inc, "Interest Expense"); debt_hist = (sdebt.fillna(0) + ldebt.fillna(0)).abs()
-    int_rate = (iex.abs() / debt_hist.replace(0, pd.NA)).dropna()
+    int_rate = (iex.abs() / debt_hist.replace(0, np.nan)).replace([np.inf, -np.inf], np.nan).dropna()
 
     drivers = {
         "rev0": _latest_val(rev),
@@ -994,12 +1089,15 @@ def compute_history_bands_for_drivers(inc: pd.DataFrame, bs: pd.DataFrame, cf: p
     tax = inc.get("Tax Provision")
     ptx = inc.get("Pretax Income") if "Pretax Income" in inc.columns else inc.get("Income Before Tax")
 
-    dep = _pick_first(cf, ["Depreciation", "Depreciation And Amortization"])
-    cap = _pick_first(cf, ["Capital Expenditures", "Capital Expenditure"])
+    dep = _pick_first(cf, ["Depreciation", "Depreciation And Amortization", "Depreciation Amortization Depletion"])
+    cap = _pick_first(cf, [
+        "Capital Expenditures", "Capital Expenditure", "Purchase Of Property Plant And Equipment",
+        "Investments In Property Plant And Equipment", "Investments In Property, Plant And Equipment",
+    ])
     tca = bs.get("Total Current Assets")
     tcl = bs.get("Total Current Liabilities")
     cash= _pick_first(bs, ["Cash And Cash Equivalents","Cash"])
-    sdebt=_pick_first(bs, ["Short Long Term Debt","Short Term Debt"])
+    sdebt=_pick_first(bs, ["Current Debt", "Short Long Term Debt","Short Term Debt", "Current Debt And Capital Lease Obligation"])
     if sdebt is None: sdebt = pd.Series(index=bs.index, dtype="float64")
 
     # history windows (use last 5 rows if available)
@@ -1033,7 +1131,7 @@ def compute_history_bands_for_drivers(inc: pd.DataFrame, bs: pd.DataFrame, cf: p
 
     # interest rate ~ Interest Expense / Debt
     iex = inc.get("Interest Expense")
-    ldebt = bs.get("Long Term Debt")
+    ldebt = _pick_first(bs, ["Long Term Debt", "Long Term Debt And Capital Lease Obligation"])
     debt_hist = (sdebt.fillna(0) + (ldebt.fillna(0) if ldebt is not None else 0)).replace(0, np.nan)
     int_rate_ser = last_n((abs(_pct(iex)) / _pct(debt_hist))).replace([np.inf,-np.inf], np.nan).dropna()
 
@@ -1216,7 +1314,8 @@ def build_dcf_from_series(fcf_series: pd.Series, r: float, g_term: float, net_de
     ev = sum(pv) + term_pv
     eq_v = ev - (net_debt or 0.0)
     px   = (eq_v / shares_out) if shares_out else None
-    detail = pd.DataFrame({"Year": years + ["Terminal"], "FCF": list(fcf_series.values) + [term_fcf], "PV FCF": pv + [term_pv]})
+    # Year as str so the mixed 1..N + "Terminal" column serializes cleanly via Arrow
+    detail = pd.DataFrame({"Year": [str(y) for y in years] + ["Terminal"], "FCF": list(fcf_series.values) + [term_fcf], "PV FCF": pv + [term_pv]})
     head = pd.Series({"Enterprise Value": ev, "Less: Net Debt": net_debt, "Equity Value": eq_v, "Shares Out": shares_out, "Implied Price": px}).to_frame("Value")
     return px, detail, head
 
@@ -1340,7 +1439,7 @@ with st.sidebar.form("report_form"):
     )
     allow_q_backfill = st.checkbox(
         "Allow quarterly backfill when annuals < N",
-        value=st.session_state.get("allow_q_backfill", False),
+        value=st.session_state.get("allow_quarterly_backfill", False),
         help="If off, show only as-reported annual rows (no quarterly padding)."
     )
     submitted = st.form_submit_button("Generate Report", type="primary")
@@ -1456,6 +1555,11 @@ if submitted:
         # reset 3S state
         "three_s": {},
     })
+    # Clear ticker-specific %-input text caches so the new ticker's derived
+    # defaults actually show (otherwise the old text silently overrides them).
+    for _pk in list(st.session_state.keys()):
+        if _pk.endswith("__pctstr") and (_pk.startswith("drv_") or _pk in ("g1__pctstr", "g2__pctstr", "r__pctstr")):
+            del st.session_state[_pk]
 
 # ---------- Guard ----------
 if not st.session_state["data_ready"]:
@@ -1475,7 +1579,7 @@ years_back  = st.session_state["years_back"]
 
 # ---------- Price chart ----------
 st.subheader("Price Performance")
-st.line_chart(price_df["Close"], height=300, use_container_width=True)
+st.line_chart(price_df["Close"], height=300, width="stretch")
 
 st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
 
@@ -1493,15 +1597,15 @@ cf_pref = ["Total Cash From Operating Activities", "Capital Expenditures"]
 cf_cols = [c for c in cf_pref if c in cf.columns] + [c for c in cf.columns if c not in cf_pref]
 
 st.markdown('<div class="ui-card"><div class="ui-card-title">Income Statement</div>', unsafe_allow_html=True)
-st.dataframe(format_statement(inc[inc_cols].head(years_back), decimals=0), use_container_width=True)
+st.dataframe(format_statement(inc[inc_cols].head(years_back), decimals=0), width="stretch")
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="ui-card"><div class="ui-card-title">Balance Sheet</div>', unsafe_allow_html=True)
-st.dataframe(format_statement(bs[bs_cols].head(years_back), decimals=0), use_container_width=True)
+st.dataframe(format_statement(bs[bs_cols].head(years_back), decimals=0), width="stretch")
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="ui-card"><div class="ui-card-title">Cash Flow</div>', unsafe_allow_html=True)
-st.dataframe(format_statement(cf[cf_cols].head(years_back), decimals=0), use_container_width=True)
+st.dataframe(format_statement(cf[cf_cols].head(years_back), decimals=0), width="stretch")
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------- Metrics ----------
@@ -1538,21 +1642,30 @@ st.caption("You control the comp set. Replace/add true peers by model/size/growt
 peer_input = st.text_input("Peer tickers (comma-separated)", "MSFT,GOOG,AMZN")
 peers = [p.strip().upper() for p in peer_input.split(",") if p.strip()]
 
-rows = []
-for peer in peers:
-    try:
-        info = yf.Ticker(peer).info or {}
-        rows.append({
-            "Ticker": peer,
-            "P/E": info.get("trailingPE"),
-            "EV/EBITDA": info.get("enterpriseToEbitda"),
-            "P/B": info.get("priceToBook"),
-            "P/S": info.get("priceToSalesTrailing12Months"),
-            "Dividend Yield": info.get("dividendYield"),
-        })
-    except Exception:
-        rows.append({"Ticker": peer})
-comps_df = pd.DataFrame(rows).set_index("Ticker")
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_peer_multiples(peer_tickers: tuple[str, ...]) -> pd.DataFrame:
+    rows = []
+    for peer in peer_tickers:
+        try:
+            info = _try_once_then_retry(lambda: yf.Ticker(peer).info) or {}
+            rows.append({
+                "Ticker": peer,
+                "P/E": info.get("trailingPE") or info.get("forwardPE"),
+                "EV/EBITDA": info.get("enterpriseToEbitda"),
+                "P/B": info.get("priceToBook"),
+                "P/S": info.get("priceToSalesTrailing12Months"),
+                "Dividend Yield": info.get("dividendYield"),
+            })
+        except Exception:
+            rows.append({"Ticker": peer})
+    if not rows:
+        return pd.DataFrame(columns=["P/E", "EV/EBITDA", "P/B", "P/S", "Dividend Yield"])
+    return pd.DataFrame(rows).set_index("Ticker")
+
+comps_df = fetch_peer_multiples(tuple(peers))
+for col in ["P/E", "EV/EBITDA", "P/B", "P/S", "Dividend Yield"]:
+    if col in comps_df.columns:
+        comps_df[col] = pd.to_numeric(comps_df[col], errors="coerce")
 st.table(comps_df)
 
 # ===== AI Comps & Market Analysis =====
@@ -1646,7 +1759,7 @@ st.session_state["peer_input_prev"] = peer_input
 st.markdown("**Comps & Market Analysis (AI)**")
 colA, colB = st.columns([1, 5])
 with colA:
-    if st.button("🔁 Refresh", use_container_width=True):
+    if st.button("🔁 Refresh", width="stretch"):
         generate_comps_analysis_if_needed()
 with colB:
     if st.session_state.get("comps_analysis"):
@@ -1670,7 +1783,7 @@ with st.expander("3-Statement Model (Driver-based)", expanded=True):
         c1, c2, c3 = st.columns(3)
 
         with c1:
-            years_proj = st.slider("Projection Years (3S)", 3, 10, st.session_state.get("years_proj_3s", 5), key="years_proj_3s")
+            years_proj = st.slider("Projection Years (3S)", 3, 10, key="years_proj_3s")
             drivers["revg"]        = percent_input("Revenue Growth (g)", key="drv_revg",        default=float(drivers["revg"]))
             drivers["ebit_margin"] = percent_input("EBIT Margin",         key="drv_ebit_m",      default=float(drivers["ebit_margin"]))
             drivers["tax_rate"]    = percent_input("Tax Rate",            key="drv_tax",         default=float(drivers["tax_rate"]))
@@ -1782,13 +1895,13 @@ with st.expander("3-Statement Model (Driver-based)", expanded=True):
 
 
     st.markdown("**Income Statement (Projected)**")
-    st.dataframe( format_statement( inc_p.set_index("Year"), decimals=0 ), use_container_width=True )
+    st.dataframe( format_statement( inc_p.set_index("Year"), decimals=0 ), width="stretch" )
 
     st.markdown("**Balance Sheet (Projected)**")
-    st.dataframe( format_statement( bs_p.set_index("Year"), decimals=0 ), use_container_width=True )
+    st.dataframe( format_statement( bs_p.set_index("Year"), decimals=0 ), width="stretch" )
 
     st.markdown("**Cash Flow (Projected)**")
-    st.dataframe( format_statement( cf_p.set_index("Year"), decimals=0 ), use_container_width=True )
+    st.dataframe( format_statement( cf_p.set_index("Year"), decimals=0 ), width="stretch" )
 
     if reported_fcff_base is not None:
         st.caption(f"Reported FCFF base (TTM-derived): ${reported_fcff_base:,.0f}")
@@ -1828,7 +1941,7 @@ with st.expander("Fundamentals-based WACC (CAPM)", expanded=False):
     wacc = ke_capm * E + kd_after * D
 
     st.metric("WACC (derived)", f"{wacc*100:.2f}%")
-    use_wacc = st.checkbox("Use WACC as discount rate in DCF", key="use_wacc", value=st.session_state.get("use_wacc", False))
+    use_wacc = st.checkbox("Use WACC as discount rate in DCF", key="use_wacc")
 
 st.subheader("Growth Consistency (g ≈ ROIC × Reinvestment)")
 with st.expander("Cross-check sustainable growth and reinvestment", expanded=False):
@@ -1863,10 +1976,10 @@ with st.expander("Discounted Cash-Flow (DCF)", expanded=True):
     net_debt = extras.get("Net Debt ($)") or 0.0
     base_fcf = get_base_fcf(cf, cf_quarterly=cf_q, inc_annual=inc, bs_annual=bs)
 
-    st.session_state.setdefault("base_fcf", base_fcf)
-    st.session_state.setdefault("shares_out", shares_out)
-    st.session_state.setdefault("net_debt", net_debt)
-    st.session_state.setdefault("last_close", last_close)
+    st.session_state["base_fcf"] = base_fcf
+    st.session_state["shares_out"] = shares_out
+    st.session_state["net_debt"] = net_debt
+    st.session_state["last_close"] = last_close
 
     # Controls
     colm1, colm2 = st.columns([1.2, 1])
@@ -1890,8 +2003,8 @@ with st.expander("Discounted Cash-Flow (DCF)", expanded=True):
     percent_input("Stage-1 FCF Growth (g₁)", key="g1", default=st.session_state.get("g1", 0.10))
     percent_input("Terminal Growth (g₂)",    key="g2", default=st.session_state.get("g2", 0.025))
     percent_input("Discount Rate (r)",       key="r",  default=st.session_state.get("r", 0.09))
-    st.slider("Projection Years (N)", min_value=1, max_value=20, key="N", value=st.session_state.get("N", 5))
-    st.checkbox("Fade g₁ → g₂ across N (more realistic)", key="fade", value=st.session_state.get("fade", True))
+    st.slider("Projection Years (N)", min_value=1, max_value=20, key="N")
+    st.checkbox("Fade g₁ → g₂ across N (more realistic)", key="fade")
 
     st.radio("Calibrate to current price by solving for:", ["Discount rate (r)", "Stage-1 growth (g₁)"], key="calib_mode", horizontal=True)
 
@@ -1913,14 +2026,19 @@ with st.expander("Discounted Cash-Flow (DCF)", expanded=True):
             if sol is None:
                 s["calib_error"] = "No feasible r; adjust g₁/g₂ or N."
             else:
-                s["r"] = float(round(sol, 4)); s["calib_error"] = ""
+                s["r"] = float(round(sol, 4))
+                # sync the %-text widget, or percent_input re-parses the old text next rerun
+                s["r__pctstr"] = f"{sol*100:.2f}"
+                s["calib_error"] = ""
         else:
             r = float(s.get("r", 0.09))
             sol = solve_implied_g1(last_px, base, sh, nd, N, r, g2, fade=fade)
             if sol is None:
                 s["calib_error"] = "No feasible g₁; adjust r/g₂ or N."
             else:
-                s["g1"] = float(round(sol, 4)); s["calib_error"] = ""
+                s["g1"] = float(round(sol, 4))
+                s["g1__pctstr"] = f"{sol*100:.2f}"
+                s["calib_error"] = ""
 
     st.button("📐 Auto-calibrate to market", on_click=_calibrate_callback)
     if st.session_state.get("calib_error"):
@@ -1958,7 +2076,7 @@ with st.expander("Discounted Cash-Flow (DCF)", expanded=True):
             term_pv  = term_val / (1 + r_eff) ** N
             ev       = sum(pv_fcf) + term_pv
             eq_v     = ev - (net_debt or 0.0)
-            dcf_df_two = pd.DataFrame({"Year": years + ["Terminal"], "FCF": proj_fcf + [fcf_N1], "PV FCF": pv_fcf + [term_pv]})
+            dcf_df_two = pd.DataFrame({"Year": [str(y) for y in years] + ["Terminal"], "FCF": proj_fcf + [fcf_N1], "PV FCF": pv_fcf + [term_pv]})
             term_pct = term_pv / ev if ev else None
             y1_pv = pv_fcf[0] if pv_fcf else None
             pv_mult = (sum(pv_fcf) / y1_pv) if (y1_pv and y1_pv != 0) else None
@@ -1979,7 +2097,7 @@ with st.expander("Discounted Cash-Flow (DCF)", expanded=True):
                             "PV(Years 1..N) / PV(Year1) (x)": f"{pv_mult:.1f}x" if pv_mult is not None else "—",
             }).to_frame("Value")
             dcf_head_two.loc["N (years)", "Value"] = f"{int(N)}"
-    except Exception as e:
+    except Exception:
         pass
 
     try:
@@ -2033,11 +2151,9 @@ with st.expander("Discounted Cash-Flow (DCF)", expanded=True):
 
     st.markdown('<div class="section-break"></div>', unsafe_allow_html=True)
 
-# -------------------- DCF (two-stage + 3S-driven) --------------
-st.markdown('<div class="section-label">Valuation Models</div>', unsafe_allow_html=True)
+# -------------------- Residual Income (Banks/Insurers) ----------
 with st.expander("Residual Income (Banks/Insurers)", expanded=False):
     st.subheader("Residual Income Valuation")
-
 
     auto_fin = detect_is_financials(extras)
     use_financials_mode = st.checkbox(
@@ -2080,7 +2196,7 @@ with st.expander("Residual Income (Banks/Insurers)", expanded=False):
             "Earnings": "${:,.0f}", "Dividends": "${:,.0f}",
             "BV_End": "${:,.0f}", "Residual Income": "${:,.0f}",
             "PV RI": "${:,.0f}"
-        }), use_container_width=True)
+        }), width="stretch")
 
     # Persist RI context for export
     st.session_state["ri_params"] = {
