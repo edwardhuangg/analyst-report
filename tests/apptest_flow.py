@@ -15,7 +15,8 @@ as_of = date.fromisoformat(sys.argv[2]) if len(sys.argv) > 2 else date(2025, 8, 
 peers = sys.argv[3] if len(sys.argv) > 3 else "GE,RTX,ETN,EMR,ROK,JCI"
 
 use_ai = os.environ.get("APPTEST_AI") == "1"
-at = AppTest.from_file("streamlit_app.py", default_timeout=900 if use_ai else 300)
+at = AppTest.from_file(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "streamlit_app.py"),
+                       default_timeout=900 if use_ai else 300)
 at.run()
 assert not at.exception, at.exception
 if any(t.label == "Password" for t in at.text_input):  # the app's password gate (APP_PASSWORD in secrets)
