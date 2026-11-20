@@ -1,0 +1,12 @@
+PM follow-up on the CAT review pass (numbers from the model's own tabs):
+- Mid-cycle means volume and margin together, and the pass mixes the two.
+  - The base case takes sales from $67.6bn (FY2025) to $102.6bn by 2031E, a peak-volume path 52% above today and 2.7x FY2016's $38.5bn.
+  - Yet it cuts the operating margin to 14.7%, the 10-year median.
+  - That median is measured at much lower volumes and includes the FY2016 trough (3.0% on $38.5bn).
+  - At mid-cycle, either sales sit at mid-cycle volume with a mid-cycle margin, or margins at this volume carry the operating leverage the company's history shows (FY2023–25: 16.5–20.2% on $64.8–67.6bn).
+- Pick one consistent path and state it:
+  - mid-cycle sales and margin for the terminal year; or
+  - the structural change (Power & Energy mix, services, pricing) with its margin effect in pt, from the documents.
+  - Segment margins (Construction Industries to 13%, Resource Industries to 9.5%) need each segment's own history behind them.
+- Keep everything else: RONIC 19% (the return including goodwill), the method beta 1.21, 5 fade years, and the rule-based Neutral.
+- Explain the result under 'gate 16' and in thesis.explanations['pm review'], with the value effect.

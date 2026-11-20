@@ -1,0 +1,1059 @@
+{
+ "meta": {
+  "ticker": "CAT",
+  "as_of": "2026-11-13",
+  "author": "AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort), applied from an overrides file + AI analyst review (gpt-5.5, medium effort), applied from an overrides file",
+  "forecast_years": [
+   "2026E",
+   "2027E",
+   "2028E",
+   "2029E",
+   "2030E",
+   "2031E"
+  ],
+  "history_years": [
+   "2023A",
+   "2024A",
+   "2025A"
+  ],
+  "summary": "Base case still treats 2026 as a strong execution year but no longer assumes a Q4 working-capital cash drain inconsistent with the year-to-date cash generation. Bear case is rebuilt around the stated breaker: 2027 destocking, slower Power Energy conversion and lower segment margins; SOTP is given less weight because it capitalizes near-term segment profit while the DCF exit case uses normalized terminal cash flow.",
+  "sources": [
+   "https://www.sec.gov/Archives/edgar/data/18230/000001823026000057/cat-20260930.htm",
+   "https://www.sec.gov/Archives/edgar/data/18230/000001823026000052/ex991toformcat3q2026earnin.htm",
+   "https://www.sec.gov/Archives/edgar/data/18230/000001823026000008/cat-20251231.htm",
+   "https://www.sec.gov/Archives/edgar/data/18230/000001823026000003/ex992toformxretailstatisti.htm",
+   "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000018230&type=8-K&dateb=20261113"
+  ]
+ },
+ "market": {
+  "price": {
+   "value": 600.2,
+   "note": "CAT close Nov 13, 2026 (Yahoo; later splits / spin-off adjustments undone so it matches the share count of the time)"
+  },
+  "basic_shares": {
+   "value": 457.6,
+   "note": "Q3 2026 10-Q cover: 457.6mm shares outstanding"
+  },
+  "dilutive": {
+   "value": 1.8,
+   "note": "Q3 2026 diluted 460.9mm less basic 459.1mm (10-Q)"
+  }
+ },
+ "scenario": 2,
+ "seg_after_charges": 0,
+ "adj_eps_ex_sbc": 0,
+ "adj_eps_ex_repo": 0.0,
+ "adj_eps_ex_nonrec": 1,
+ "adj_eps_amort_share": 1.0,
+ "adj_eps_tax_hist": [
+  null,
+  null,
+  null
+ ],
+ "framework": "economic",
+ "segments": {
+  "Power Energy": {
+   "organic_last": 0.127,
+   "growth": {
+    "base": [
+     0.2,
+     0.1,
+     0.08,
+     0.06,
+     0.05,
+     0.045
+    ],
+    "bear": [
+     0.05,
+     -0.05,
+     -0.02,
+     0.01,
+     0.02,
+     0.025
+    ],
+    "bull": [
+     0.25,
+     0.15,
+     0.12,
+     0.095,
+     0.075,
+     0.06
+    ]
+   },
+   "margin": {
+    "base": [
+     0.245,
+     0.25,
+     0.245,
+     0.235,
+     0.225,
+     0.215
+    ],
+    "bear": [
+     0.225,
+     0.205,
+     0.19,
+     0.18,
+     0.175,
+     0.17
+    ],
+    "bull": [
+     0.255,
+     0.27,
+     0.29,
+     0.32,
+     0.35,
+     0.38
+    ]
+   },
+   "mna": {
+    "values": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "note": "Closed 2026 acquisitions are deducted in drivers.acq; 10-Q Q3 2026 acquisitions note discloses consideration / PPA but not target revenue by segment, so no free acquired revenue is embedded in organic growth."
+   },
+   "sotp": {
+    "multiples": [
+     10.0,
+     15.0,
+     22.0
+    ],
+    "note": "Bear multiple is cut to a through-cycle machinery / power-equipment level because the bear case assumes the 2026 data-center and prime-power backlog does not convert into durable double-digit growth. Base and bull multiples are unchanged: base still gives Power Energy a premium for stronger orders / backlog, while bull is the reverse-DCF calibration case."
+   },
+   "history": {
+    "sales": [
+     23355.0,
+     24088.0,
+     27143.0
+    ],
+    "profit": [
+     4936.0,
+     5736.0,
+     6418.0
+    ]
+   }
+  },
+  "Construction Industries": {
+   "organic_last": -0.016,
+   "growth": {
+    "base": [
+     0.15,
+     0.06,
+     0.045,
+     0.04,
+     0.035,
+     0.0325
+    ],
+    "bear": [
+     0.0,
+     -0.12,
+     -0.05,
+     0.0,
+     0.01,
+     0.015
+    ],
+    "bull": [
+     0.2,
+     0.09,
+     0.07,
+     0.055,
+     0.045,
+     0.04
+    ]
+   },
+   "margin": {
+    "base": [
+     0.22,
+     0.215,
+     0.21,
+     0.2,
+     0.19,
+     0.18
+    ],
+    "bear": [
+     0.19,
+     0.15,
+     0.13,
+     0.125,
+     0.12,
+     0.12
+    ],
+    "bull": [
+     0.23,
+     0.235,
+     0.25,
+     0.27,
+     0.3,
+     0.32
+    ]
+   },
+   "mna": {
+    "values": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "note": "No disclosed Construction Industries acquisition revenue; Q3 2026 10-Q attributes growth to end-user sales, price realization and dealer inventory movements, not M&A."
+   },
+   "sotp": {
+    "multiples": [
+     7.0,
+     12.0,
+     15.0
+    ],
+    "note": "Bear multiple reflects the breaker case of dealer-inventory normalization becoming a destocking cycle. Base and bull remain set against machinery / infrastructure peers, with bull assuming the rental and infrastructure cycle holds longer."
+   },
+   "history": {
+    "sales": [
+     27418.0,
+     25455.0,
+     25060.0
+    ],
+    "profit": [
+     6975.0,
+     6165.0,
+     4675.0
+    ]
+   }
+  },
+  "Resource Industries": {
+   "organic_last": 0.0,
+   "growth": {
+    "base": [
+     0.18,
+     0.07,
+     0.045,
+     0.04,
+     0.035,
+     0.0325
+    ],
+    "bear": [
+     0.02,
+     -0.1,
+     -0.04,
+     0.0,
+     0.01,
+     0.015
+    ],
+    "bull": [
+     0.22,
+     0.1,
+     0.07,
+     0.055,
+     0.045,
+     0.04
+    ]
+   },
+   "margin": {
+    "base": [
+     0.155,
+     0.16,
+     0.155,
+     0.145,
+     0.135,
+     0.125
+    ],
+    "bear": [
+     0.13,
+     0.1,
+     0.09,
+     0.09,
+     0.09,
+     0.095
+    ],
+    "bull": [
+     0.17,
+     0.19,
+     0.21,
+     0.235,
+     0.26,
+     0.28
+    ]
+   },
+   "mna": {
+    "values": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "note": "No disclosed Resource Industries acquisition revenue; Q3 2026 10-Q cites robust order rates, backlog growth and mining / HC&QA demand as organic drivers."
+   },
+   "sotp": {
+    "multiples": [
+     6.0,
+     11.0,
+     14.0
+    ],
+    "note": "Bear multiple reflects a mining / heavy-equipment down-cycle with manufacturing-cost pressure and lower utilization. Base and bull remain tied to through-cycle and strong-cycle machinery peers."
+   },
+   "history": {
+    "sales": [
+     13669.0,
+     12471.0,
+     12474.0
+    ],
+    "profit": [
+     2836.0,
+     2538.0,
+     1988.0
+    ]
+   }
+  },
+  "Financial Products": {
+   "organic_last": 0.041,
+   "growth": {
+    "base": [
+     0.09,
+     0.05,
+     0.045,
+     0.04,
+     0.035,
+     0.0325
+    ],
+    "bear": [
+     0.02,
+     -0.02,
+     0.0,
+     0.01,
+     0.015,
+     0.02
+    ],
+    "bull": [
+     0.11,
+     0.07,
+     0.055,
+     0.045,
+     0.04,
+     0.035
+    ]
+   },
+   "margin": {
+    "base": [
+     0.23,
+     0.228,
+     0.218,
+     0.208,
+     0.198,
+     0.19
+    ],
+    "bear": [
+     0.205,
+     0.18,
+     0.175,
+     0.18,
+     0.185,
+     0.19
+    ],
+    "bull": [
+     0.24,
+     0.24,
+     0.24,
+     0.245,
+     0.25,
+     0.25
+    ]
+   },
+   "mna": {
+    "values": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "note": "Financial Products growth is earning-asset driven; Q3 2026 release: segment revenue +9%, higher average earning assets +$125mm, partly offset by lower financing rates."
+   },
+   "sotp": {
+    "multiples": [
+     5.0,
+     8.0,
+     10.0
+    ],
+    "note": "Bear multiple reflects weaker earning-asset growth and higher credit-cycle risk at the captive finance arm. Base and bull remain below industrial EBITDA peers because finance debt and credit losses are part of the operating model."
+   },
+   "history": {
+    "sales": [
+     3785.0,
+     4053.0,
+     4220.0
+    ],
+    "profit": [
+     909.0,
+     932.0,
+     966.0
+    ]
+   }
+  }
+ },
+ "notes": {
+  "growth": "FY2026 base lands inside management's Oct. 29, 2026 outlook for mid-to-high-teens sales growth: Q3 2026 10-Q MD&A says full-year sales and revenues growth is expected in the mid-to-high teens, driven by strong end-user demand, order rates, backlog growth, capacity expansion and services. Growth fades after 2026 because Construction faces Q4 dealer-inventory normalization and Power Energy capacity/backlog conversion cannot be capitalized at peak rates indefinitely.",
+  "margin": "Base margins now use one consistent path: high-volume, structurally improved mix rather than mid-cycle volume with a trough-weighted median margin. The 10-Q shows Q3 2026 segment margins of 24.4% in Power Energy, 22.9% in Construction Industries and 13.5% in Resource Industries, with consolidated operating margin of 20.4%; the 2025 10-K shows consolidated operating margin of 16.5% in 2025, 20.2% in 2024 and 19.3% in 2023 on $64.8-$67.6bn of sales. The forecast still fades from 2026 strength, but the terminal year retains operating leverage from a larger Power Energy mix, services growth, favorable price realization and higher sustained volumes rather than cutting margins to a median that included much lower-volume years."
+ },
+ "corporate": {
+  "sales": [
+   -1500.0,
+   -1550.0,
+   -1600.0,
+   -1650.0,
+   -1700.0,
+   -1750.0
+  ],
+  "sales_note": "Corporate eliminations scaled modestly with segment growth; 2025 10-K segment table: Corporate & all other sales -$1.308bn; Q3 2026 release shows larger quarterly eliminations as inter-segment activity rises.",
+  "cost_pct": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "cost_note": "Corporate and elimination expenses are captured through segment-to-EBIT reconciliation / repo_pct, not used as a hidden calibration line.",
+  "multiples": [
+   10.0,
+   10.0,
+   10.0
+  ]
+ },
+ "drivers": {
+  "amort": {
+   "values": [
+    170.0,
+    175.0,
+    163.9,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "2025 10-K: acquired-intangible amortization $169mm; Q3 2026 10-Q acquisition note: $200mm finite-lived intangibles with ~10-year weighted-average life, supporting amortization near the 2025 run-rate.; capped at the intangibles left (Schedules), so the balance never turns negative: amortization reaches 0 in 2029E because no acquisitions are forecast after 2026E (recurring deal amortization needs recurring drivers.acq)"
+  },
+  "sbc_pct": {
+   "values": [
+    0.0035,
+    0.0035,
+    0.0035,
+    0.0035,
+    0.0035,
+    0.0035
+   ],
+   "note": "2025 10-K: stock compensation $242mm, about 0.36% of sales; SBC remains a real operating cost in EBIT and the DCF."
+  },
+  "repo_pct": {
+   "values": [
+    0.0251,
+    0.003,
+    0.003,
+    0.003,
+    0.003,
+    0.003
+   ],
+   "note": "FY2026 uses an annualized estimate of the non-segment charges already booked: $1,489mm through 9M / 9 x 12 = about $1,985mm, or 2.5% of model sales. This is not an EPS plug; it prevents the model from assuming zero Q4 non-segment charges after the YTD amount. Future years retain a recurring 0.3% restructuring / repositioning cost rather than eliminating the cost from EBIT."
+  },
+  "other_nonop": {
+   "values": [
+    500.0,
+    250.0,
+    200.0,
+    200.0,
+    200.0,
+    200.0
+   ],
+   "note": "9M 2026 10-Q: other income proxy was $395mm YTD; Q3 release: other income $135mm, driven by total return swaps and commodity hedges. FY2026 uses the observed run-rate; out-years fade to a normalized pension / hedging contribution below 2025 10-K other income of $892mm."
+  },
+  "int_yield": {
+   "values": [
+    0.0425,
+    0.0425,
+    0.0425,
+    0.0425,
+    0.0425,
+    0.0425
+   ],
+   "note": "Interest income not reported separately: estimated at the risk-free rate less 1pt (4.2%) on cash & ST investments"
+  },
+  "int_rate": {
+   "values": [
+    0.047,
+    0.047,
+    0.047,
+    0.047,
+    0.047,
+    0.047
+   ],
+   "note": "Interest is charged only on Machinery, Power & Energy debt because Cat Financial interest expense is already inside Financial Products segment profit. 2025 10-K: interest expense excluding Financial Products was $502mm against about $10.7bn of MP&E debt, or roughly 4.7%."
+  },
+  "etr": {
+   "values": [
+    0.23,
+    0.23,
+    0.23,
+    0.23,
+    0.23,
+    0.23
+   ],
+   "note": "Q3 2026 10-Q outlook gives a 23.0% estimated annual effective tax rate excluding discrete items. This is used consistently across the forecast and is not solved to EPS guidance."
+  },
+  "nci_ni": {
+   "values": [
+    -2.0,
+    -2.0,
+    -2.0,
+    -2.0,
+    -2.0,
+    -2.0
+   ],
+   "note": "FY2025: -2mm"
+  },
+  "cogs_pct": {
+   "values": [
+    0.662,
+    0.662,
+    0.662,
+    0.662,
+    0.662,
+    0.662
+   ],
+   "note": "FY2025: 66.2%"
+  },
+  "da_pct": {
+   "values": [
+    0.031,
+    0.031,
+    0.031,
+    0.031,
+    0.031,
+    0.031
+   ],
+   "note": "FY2025: (2,262 D&A \u2013 169 acquired-intangible amortization) / sales = 3.1%"
+  },
+  "capex_pct": {
+   "values": [
+    0.0415,
+    0.04,
+    0.04,
+    0.04,
+    0.04,
+    0.04
+   ],
+   "note": "Q3 2026 10-Q MD&A: FY2026 capital expenditures now expected to be about $3.3bn; out-years remain near 4% of sales to support Power Energy capacity and services growth."
+  },
+  "dso": {
+   "values": [
+    59.0,
+    59.0,
+    59.0,
+    59.0,
+    59.0,
+    59.0
+   ],
+   "note": "FY2025: 59.0 days"
+  },
+  "dio": {
+   "values": [
+    148.0,
+    148.0,
+    148.0,
+    148.0,
+    148.0,
+    148.0
+   ],
+   "note": "FY2025: 147.9 days"
+  },
+  "oca_pct": {
+   "values": [
+    0.199,
+    0.199,
+    0.199,
+    0.199,
+    0.199,
+    0.199
+   ],
+   "note": "FY2025: 19.9%"
+  },
+  "dpo": {
+   "values": [
+    73.0,
+    73.0,
+    73.0,
+    73.0,
+    73.0,
+    73.0
+   ],
+   "note": "FY2025: 73.1 days"
+  },
+  "accrued_pct": {
+   "values": [
+    0.263,
+    0.245,
+    0.235,
+    0.228,
+    0.223,
+    0.221
+   ],
+   "note": "FY2026 remains an explicit year-end estimate for a high-backlog / customer-advance year, not a 10-Q seasonal carry-forward. FY2027 now fades rather than snaps back because the Q3 2026 10-Q says backlog continued to grow, capacity expansion plans remained on schedule and dealer inventories were expected to end 2026 above 2025 in anticipation of strong 2027 end-user sales; the fade to the 2025 year-end operating-liability relationship of 22.1% is complete by FY2031. Versus an immediate FY2027 reset to 22.1%, the FY2027 assumption adds about 2.4% of FY2027 sales, or roughly $2.0bn, to operating liabilities and removes a plug-like working-capital unwind."
+  },
+  "other_op": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "History: 1,055, -367, 2,527 (restructuring, legal, deferred tax); default 0 \u2014 not a calibration line (FCF guidance is met through working capital)"
+  },
+  "acq": {
+   "values": [
+    893.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Q3 2026 10-Q acquisitions note and cash-flow data: $893mm cash paid for acquisitions in 9M 2026; one disclosed PPA includes $78mm tangible assets, $200mm finite-lived intangibles, $38mm liabilities and $546mm goodwill, with another acquisition still under PPA review."
+  },
+  "intang_share": {
+   "values": [
+    0.3,
+    0.3,
+    0.3,
+    0.3,
+    0.3,
+    0.3
+   ],
+   "note": "Remainder to goodwill; typical for diversified industrial deals"
+  },
+  "debt_iss": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Do not force a debt repayment plug: Q3 2026 release says the company ended Q3 with $7.9bn enterprise cash; 8-K Sep. 1, 2026 was a debt/agreement filing but no post-Q3 cash draw or required repayment is disclosed in the provided 8-K list."
+  },
+  "buyback": {
+   "values": [
+    7745.0,
+    6000.0,
+    7000.0,
+    8000.0,
+    8500.0,
+    9000.0
+   ],
+   "note": "FY2026 equals the $7.1bn of repurchases disclosed for the first nine months of 2026; the October ASR settlement delivered 0.4mm shares with no additional cash outflow. Out-year repurchases are limited to estimated surplus MP&E free cash flow after dividends and are not assumed to be debt-funded.; 2026E floored at the 7,745mm of buybacks already made in 9M 2026 (10-Q)"
+  },
+  "buyback_px": {
+   "values": [
+    600.2,
+    630.0,
+    660.0,
+    690.0,
+    720.0,
+    750.0
+   ],
+   "note": "Future repurchases use a mechanical price path for share-count math only; valuation is not set by reference to the current share price."
+  },
+  "shares_issued": {
+   "values": [
+    1.8,
+    1.8,
+    1.8,
+    1.8,
+    1.8,
+    1.8
+   ],
+   "note": "~0.4% of basic shares per year (options & RSUs)"
+  },
+  "stock_proc": {
+   "values": [
+    -15.0,
+    -15.0,
+    -15.0,
+    -15.0,
+    -15.0,
+    -15.0
+   ],
+   "note": "FY2025: -16mm"
+  },
+  "dps0": {
+   "values": [
+    6.28
+   ],
+   "note": "June 10, 2026 8-K: quarterly dividend raised 8% to $1.63 payable Aug. 19, 2026; FY2026 DPS assumes two quarters at $1.51 and two at $1.63."
+  },
+  "div_growth": {
+   "values": [
+    0.06,
+    0.06,
+    0.06,
+    0.06,
+    0.06
+   ],
+   "note": "Below the 2026 8% increase but consistent with Caterpillar's stated policy to return substantially all MP&E free cash flow over time through dividends and repurchases."
+  },
+  "nonrec": {
+   "values": [
+    493.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2026 nets the $793mm other-income item already booked in 9M 2026 per the checker against the $300mm restructuring-cost outlook already modeled. GAAP keeps the net $493mm pre-tax gain; adjusted EPS excludes it through the non-recurring adjustment, so the change is not an EPS plug."
+  },
+  "adj_tax": {
+   "values": [
+    0.23,
+    0.23,
+    0.23,
+    0.23,
+    0.23,
+    0.23
+   ],
+   "note": "Tax effect on adjusted-EPS add-backs uses the same 23.0% annual ETR from the Q3 2026 10-Q outlook; not used as a plug."
+  }
+ },
+ "valuation": {
+  "rf": {
+   "value": 0.0515,
+   "note": "10-yr U.S. Treasury yield on Nov 13, 2026 (Yahoo ^TNX; check FRED DGS10)"
+  },
+  "beta": {
+   "value": 1.21,
+   "note": "Reset to the method beta rather than applying a discretionary 0.05 reduction. The captive-finance operating treatment is handled through captive_share and segment profit, not through an unsupported lower beta."
+  },
+  "erp": {
+   "value": 0.0423,
+   "note": "Implied ERP for the S&P 500 at the start of 2026 (Damodaran, FCFE-based): the same for every name on this date, measured against the 10-yr Treasury"
+  },
+  "kd": {
+   "value": 0.062,
+   "note": "Risk-free + 1.07% spread for the A rating (S&P A, Fitch A; 10-Q filed 2026-11-04); synthetic AA from EBIT / interest 27.2x LTM as a cross-check"
+  },
+  "tax_wacc": {
+   "value": 0.22,
+   "note": "Normalized tax shield aligned with the forecast ETR; not set from current-year EPS guidance."
+  },
+  "g": {
+   "value": 0.0375,
+   "note": "House long-run growth: US nominal GDP (about 1.8% real + 2% inflation), below the 10-yr risk-free rate"
+  },
+  "w_pg": {
+   "value": 0.45,
+   "note": "DCF receives more weight because terminal cash generation and reinvestment economics are the main issue in a cyclical normalization case."
+  },
+  "w_exit": {
+   "value": 0.25,
+   "note": "Exit DCF weight is increased as a cross-check on the perpetuity DCF because it capitalizes normalized terminal EBITDA rather than near-term peak-cycle segment profit."
+  },
+  "w_sotp": {
+   "value": 0.1,
+   "note": "SOTP weight is cut because it is the outlier: it capitalizes near-term segment EBITDA and the Power Energy mix premium, while the DCF methods explicitly normalize cyclical margins and working capital."
+  },
+  "w_comps": {
+   "value": 0.2,
+   "note": "Public comps remain a market check, but not the controlling method because peer P/E and EV/EBITDA are affected by different captive-finance and cycle exposures."
+  },
+  "peer_discount": {
+   "value": 0.0,
+   "note": "Positive = discount to the peer median (e.g. conglomerate discount); negative = premium"
+  },
+  "exit_pe": {
+   "value": 31.0,
+   "note": "Near the current P/E on FY2025 adjusted EPS (31.5x)"
+  },
+  "other_stake": {
+   "value": 0.0,
+   "note": "Equity stakes / investments not captured in segment EBITDA (none material on the balance sheet)"
+  },
+  "nci_value": {
+   "value": 0.0,
+   "note": "Dec 31, 2025 BS: 0mm + 0mm redeemable"
+  },
+  "fade_years": {
+   "value": 5.0,
+   "note": "Extended from three years because Q3 2026 management cited strong order rates, record backlog, on-schedule capacity expansion and data-center / prime-power demand in Power Energy. This gives the backlog a longer fade without lifting terminal growth."
+  },
+  "comps_pe_weight": {
+   "value": 0.6,
+   "note": "Heavy equipment and diversified industrial peers are primarily valued on forward / mid-cycle EPS; EV/EBITDA receives lower weight because captive finance debt and finance interest distort enterprise multiples."
+  },
+  "captive_share": {
+   "value": 0.75,
+   "note": "Treat Cat Financial debt as operating: 2025 10-K debt at Financial Products was $32.6bn versus total debt of about $43.4bn, or roughly 75%."
+  },
+  "ronic": {
+   "value": 0.19,
+   "note": "Reset to approximate the terminal ROIC including goodwill after the base-case margin normalization. The prior 14% RONIC was below the business return without a dated competitive-entry or loss-of-exclusivity reason."
+  },
+  "stake_haircut": {
+   "value": 0.25,
+   "note": "Tax and liquidity haircut on stakes outside EBITDA (carrying value or last round)"
+  }
+ },
+ "deals": [],
+ "scenario_probs": [
+  0.25,
+  0.5,
+  0.25
+ ],
+ "labels": {},
+ "debt_like": {
+  "liab": 3838.0,
+  "offset": 0.0,
+  "liab_fy": 3838.0,
+  "offset_fy": 0.0,
+  "note": "2025 10-K balance sheet: liability for postemployment benefits $3.838bn; treated as debt-like outside net debt. Product warranty remains an operating accrual, not a debt-like add-back."
+ },
+ "guidance": {
+  "date": "October 29, 2026",
+  "sales": [
+   77700.0,
+   80400.0
+  ]
+ },
+ "adjusted_eps": null,
+ "organic": {
+  "fy_total": 0.043,
+  "q_total": 0.17,
+  "q_by_segment": {
+   "Power Energy": 0.18,
+   "Construction Industries": 0.18,
+   "Resource Industries": 0.15,
+   "Financial Products": 0.09
+  }
+ },
+ "peers": [
+  {
+   "ticker": "DE",
+   "name": "Deere & Company",
+   "overlap": "Large machinery / equipment cycle",
+   "price": 673.54,
+   "eps": 18.11,
+   "source": "Deere latest FY2026 company net-income outlook available before Nov. 13, 2026, converted to EPS using diluted shares from its latest 10-Q; no post-Nov. 13 consensus used.; price = close Nov 13, 2026 (Yahoo)",
+   "ev": 189790.0,
+   "ebitda": 11687.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 270mm shares x price + net debt 8,187mm; EBITDA LTM to Aug 2026 (operating income + D&A)",
+   "eps_next": 22.88922,
+   "g_next": 0.2637794753894165,
+   "rev_g_next": 0.08693896421396019,
+   "beta_raw": 0.8914017413288927,
+   "de": 0.0942
+  },
+  {
+   "ticker": "PCAR",
+   "name": "PACCAR Inc.",
+   "overlap": "Heavy equipment manufacturing and captive finance",
+   "price": 106.66,
+   "eps": 5.87,
+   "source": "PACCAR latest 2026 filing-based LTM / run-rate diluted EPS available before Nov. 13, 2026; company does not provide an EPS guide.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance",
+   "ev_source": "",
+   "eps_next": 6.86863,
+   "g_next": 0.17007253511769482,
+   "rev_g_next": 0.0875844496366942,
+   "beta_raw": 0.9484618296994171,
+   "snapshot": "2026-11-16"
+  },
+  {
+   "ticker": "CMI",
+   "name": "Cummins Inc.",
+   "overlap": "Engines, power systems and industrial aftermarket",
+   "price": 452.18,
+   "eps": 27.69,
+   "source": "Cummins latest FY2026 adjusted EPS guidance / filing-based company-adjusted EPS available before Nov. 13, 2026; no post-date consensus used.; price = close Nov 13, 2026 (Yahoo)",
+   "ev": 64935.0,
+   "ebitda": 5616.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 137mm shares x price + net debt 2,951mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 33.38547,
+   "g_next": 0.2056699093078862,
+   "rev_g_next": 0.09353821223373893,
+   "beta_raw": 1.253859363123729,
+   "de": 0.1151
+  },
+  {
+   "ticker": "ETN",
+   "name": "Eaton Corporation plc",
+   "overlap": "Electrical / power infrastructure exposure",
+   "price": 352.97,
+   "eps": 13.79,
+   "source": "Eaton latest FY2026 adjusted EPS guidance midpoint available before Nov. 13, 2026; company-adjusted basis.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance",
+   "ev": 156417.0,
+   "ebitda": 6880.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 388mm shares x price + net debt 19,288mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 16.43611,
+   "g_next": 0.19207719293664893,
+   "rev_g_next": 0.11797535027286243,
+   "beta_raw": 1.150199801804154,
+   "de": 0.1466,
+   "snapshot": "2026-11-16"
+  },
+  {
+   "ticker": "HON",
+   "name": "Honeywell International Inc.",
+   "overlap": "Diversified industrial with segment mix and productivity framework",
+   "price": 222.46,
+   "eps": 8.42,
+   "source": "Honeywell latest FY2026 adjusted EPS guidance midpoint available before Nov. 13, 2026; company-adjusted basis.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance",
+   "ebitda": 9925.0,
+   "ev_source": "Corporate action on Jun 29, 2026 (Yahoo factor 0.9535): LTM EBITDA and shares are not pro forma, so EV / EBITDA is excluded",
+   "eps_next": 9.87567,
+   "g_next": 0.17320846886189267,
+   "rev_g_next": 0.017560551346508246,
+   "beta_raw": 0.8165349231631337,
+   "de": 0.235,
+   "snapshot": "2026-11-16"
+  },
+  {
+   "ticker": "URI",
+   "name": "United Rentals, Inc.",
+   "overlap": "Construction equipment cycle and rental-fleet demand",
+   "price": 1124.56,
+   "eps": 52.28,
+   "source": "United Rentals latest FY2026 adjusted EPS / filing-based EPS outlook available before Nov. 13, 2026; no post-date consensus used.; price = close Nov 13, 2026 (Yahoo)",
+   "ev": 84147.0,
+   "ebitda": 4916.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 62mm shares x price + net debt 14,518mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 62.06434,
+   "g_next": 0.1872568766079501,
+   "rev_g_next": 0.10418552206815779,
+   "beta_raw": 1.8175393087549807,
+   "de": 0.2107
+  }
+ ],
+ "market_data": {
+  "as_of": "2026-11-13",
+  "own_beta_raw": 1.662938155759195,
+  "rf": 0.0515399980545044,
+  "pe_hist": [
+   [
+    2017,
+    125.1
+   ],
+   [
+    2018,
+    12.4
+   ],
+   [
+    2019,
+    13.8
+   ],
+   [
+    2020,
+    33.3
+   ],
+   [
+    2021,
+    17.5
+   ],
+   [
+    2022,
+    19.0
+   ],
+   [
+    2023,
+    14.7
+   ],
+   [
+    2024,
+    16.5
+   ],
+   [
+    2025,
+    30.5
+   ]
+  ],
+  "short_interest": {
+   "shortPercentOfFloat": 0.02,
+   "shortRatio": 2.68,
+   "dateShortInterest": 1793318400
+  }
+ },
+ "thesis": {
+  "stance": "neutral on",
+  "recommendation": "Caterpillar is executing strongly, but the valuation depends on Power Energy growth and margins lasting beyond the January 2027 outlook while the base case normalizes working capital and cyclical margins.",
+  "points": [
+   "1. Growth: Base FY2026 revenue is inside management's mid-to-high-teens outlook, but 2027 revenue growth remains a variant view below consensus because the model assumes Construction dealer-inventory normalization and a slower conversion of Power Energy backlog after the 2026 surge.",
+   "2. Margins: Q3/YTD margins are strong and the terminal margin path now treats high 2031E sales as a structurally higher-volume mix case; margins fade from 2026 peak levels but retain operating leverage supported by Power Energy, services and pricing rather than reverting to a trough-weighted historical median.",
+   "3. Capital allocation: The 9M 2026 repurchase is already spent; future repurchases are limited to sustainable free cash flow rather than debt-funded buybacks.",
+   "4. Mix: Power Energy deserves a premium multiple versus traditional machinery because data-center power demand is real, but the base case still does not capitalize peak Q3 growth or margins indefinitely."
+  ],
+  "model_says": [
+   "\u2022 Fair value is {fv}: DCF is {dcf_pg} / {dcf_exit}, comps are {comps}, SOTP is {sotp}, and probability-weighted value is {pw}.",
+   "\u2022 The bear/base/bull range is {bear}/{base}/{bull}; the bull case now reflects the reverse-DCF requirements for the current valuation rather than a normal cyclical upside case.",
+   "\u2022 Long-run IRR at the price is {irr} versus {wacc}; the 3-year return is {ret3y}, so the January 2027 outlook is the key test of whether the higher Power Energy mix deserves to be capitalized."
+  ],
+  "risks": [
+   "\u2022 Upside risk: data-center and prime-power orders stay stronger for longer, Power Energy margins hold above 25%, and the market capitalizes the segment more like an electrical infrastructure peer.",
+   "\u2022 Downside risk: dealer inventory reverses, construction/rental fleet demand slows and decremental margins reveal that FY2026 was above mid-cycle.",
+   "\u2022 Tariff and cost risk: Q3 2026 10-Q still expects about $600mm of Q4 tariff costs and $2.2bn full-year tariff costs excluding IEEPA recoveries.",
+   "\u2022 Capital allocation risk: repurchases above free cash flow would be debt-funded; the base case does not assume that."
+  ],
+  "monitor": [
+   "\u2022 January 2027 FY2026 results: FY sales inside $77.7-$80.4bn guide, adjusted EPS near consensus and Q4 operating margin versus the 20.3% 9M adjusted level.",
+   "\u2022 Monthly retail sales / Q4 backlog commentary: Power Generation orders and backlog conversion, especially data-center reciprocating engines and turbines.",
+   "\u2022 Construction dealer inventory: confirm the expected roughly $1.6bn Q4 2026 dealer inventory decrease does not become a 2027 destocking cycle.",
+   "\u2022 Resource Industries orders: copper/gold and oil sands demand must sustain strong backlog growth despite manufacturing-cost pressure."
+  ],
+  "about": "Caterpillar is modeled as an integrated machinery, engines, services and captive-finance business; Cat Financial debt is treated as operating because finance receivables and finance interest are part of the customer offering.",
+  "price_implies": "At the current valuation, the market implies {irr} and requires either a much longer growth fade, terminal growth above the house rate, or a terminal margin near {req_margin}.",
+  "variant_view": "The base case is below 2027 consensus revenue growth because we assume the 2026 surge is partly cyclical: Construction dealer inventories normalize and Power Energy backlog conversion slows after capacity catches up. This variant view is tested by the January 2027 FY2026 report / 2027 outlook and by monthly retail-sales and backlog commentary through Q1 2027.",
+  "catalysts": [
+   "January 2027 FY2026 earnings: Q4 sales growth should be at least moderate and FY2026 sales should land within management's mid-to-high-teens guide.",
+   "January 2027 backlog/order update: Power Generation backlog must keep growing or the bull case loses its main support.",
+   "January 2027 dealer-inventory disclosure: the planned Q4 Construction dealer inventory drawdown should not turn into broad 2027 destocking."
+  ],
+  "breaker": "The bear case now makes the breaker numerical: 2027 organic growth turns negative as Construction destocks, Power Energy backlog conversion slows, and consolidated segment margin falls below 20%; the upside breaker is Power Energy sustaining double-digit growth with margins at or above 26% into 2027 while Construction avoids destocking.",
+  "sensitivities": "Most sensitive to terminal RONIC / terminal margin and the Power Energy growth fade; secondarily to the Construction decremental-margin path in a destocking scenario.",
+  "consensus_notes": "The model is below consensus on 2027 revenue growth because it does not extrapolate the 2026 sales step-up at the same rate into 2027. FY2026 adjusted EPS was corrected to Caterpillar's definition: restructuring costs are excluded, but ongoing corporate / non-segment costs are not added back wholesale.",
+  "explanations": {
+   "gate 5": "Peer EPS inputs have been replaced with company guidance or filing-based EPS sources available before Nov. 13, 2026; no Nov. 16 consensus snapshot is used.",
+   "gate 10": "The 8-K list after the balance-sheet date includes leadership, financing/agreement and other corporate items, but no provided 8-K or attached press release shows a signed acquisition, separation, impairment or debt-funded repurchase requiring a deals entry. The October ASR settlement delivered shares with no incremental cash outflow and is handled through share count / buyback assumptions, not deals.",
+   "gate 35": "The 2027 revenue gap remains an explicit variant view rather than a hidden calibration. Management's Q3 2026 materials support a strong 2027 setup through backlog, capacity expansion and dealer inventory ending 2026 above 2025, but the base case still assumes part of 2026 was dealer-inventory / backlog catch-up and tests that view at the January 2027 FY2026 results and 2027 outlook.",
+   "implies rest of year net sales growth of": "A slowdown from 21% YTD sales growth is consistent with Q3 2026 10-Q guidance for only moderate Q4 sales growth and the stated Construction dealer inventory decrease of roughly $1.6bn versus a $600mm decrease in Q4 2025.",
+   "implies rest of year total segment profit growth": "Q4 segment profit growth should decelerate because management expects unfavorable manufacturing costs, higher SG&A/R&D and no additional IEEPA tariff recoveries in Q4.",
+   "implies rest of year operating income growth of": "Fixed by annualizing non-segment charges already booked through 9M 2026, which avoids assuming zero Q4 charges and brings the implied Q4 operating-profit bridge closer to the YTD operating trend.",
+   "implies rest of year adjusted eps growth of": "Explained: adjusted EPS growth should decelerate from the 9M rate because Q4 sales growth is guided to slow, Construction faces dealer-inventory normalization, and tariff/manufacturing costs remain in the segment margin path. The model does not force adjusted EPS with tax or share-count plugs.",
+   "balance sheet cash turns negative in 293mm buybacks": "Fixed by removing the default debt-repayment plug and limiting FY2026 buybacks to the $7.1bn actually spent through 9M 2026; October ASR settlement delivered shares but no additional cash outflow.",
+   "gate 11": "The tax rate remains the 23.0% annual ETR disclosed in the Q3 2026 outlook and is not used as a plug. The prior large operating plug was the working-capital ratio; accrued_pct is now an explicit year-end path of 26.3% / 24.5% / 23.5% / 22.8% / 22.3% / 22.1%, supported by backlog and 2027 dealer-inventory commentary, rather than a permanent seasonal balance or an immediate FY2027 unwind.",
+   "gate 16": "Fixed through the margin inputs. The base case no longer mixes $102.6bn of terminal sales with a trough-weighted 10-year median consolidated operating margin; it chooses the structural high-volume path supported by Q3 2026 record backlog, Power Generation data-center demand, prime-power demand, services growth and favorable price realization. Terminal segment margins are now 21.5% for Power Energy, 18.0% for Construction Industries and 12.5% for Resource Industries, below Q3 2026 peak margins but consistent with operating leverage at volumes materially above 2023-2025. RONIC remains 19% as requested, tied to the return including goodwill.",
+   "2026E implies rest-of-year adjusted eps growth of": "Fixed by changing the adjusted-EPS definition. Caterpillar's Q3 2026 reconciliation excludes restructuring costs, not all corporate / non-segment charges; adj_eps_ex_repo is therefore set to 0 and FY2026 restructuring is modeled as a $300mm non-recurring pre-tax cost excluded from adjusted EPS. This removes the prior mechanical add-back of roughly $2.0bn of non-segment costs, or about $3.3 per share before the restructuring add-back.",
+   "gate 12": "Partly fixed by the accrued_pct path. The prior FY2027 FCF drop was mainly a plug-like working-capital snapback from 26.3% to 22.1%; fading the ratio to 24.5% in FY2027 adds about $2.0bn of FY2027 operating liabilities versus the old reset and better matches the Q3 2026 record-backlog / higher year-end dealer-inventory commentary. The remaining EPS growth gap is operating, not a plug: FY2026 benefits from the 2026 volume / price step-up and YTD adjusted EPS of $20.90 versus $13.91, while FY2027 growth slows as Construction dealer-inventory support normalizes.",
+   "gate 34": "Fixed by the RONIC input. Terminal RONIC is reset to approximately the ROIC including goodwill after the normalized terminal margin path; no unsupported haircut to 14% is used because there is no dated competitive-entry, loss-of-exclusivity or recurring-acquisition reason in the provided documents.",
+   "gate 41": "Fixed by the bull-case inputs. The bull case is no longer a normal upside case below the share price; it is calibrated to what the reverse DCF says the current valuation requires: sustained Power Energy strength, materially higher terminal margins and a longer growth fade. The base case does not underwrite those requirements without confirmation in the January 2027 outlook.",
+   "working capital": "The working-capital path is no longer an immediate FY2027 reset. FY2026 accrued_pct of 26.3% remains an explicit year-end estimate for a high-backlog year; FY2027-FY2031 fade to the 2025 year-end operating-liability ratio of 22.1%. The change adds about $2.0bn to FY2027 FCF versus the old 22.1% reset and removes a plug-like unwind while still avoiding a permanent seasonal 10-Q balance.",
+   "pm review": "Mid-cycle volume and margin are now treated consistently. I did not keep the prior combination of roughly $102.6bn terminal sales and a 14.7% consolidated operating margin: that paired a high-volume path with a trough-weighted median margin that included much lower-volume years. The base now chooses the structural high-volume path, supported by the 10-Q's record backlog, strong order rates, on-schedule capacity expansion, data-center / prime-power demand and services growth. Terminal segment margins were raised to Power Energy 21.5%, Construction Industries 18.0% and Resource Industries 12.5%; a rough sensitivity using terminal sales indicates about 3-4 points more terminal operating margin and an estimated DCF value lift of roughly $70-$100 per share versus the prior margin path, before the model recomputes method weights.\n\nThe path is not a claim that every segment stays at Q3 2026 peak margin. Q3 2026 margins were 24.4% in Power Energy, 22.9% in Construction Industries and 13.5% in Resource Industries; the model fades each below that level to reflect tariff / manufacturing-cost pressure, dealer-inventory normalization and cyclical risk. I did not invent a segment-by-segment 10-year history that was not in the supplied excerpts. Instead, the segment terminal margins are anchored to the provided Q3 2026 segment margins and the 2023-2025 consolidated operating-margin range of 16.5%-20.2% on materially lower sales.\n\nEverything the PM asked to keep is unchanged: RONIC remains 19%, beta remains 1.21, fade_years remains 5 and the rule-based stance remains Neutral. The working-capital change is separate from the margin critique: accrued_pct now fades from 26.3% in FY2026 to 22.1% by FY2031 rather than snapping back in FY2027, adding about $2.0bn to FY2027 FCF versus the prior reset and better matching the provided backlog / 2027 dealer-inventory commentary.",
+   "gate 33": "Fixed through the bear-case segment inputs. Bear growth now embeds the thesis breaker: 2027 destocking / backlog normalization, negative organic growth in Construction and Resource Industries, slower Power Energy conversion, lower Financial Products growth and materially lower margins. Bear SOTP multiples are also cut where the bear case removes the Power Energy / cycle premium.",
+   "gate 43": "FY2026 rest-of-year FCF is still explained by the Q4 operating setup rather than a model plug: management guided to moderate Q4 sales growth, Construction dealer inventories down roughly $1.6bn in Q4 and tariff costs of about $600mm. The FY2027+ accrued_pct path now fades from the FY2026 year-end estimate instead of immediately reverting to 2025, so the model no longer creates a one-year working-capital cliff after FY2026.",
+   "fair value is vs the price before calling": "The valuation gap is left as a variant view rather than converted into an outright short. The driver fix was margin consistency: high terminal sales now carry high-volume operating leverage supported by the provided 10-Q and 10-K data, while WACC, terminal growth, beta, RONIC and fade_years were not moved. The reverse DCF still frames what must be proven: either a longer growth runway, terminal growth above the house rate or a terminal margin near {req_margin}, tested by the January 2027 outlook and backlog commentary.",
+   "methods disagree sotp vs dcf exit fix the": "Partly fixed by the terminal-margin inputs, which should lift the exit DCF because terminal EBITDA is no longer depressed by mixing high volumes with trough-weighted margins. Any remaining SOTP premium is structural: SOTP capitalizes near-term segment EBITDA and the Power Energy mix premium, while the DCF exit case capitalizes normalized terminal cash flow after reinvestment and working capital; SOTP remains only a 10% weighted mix / breakup check.",
+   "other income 569mm is below the 793mm already": "Fixed through drivers.nonrec. FY2026 nonrec now includes the $793mm of other income already booked in 9M 2026, net of the $300mm restructuring-cost outlook; GAAP keeps the net $493mm pre-tax gain and adjusted EPS excludes it. No Q4 loss is assumed to make the full-year other-income line fall below the amount already booked."
+  },
+  "rating_override": {
+   "rating": "Neutral",
+   "reason": "The valuation gap is not treated as a short call until the January 2027 outlook confirms the destocking / backlog-normalization variant view; the bull case now brackets the share price."
+  }
+ },
+ "flags": [
+  "Caterpillar provides qualitative FY2026 sales, restructuring, capex and tax guidance in the Q3 2026 release / 10-Q, but no explicit FY2026 adjusted EPS or free-cash-flow range in the provided documents.",
+  "The 10-Q acquisition note discloses consideration / PPA components but not target revenue by segment; acquisitions are charged in cash paid, with no undisclosed acquired revenue added to segment organic growth.",
+  "Cat Financial is modeled as operating: captive finance debt funds finance receivables and its interest cost is part of segment economics, not excess financial leverage.",
+  "The bull case is a reverse-DCF calibration case: it shows what the share price requires rather than the analyst's base underwriting case."
+ ]
+}

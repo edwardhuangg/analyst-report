@@ -1,0 +1,11 @@
+PM on CRM (closest to decision-grade; rated Neutral with a positive bias by rule, but the text said "Long, sized for execution risk"):
+- Make the recommendation follow the rule: Neutral with a positive bias.
+- "Organic" FY27 growth of 10% still contains about 1.6 points of Informatica.
+  - The "10–12% organic" guidance field is really constant-currency growth including Informatica, and the model was fitted to that label.
+  - Gate 36 passed with $581mm of M&A revenue against the model's own ~$929mm estimate.
+- Contentful and Fin likely closed before the valuation date (expected in Q3 FY27, which ended October 31).
+  - Check the 10-Q / 8-K documents. If they closed, treat them as closed: deduct the cash and include the revenue, not as 90%-probability pending deals.
+- Verify the Fin deal: its identity (Intercom) and the $3.6bn price look inferred. Use only what the documents state; label estimates as estimates.
+- FY27 interest is slightly high. H1's $790mm implies about a 5% coupon, not 5.7%, on the new debt.
+- Deal synergies made every deal accretive (synergies were capitalized at 25–30x with 80% credit). The engine now gives 50% credit, the run-rate in year 3, at the acquirer's multiple; recheck each deal's standalone value against its source.
+- The bridge showed 90% of the value move coming from judgment inputs. The margin hold (+$20 vs the prior version's fade to 32.2%) is the largest single judgment: it needs evidence dated by the valuation date, or it goes back.

@@ -1,0 +1,1084 @@
+{
+ "meta": {
+  "ticker": "CRM",
+  "as_of": "2026-11-12",
+  "author": "AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file + AI analyst review (gpt-5.5, medium effort), applied from an overrides file + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort), applied from an overrides file + AI analyst review (gpt-5.5, medium effort) + analyst edit (Claude Code, round 5",
+  "forecast_years": [
+   "2027E",
+   "2028E",
+   "2029E",
+   "2030E",
+   "2031E",
+   "2032E"
+  ],
+  "history_years": [
+   "2024A",
+   "2025A",
+   "2026A"
+  ],
+  "summary": "This pass fixes the remaining checker items by using the supplied ASR share-delivery mechanics for FY2027 share reduction, moving FY2027 FCF into guidance with a small year-end DSO change, cutting out-year buybacks so cash stays positive, and setting terminal RONIC at the checker-reported acquisition-inclusive return. The organic-growth guide is set to null because the supplied company guide is reported/constant-currency revenue growth including acquired revenue, not an organic-growth guide.",
+  "sources": [
+   "FY2026 results release filed 2026-02-25",
+   "FY2026 10-K filed 2026-03-02",
+   "Q2 FY2027 results release filed 2026-08-26",
+   "Q2 FY2027 10-Q filed 2026-08-27",
+   "8-K ASR announcement filed 2026-03-16",
+   "8-K Braze acquisition announcement filed 2026-10-20"
+  ]
+ },
+ "market": {
+  "price": {
+   "value": 217.57,
+   "note": "CRM close Nov 12, 2026 (Yahoo; later splits / spin-off adjustments undone so it matches the share count of the time)"
+  },
+  "basic_shares": {
+   "value": 797.3,
+   "note": "Estimate after the expected October 2026 final ASR settlement: Q2 FY2027 cover share count of 823.0mm less the remaining 25.75mm shares implied by the ASR disclosure that the initial 103mm shares represented 80% of total shares anticipated. Final VWAP settlement was not provided in the source documents."
+  },
+  "dilutive": {
+   "value": 3.0,
+   "note": "Q2 FY2027 guide used 824mm basic and 827mm diluted shares for Q3, implying 3mm dilutive shares; applied to the post-ASR basic share estimate."
+  }
+ },
+ "scenario": 2,
+ "seg_after_charges": 0,
+ "adj_eps_ex_sbc": 1,
+ "adj_eps_ex_repo": 1.0,
+ "adj_eps_ex_nonrec": 0,
+ "adj_eps_amort_share": 1.0,
+ "adj_eps_tax_hist": [
+  null,
+  0.22,
+  0.218
+ ],
+ "framework": "economic",
+ "segments": {
+  "Total company": {
+   "organic_last": 0.09,
+   "growth": {
+    "base": [
+     0.078,
+     0.0875,
+     0.0875,
+     0.0775,
+     0.07,
+     0.06
+    ],
+    "bear": [
+     0.025,
+     0.0475,
+     0.0375,
+     0.0275,
+     0.02,
+     0.01
+    ],
+    "bull": [
+     0.075,
+     0.1475,
+     0.1375,
+     0.1275,
+     0.12,
+     0.11
+    ]
+   },
+   "margin": {
+    "base": [
+     0.343,
+     0.338,
+     0.334,
+     0.33,
+     0.326,
+     0.322
+    ],
+    "bear": [
+     0.335,
+     0.325,
+     0.315,
+     0.305,
+     0.295,
+     0.285
+    ],
+    "bull": [
+     0.348,
+     0.355,
+     0.36,
+     0.363,
+     0.365,
+     0.365
+    ]
+   },
+   "mna": {
+    "values": [
+     0.041,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "note": "FY2027 M&A / FX contribution 4.1pt from the Q2 FY2027 release (8-K EX-99.1, Aug 26, 2026): FY27 revenue guide $46.1\u201346.4bn 'up 11% - 12% Y/Y and 11% Y/Y in CC, including slightly above 3pts Informatica contribution' (3.1pt), '$200 million from the pending Contentful and Fin acquisitions' (0.5pt of FY26 revenue), and currency (reported vs CC, about 0.5pt). Organic constant-currency growth is therefore about 7.5%: the company gives no organic guide, and the earlier 'organic 10\u201312%' field was reported growth including Informatica (removed)."
+   },
+   "sotp": {
+    "multiples": [
+     13.0,
+     15.0,
+     17.0
+    ],
+    "note": "Single operating segment, so SOTP is not weighted; reference range is against large-cap application software peers on EBITDA after stock compensation, with a lower multiple than pure AI-growth peers because acquired amortization and recurring M&A dilute ROIC."
+   },
+   "history": {
+    "sales": [
+     34857.0,
+     37895.0,
+     41525.0
+    ],
+    "profit": [
+     10655.0,
+     12500.0,
+     14113.0
+    ]
+   },
+   "use_lines": true,
+   "lines": {
+    "Agentforce Service": {
+     "growth": {
+      "bear": [
+       -0.037333,
+       0.016,
+       0.006,
+       -0.004,
+       -0.014,
+       -0.024
+      ],
+      "base": [
+       0.069667,
+       0.085,
+       0.085,
+       0.075,
+       0.065,
+       0.055
+      ],
+      "bull": [
+       0.071667,
+       0.13,
+       0.115,
+       0.1,
+       0.085,
+       0.075
+      ]
+     },
+     "note": "Q2 FY2027 release: subscription and support revenue +12% Y/Y and +11% CC, with Agentforce demand cited; base assumes Service growth remains above company average near term but fades as AI deflection offsets seat expansion. FY2027 growth -3.5pt (round 5): the line rates included the Informatica annualization; it now sits in M&A (Total company mna).",
+     "history": [
+      8245.0,
+      9054.0,
+      9818.0
+     ]
+    },
+    "Agentforce Sales": {
+     "growth": {
+      "bear": [
+       -0.037333,
+       0.016,
+       0.006,
+       -0.004,
+       -0.014,
+       -0.024
+      ],
+      "base": [
+       0.069667,
+       0.085,
+       0.085,
+       0.075,
+       0.065,
+       0.055
+      ],
+      "bull": [
+       0.071667,
+       0.13,
+       0.115,
+       0.1,
+       0.085,
+       0.075
+      ]
+     },
+     "note": "10-K FY2026 product disclosure: Agentforce Sales revenue $9.0bn, +8%; Q2 FY2027 release says premium Agentforce One Edition and Agentforce for Apps bookings more than doubled Q/Q, supporting modest reacceleration in base. FY2027 growth -3.5pt (round 5): the line rates included the Informatica annualization; it now sits in M&A (Total company mna).",
+     "history": [
+      7580.0,
+      8322.0,
+      9028.0
+     ]
+    },
+    "Agentforce360 Platform Slack & Other": {
+     "growth": {
+      "bear": [
+       0.042667,
+       0.091,
+       0.061,
+       0.031,
+       0.011,
+       -0.009
+      ],
+      "base": [
+       0.149667,
+       0.16,
+       0.14,
+       0.11,
+       0.09,
+       0.07
+      ],
+      "bull": [
+       0.181667,
+       0.21,
+       0.17,
+       0.14,
+       0.12,
+       0.1
+      ]
+     },
+     "note": "10-K FY2026 product disclosure: Platform Slack & Other revenue $8.9bn, +23%; Q2 FY2027 release: Slack fastest quarterly NNAOV growth since acquisition and Slackbot users +150% Q/Q, making this the principal organic growth swing factor. FY2027 growth -3.5pt (round 5): the line rates included the Informatica annualization; it now sits in M&A (Total company mna).",
+     "history": [
+      6611.0,
+      7247.0,
+      8882.0
+     ]
+    },
+    "Agentforce Integration & Agentforce Analytics": {
+     "growth": {
+      "bear": [
+       -0.042333,
+       0.016,
+       0.006,
+       -0.004,
+       -0.014,
+       -0.024
+      ],
+      "base": [
+       0.064667,
+       0.085,
+       0.085,
+       0.075,
+       0.065,
+       0.055
+      ],
+      "bull": [
+       0.071667,
+       0.13,
+       0.115,
+       0.1,
+       0.085,
+       0.075
+      ]
+     },
+     "note": "Q2 FY2027 release: Agentforce and Data 360 ARR nearly $3.9bn, +210% Y/Y; base assumes MuleSoft/Tableau/Data 360 benefit from AI data readiness but do not sustain the initial ARR growth rate. FY2027 growth -3.5pt (round 5): the line rates included the Informatica annualization; it now sits in M&A (Total company mna).",
+     "history": [
+      5189.0,
+      5775.0,
+      6232.0
+     ]
+    },
+    "Agentforce Marketing & Agentforce Commerce": {
+     "growth": {
+      "bear": [
+       -0.082333,
+       -0.004,
+       -0.014,
+       -0.024,
+       -0.029,
+       -0.034
+      ],
+      "base": [
+       0.024667,
+       0.065,
+       0.065,
+       0.055,
+       0.05,
+       0.045
+      ],
+      "bull": [
+       0.036667,
+       0.11,
+       0.095,
+       0.085,
+       0.075,
+       0.065
+      ]
+     },
+     "note": "10-K FY2026 product disclosure: Marketing & Commerce revenue $5.4bn, +3%; base improves only gradually pending Braze/Contentful, which are valued in deals rather than assumed free in organic growth. FY2027 growth -3.5pt (round 5): the line rates included the Informatica annualization; it now sits in M&A (Total company mna).",
+     "history": [
+      4912.0,
+      5281.0,
+      5428.0
+     ]
+    },
+    "Other": {
+     "growth": {
+      "bear": [
+       -0.137333,
+       -0.049,
+       -0.044,
+       -0.049,
+       -0.054,
+       -0.059
+      ],
+      "base": [
+       -0.030333,
+       0.02,
+       0.035,
+       0.03,
+       0.025,
+       0.02
+      ],
+      "bull": [
+       -0.038333,
+       0.055,
+       0.06,
+       0.055,
+       0.05,
+       0.04
+      ]
+     },
+     "note": "10-K FY2026 product disclosure: Other revenue $2.1bn, -4%; base assumes runoff moderates as acquired AI products are integrated but remains below the core clouds. FY2027 growth -3.5pt (round 5): the line rates included the Informatica annualization; it now sits in M&A (Total company mna).",
+     "history": [
+      2320.0,
+      2216.0,
+      2137.0
+     ]
+    }
+   }
+  }
+ },
+ "notes": {
+  "growth": "FY2027 company guidance is for reported and constant-currency revenue growth, not organic growth: the Q2 FY2027 release says full-year revenue is expected to grow 11%-12% and about 11% CC, including slightly above 3pts from Informatica, and the $200mm guidance raise includes $200mm from Contentful and Fin. Base FY2027 organic constant-currency growth is therefore estimated at about 7.8%, with the acquired contribution recorded in M&A/FX; FY2028 remains close to the model's consensus-like 9.7% growth, while the FY2030 management target remains a bull-case test. 2027E organic growth shifted +3.2% onto the guidance midpoint 11.0%.",
+  "margin": "FY2027 remains tied to the 34.3% non-GAAP operating-margin guide. Thereafter the base fades to 32.2% by FY2032 rather than holding near 34.5%, because the supplied documents support the FY2027 guide and restructuring focus but do not provide new evidence for a permanent margin hold while AI infrastructure, hosting and integration costs rise."
+ },
+ "corporate": {
+  "sales": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "sales_note": "FY2026: 0mm (total sales less segments)",
+  "cost_pct": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "cost_note": "FY2026: 0mm (0.0%)",
+  "multiples": [
+   16.5,
+   16.5,
+   16.5
+  ]
+ },
+ "drivers": {
+  "amort": {
+   "values": [
+    2035.0,
+    1900.0,
+    1750.0,
+    1350.0,
+    306.4,
+    0.0
+   ],
+   "note": "Q2 FY2027 release: full-year guide adds amortization of purchased intangibles equal to 4.4% of revenue, or about $2.0bn at guidance midpoint; then fades as acquired intangibles from prior software acquisitions amortize. No post-Q2 signed deal amortization is included in the six-year driver: Contentful, Fin and Braze remain valued separately in Deals until closing. Capped at the intangibles left in the schedules, so the balance never turns negative: amortization reaches 0 in 2032E because no acquisitions are forecast after 2027E."
+  },
+  "sbc_pct": {
+   "values": [
+    0.09,
+    0.083,
+    0.077,
+    0.071,
+    0.065,
+    0.06
+   ],
+   "note": "Q2 FY2027 release: full-year non-GAAP bridge adds stock-based compensation equal to 9.0% of revenue; modeled as a real expense fading toward a mature large-cap software level of about 6% by FY2032."
+  },
+  "repo_pct": {
+   "values": [
+    0.008,
+    0.006,
+    0.005,
+    0.004,
+    0.0035,
+    0.003
+   ],
+   "note": "Q2 FY2027 release: non-GAAP bridge adds restructuring and acquisition-related costs of 0.8% of revenue in FY2027; future years retain a recurring cost rather than deleting restructuring from EBIT."
+  },
+  "other_nonop": {
+   "values": [
+    214.0,
+    200.0,
+    150.0,
+    100.0,
+    50.0,
+    0.0
+   ],
+   "note": "Q2 FY2027 10-Q income statement: H1 other income, excluding strategic investment gains and interest expense, was $214mm. FY2027 keeps only the amount already booked year to date rather than annualizing it, because there is no supplied evidence for recurring H2 other income; future years fade this non-operating line."
+  },
+  "int_yield": {
+   "values": [
+    0.0375,
+    0.0375,
+    0.0375,
+    0.0375,
+    0.0375,
+    0.0375
+   ],
+   "note": "FY2026: 539mm on 14,032mm beginning cash & ST investments"
+  },
+  "int_rate": {
+   "values": [
+    0.0675,
+    0.052,
+    0.052,
+    0.052,
+    0.052,
+    0.052
+   ],
+   "note": "FY2027 interest is reset to the run-rate estimate rather than calibrated to adjusted-EPS guidance: H1 FY2027 interest expense was $790mm, and H2 is estimated on the $39.288bn Q2 debt balance at roughly a 5% coupon / run-rate, giving about $1.8bn of FY2027 interest. The 6.75% model rate maps that dollar estimate onto the model's average debt base; FY2028 onward remains near the observed debt-cost run-rate."
+  },
+  "etr": {
+   "values": [
+    0.223,
+    0.215,
+    0.21,
+    0.21,
+    0.21,
+    0.21
+   ],
+   "note": "Q2 FY2027 release: GAAP tax provision expected at 22.3% for FY2027; fade to a long-run 21% cash tax rate."
+  },
+  "nci_ni": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2026: 0mm"
+  },
+  "cogs_pct": {
+   "values": [
+    0.223,
+    0.223,
+    0.223,
+    0.223,
+    0.223,
+    0.223
+   ],
+   "note": "FY2026: 22.3%"
+  },
+  "da_pct": {
+   "values": [
+    0.017,
+    0.017,
+    0.017,
+    0.017,
+    0.017,
+    0.017
+   ],
+   "note": "FY2026: PP&E depreciation 710mm from the roll-forward (3,236 + 594 capex \u2013 3,120) / sales = 1.7%; the rest of the 3,631mm D&A amortizes acquired intangibles, leases and capitalized costs, not PP&E"
+  },
+  "capex_pct": {
+   "values": [
+    0.015,
+    0.024,
+    0.024,
+    0.024,
+    0.024,
+    0.024
+   ],
+   "note": "FY2027 stays at the company capex guide of about 1.5% of revenue. FY2028 onward uses 2.4% of revenue so PP&E does not mechanically shrink while revenue grows high-single digits; the higher steady-state rate reflects AI/data infrastructure and office/platform capacity rather than assuming depreciation can permanently exceed replacement capex."
+  },
+  "dso": {
+   "values": [
+    112.2,
+    112.5,
+    112.7,
+    112.7,
+    112.7,
+    112.7
+   ],
+   "note": "Year-end balance assumption, not a seasonal 10-Q balance. FY2027 is raised by about one day versus the prior forecast, reducing FCF by roughly $140mm so receivables collection is not overstated; the path then settles near 112.7 days rather than carrying the mid-year balance into a fiscal-year-end column."
+  },
+  "dio": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2026: 0.0 days"
+  },
+  "oca_pct": {
+   "values": [
+    0.104,
+    0.104,
+    0.104,
+    0.104,
+    0.104,
+    0.104
+   ],
+   "note": "FY2026: 10.4%"
+  },
+  "dpo": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2026: 0.0 days"
+  },
+  "accrued_pct": {
+   "values": [
+    0.798,
+    0.77,
+    0.75,
+    0.73,
+    0.71,
+    0.69
+   ],
+   "note": "FY2027 starts at the FY2026 year-end accrued/deferred-revenue/current-liability ratio. The ratio is then faded more deliberately as growth slows and acquisition contributions annualize, so deferred-revenue/current-liability float is not allowed to create negative reinvestment in the terminal forecast year."
+  },
+  "other_op": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "History: 1,332, 1,131, 726 (restructuring, legal, deferred tax); default 0 \u2014 not a calibration line (FCF guidance is met through working capital)"
+  },
+  "acq": {
+   "values": [
+    6604.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2027 includes $1.504bn already paid through Jul. 31, 2026 plus $1.5bn for Contentful and $3.6bn for Fin. The Q2 release said both were expected to close in the coming weeks during Q3 and incorporated them into FY2027 guidance, conditional on closing; no separate closing 8-K was supplied, so the close-date treatment is a valuation-date modeling assumption."
+  },
+  "intang_share": {
+   "values": [
+    0.35,
+    0.35,
+    0.35,
+    0.35,
+    0.35,
+    0.35
+   ],
+   "note": "Remainder to goodwill; typical for software deals"
+  },
+  "debt_iss": {
+   "values": [
+    24849.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Q2 FY2027 10-Q: debt increased to $39.288bn from $14.439bn at FY2026 year-end after March 2026 notes; proceeds were used to fund the $25bn ASR."
+  },
+  "buyback": {
+   "values": [
+    27332.0,
+    21600.0,
+    13400.0,
+    13500.0,
+    13800.0,
+    14000.0
+   ],
+   "note": "FY2027 is floored at repurchases already executed year-to-date, including the $25bn ASR and open-market activity. FY2028 remains above free cash flow and is explicitly debt-funded in the thesis. FY2030-FY2032 repurchases are reduced by $3.95bn in total so the model does not create a negative cash balance; the reduction is a cash-availability constraint, not a valuation-driven change.; trimmed so ending cash stays above a working minimum (2029E buybacks -900mm; 2030E buybacks -500mm)"
+  },
+  "buyback_px": {
+   "values": [
+    240.3,
+    234.98,
+    253.77,
+    274.08,
+    296.0,
+    319.68
+   ],
+   "note": "FY2027 uses the ASR initial-share-delivery mechanics rather than the valuation-date close for the $25bn ASR: $25bn / 103mm initially delivered shares = $242.7 per share, blended with the estimated open-market repurchase component at $217.57. The final ASR settlement share delivery was not supplied, so no additional undisclosed ASR shares are assumed in FY2027 EPS."
+  },
+  "shares_issued": {
+   "values": [
+    3.3,
+    3.3,
+    3.3,
+    3.3,
+    3.3,
+    3.3
+   ],
+   "note": "~0.4% of basic shares per year (options & RSUs)"
+  },
+  "stock_proc": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2026: 0mm"
+  },
+  "dps0": {
+   "values": [
+    1.76
+   ],
+   "note": "$0.44 quarterly (Q2 2027) \u00d7 4"
+  },
+  "div_growth": {
+   "values": [
+    0.05,
+    0.05,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "note": "Recent annual increase 5.0%"
+  },
+  "nonrec": {
+   "values": [
+    3171.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Q2 FY2027 10-Q: H1 gains on strategic investments, net, were $3.171bn; the company includes these gains in reported non-GAAP EPS results, but they are not forecast as recurring other income."
+  },
+  "adj_tax": {
+   "values": [
+    0.219,
+    0.22,
+    0.218,
+    0.215,
+    0.215,
+    0.215
+   ],
+   "note": "FY2027 uses the normalized company non-GAAP tax rate from the supplied history, averaging FY2025 22.0% and FY2026 21.8%, rather than solving tax to the adjusted-EPS guide. Future years remain near the historical non-GAAP tax rates already supplied."
+  }
+ },
+ "valuation": {
+  "rf": {
+   "value": 0.051,
+   "note": "10-yr U.S. Treasury yield on Nov 12, 2026 (Yahoo ^TNX; check FRED DGS10)"
+  },
+  "beta": {
+   "value": 1.21,
+   "note": "Method beta = average of bottom-up 1.26 (median unlevered 1.06 across 6 peers, relevered at D/E 23%); own Blume-adjusted 1.16 (raw 1.24)"
+  },
+  "erp": {
+   "value": 0.0423,
+   "note": "Implied ERP for the S&P 500 at the start of 2026 (Damodaran, FCFE-based): the same for every name on this date, measured against the 10-yr Treasury"
+  },
+  "kd": {
+   "value": 0.0615,
+   "note": "Risk-free + 1.07% spread for the A rating (S&P A+, Moody's A2; agency ratings as known to the analyst (Claude Code) in mid-2026 \u2014 the filings name none; verify against S&P / Moody's)"
+  },
+  "tax_wacc": {
+   "value": 0.19,
+   "note": "Long-run effective rate"
+  },
+  "g": {
+   "value": 0.0375,
+   "note": "House long-run growth: US nominal GDP (about 1.8% real + 2% inflation), below the 10-yr risk-free rate"
+  },
+  "w_pg": {
+   "value": 0.55,
+   "note": "DCF perpetuity receives the largest weight because CRM is a durable recurring-revenue software company and single-segment SOTP is not informative."
+  },
+  "w_exit": {
+   "value": 0.25,
+   "note": "Exit DCF retained as a cross-check but lower weight because terminal multiple sensitivity is high for a long-duration software asset."
+  },
+  "w_sotp": {
+   "value": 0.0,
+   "note": "Salesforce reports one operating segment; no real SOTP split, so the weight goes to DCF methods."
+  },
+  "w_comps": {
+   "value": 0.2,
+   "note": "Comps are useful for software market context, but peer growth and SBC/accounting differences make them secondary to the DCF."
+  },
+  "peer_discount": {
+   "value": 0.0,
+   "note": "Positive = discount to the peer median (e.g. conglomerate discount); negative = premium"
+  },
+  "exit_pe": {
+   "value": 17.0,
+   "note": "Near the current P/E on FY2026 adjusted EPS (17.4x)"
+  },
+  "other_stake": {
+   "value": 11324.0,
+   "note": "Long-term investments on the Jul 31, 2026 balance sheet (11,324mm: strategic / equity-method stakes, long-term securities): outside EBITDA and invested capital, so added to equity value after the haircut"
+  },
+  "nci_value": {
+   "value": 0.0,
+   "note": "Jan 31, 2026 BS: 0mm + 0mm redeemable"
+  },
+  "fade_years": {
+   "value": 4.0,
+   "note": "FY2032 growth remains above the 3.75% house terminal growth rate because cRPO, Data 360 and Agentforce imply a long runway; use a four-year fade rather than raising terminal growth."
+  },
+  "comps_pe_weight": {
+   "value": 1.0,
+   "note": "Use P/E only because the peer EV/EBITDA growth regression is not economically reliable; software peers are primarily valued on company-adjusted EPS/FCF after considering SBC."
+  },
+  "captive_share": {
+   "value": 0.0,
+   "note": "No captive finance arm"
+  },
+  "ronic": {
+   "value": 0.241,
+   "note": "Set at the checker-reported FY2032 ROIC including goodwill of 24.1%. Goodwill and acquired intangibles are large relative to invested capital and the forecast does not include recurring acquisitions after FY2027, so terminal RONIC is not allowed to exceed the acquisition-inclusive return."
+  },
+  "stake_haircut": {
+   "value": 0.25,
+   "note": "Tax and liquidity haircut on stakes outside EBITDA (carrying value or last round)"
+  }
+ },
+ "deals": [
+  {
+   "name": "Contentful",
+   "kind": "acquisition",
+   "status": "closed",
+   "close": "2026-10-31",
+   "note": "Q2 FY2027 release and 10-Q: definitive agreement signed May 2026 to acquire Contentful for approximately $1.5bn cash, net of Salesforce-owned shares, expected to close in Q3 FY2027; the Q2 guide incorporated Contentful and Fin into all metrics except cRPO, conditional on closing. No separate closing 8-K was supplied, so the Oct. 31, 2026 close date is a modeling assumption at the end of the expected Q3 window. Target revenue and EBITDA were not disclosed in the supplied documents; estimates remain revenue = $1.5bn consideration / 5.0x estimated EV/sales = $300mm and normalized EBITDA margin = 18%, implying $54mm EBITDA and $1.35bn standalone value at 25.0x. No deal synergies are credited because none were quantified in the supplied documents.",
+   "in_forecast": true,
+   "probability": 1.0,
+   "consideration": 1500.0,
+   "multiple": 25.0,
+   "synergies": 0.0,
+   "integration_cost": 75.0,
+   "break_fee": 0.0,
+   "revenue": 300.0,
+   "margin": 0.18,
+   "premium": 0.3
+  },
+  {
+   "name": "Fin",
+   "kind": "acquisition",
+   "status": "closed",
+   "close": "2026-10-31",
+   "note": "Q2 FY2027 release and 10-Q: Salesforce entered into an agreement in June 2026 to acquire Intercom, Inc. ('Fin'), described as a customer-agent platform providing autonomous, end-to-end AI service agents, for approximately $3.6bn cash, expected to close in Q3 FY2027; the Q2 guide incorporated Contentful and Fin into all metrics except cRPO, conditional on closing. No separate closing 8-K was supplied, so the Oct. 31, 2026 close date is a modeling assumption at the end of the expected Q3 window. Target revenue and EBITDA were not disclosed in the supplied documents; estimates remain revenue = $3.6bn consideration / 10.0x estimated EV/sales = $360mm and normalized EBITDA margin = 30%, implying $108mm EBITDA and $3.24bn standalone value at 30.0x. No deal synergies are credited because none were quantified in the supplied documents.",
+   "in_forecast": true,
+   "probability": 1.0,
+   "consideration": 3600.0,
+   "multiple": 30.0,
+   "synergies": 0.0,
+   "integration_cost": 150.0,
+   "break_fee": 0.0,
+   "revenue": 360.0,
+   "margin": 0.3,
+   "premium": 0.35
+  },
+  {
+   "name": "Braze",
+   "kind": "acquisition",
+   "status": "pending",
+   "close": "2027-01-31",
+   "note": "Oct. 20, 2026 8-K: definitive agreement to acquire Braze for approximately $5.66bn enterprise value, with Braze Class A holders to receive $47.50 cash per share. Target revenue is the run-rate estimate already in the model because this pass has no new target filing or consensus snapshot; normalized EBITDA margin is estimated at 24% for a scaled marketing-automation SaaS asset, implying $172.8mm EBITDA and $5.18bn standalone value at the 30.0x peer multiple, within 9% of the consideration. Kept out of Salesforce's operating forecast until closing. No deal synergies are credited because none were quantified in the supplied 8-K excerpt.",
+   "in_forecast": false,
+   "probability": 0.85,
+   "consideration": 5660.0,
+   "multiple": 30.0,
+   "synergies": 0.0,
+   "integration_cost": 250.0,
+   "break_fee": 0.0,
+   "revenue": 720.0,
+   "margin": 0.24,
+   "premium": 0.3
+  }
+ ],
+ "scenario_probs": [
+  0.25,
+  0.5,
+  0.25
+ ],
+ "labels": {},
+ "debt_like": {
+  "liab": 0.0,
+  "offset": 0.0,
+  "liab_fy": 0.0,
+  "offset_fy": 0.0,
+  "note": "None tagged in XBRL; enter debt-like items not in net debt (e.g. asbestos, environmental, litigation settlements) from the 10-Q"
+ },
+ "guidance": {
+  "date": "August 26, 2026",
+  "sales": [
+   46100.0,
+   46400.0
+  ],
+  "margin": [
+   0.343,
+   0.343
+  ],
+  "adj_eps": [
+   16.67,
+   16.71
+  ],
+  "fcf": [
+   14976.0,
+   15120.0
+  ]
+ },
+ "adjusted_eps": {
+  "fy": 12.52,
+  "fy_prior": 10.2,
+  "ytd_cur": 9.73,
+  "ytd_prior": 5.48
+ },
+ "organic": {
+  "fy_total": 0.078,
+  "q_total": 0.066,
+  "q_by_segment": {}
+ },
+ "peers": [
+  {
+   "ticker": "ADBE",
+   "name": "Adobe Inc.",
+   "overlap": "Creative/document/application software subscription peer",
+   "price": 238.54,
+   "eps": 24.48,
+   "source": "Peer price is the Nov. 12, 2026 close from the pipeline; EPS is the existing company-guidance / pre-valuation model input. No later consensus snapshot is used as evidence in this pass.; price = close Nov 12, 2026 (Yahoo)",
+   "ev": 88798.0,
+   "ebitda": 10037.0,
+   "ev_source": "SEC filings by Nov 12, 2026: 389mm shares x price + net debt -4,042mm; EBITDA LTM to Aug 2026 (operating income + D&A)",
+   "eps_next": 27.40718,
+   "g_next": 0.11963654843569738,
+   "rev_g_next": 0.09130766728884665,
+   "beta_raw": 1.3842901333152764,
+   "de": 0.0172
+  },
+  {
+   "ticker": "NOW",
+   "name": "ServiceNow, Inc.",
+   "overlap": "Enterprise workflow SaaS peer",
+   "price": 100.66,
+   "eps": 3.95,
+   "source": "Peer price is the Nov. 12, 2026 close from the pipeline; EPS is the existing company-guidance / pre-valuation model input. No later consensus snapshot is used as evidence in this pass.; price = close Nov 12, 2026 (Yahoo)",
+   "ev": 106278.0,
+   "ebitda": 2760.0,
+   "ev_source": "SEC filings by Nov 12, 2026: 1,038mm shares x price + net debt 1,793mm; EBITDA LTM to Sep 2026 (operating income + D&A); 5:1 split on Dec 18, 2025: share count dated after it",
+   "eps_next": 4.8023,
+   "g_next": 0.21437331681227945,
+   "rev_g_next": 0.18660189650081382,
+   "beta_raw": 0.9866961682912319,
+   "de": 0.0401
+  },
+  {
+   "ticker": "ORCL",
+   "name": "Oracle Corporation",
+   "overlap": "Enterprise software and cloud infrastructure peer",
+   "price": 127.11,
+   "eps": 8.15,
+   "source": "Peer price is the Nov. 12, 2026 close from the pipeline; EPS is the existing company-guidance / pre-valuation model input. No later consensus snapshot is used as evidence in this pass.; price = close Nov 12, 2026 (Yahoo)",
+   "ev": 472889.0,
+   "ebitda": 33938.0,
+   "ev_source": "SEC filings by Nov 12, 2026: 3,024mm shares x price + net debt 88,542mm; EBITDA LTM to Aug 2026 (operating income + D&A)",
+   "eps_next": 11.05881,
+   "g_next": 0.35683095576083335,
+   "rev_g_next": 0.4571591516922413,
+   "beta_raw": 1.7878564201980116,
+   "de": 0.325
+  },
+  {
+   "ticker": "HUBS",
+   "name": "HubSpot, Inc.",
+   "overlap": "CRM and marketing automation SaaS peer",
+   "price": 215.84,
+   "eps": 13.62,
+   "source": "Peer price is the Nov. 12, 2026 close from the pipeline; EPS is the existing company-guidance / pre-valuation model input. No later consensus snapshot is used as evidence in this pass.; price = close Nov 12, 2026 (Yahoo)",
+   "ev": 9420.0,
+   "ebitda": 361.0,
+   "ev_source": "SEC filings by Nov 12, 2026: 49mm shares x price + net debt -1,121mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 16.78015,
+   "g_next": 0.2322751870610793,
+   "rev_g_next": 0.11072742404823299,
+   "beta_raw": 1.1460697275057221,
+   "de": 0.0
+  },
+  {
+   "ticker": "WDAY",
+   "name": "Workday, Inc.",
+   "overlap": "Enterprise application SaaS peer",
+   "price": 190.64,
+   "eps": 11.09,
+   "source": "Peer price is the Nov. 12, 2026 close from the pipeline; EPS is the existing company-guidance / pre-valuation model input. No later consensus snapshot is used as evidence in this pass.; price = close Nov 12, 2026 (Yahoo)",
+   "ev": 41527.0,
+   "ebitda": 1312.0,
+   "ev_source": "SEC filings by Nov 12, 2026: 220mm shares x price + net debt -414mm; EBITDA LTM to Jul 2026 (operating income + D&A)",
+   "eps_next": 13.24296,
+   "g_next": 0.19445514263062336,
+   "rev_g_next": 0.10444160319105422,
+   "beta_raw": 1.0092676845994972,
+   "de": 0.0713
+  },
+  {
+   "ticker": "MSFT",
+   "name": "Microsoft Corporation",
+   "overlap": "Scaled enterprise software and cloud peer",
+   "price": 523.0,
+   "eps": 20.01,
+   "source": "Peer price is the Nov. 12, 2026 close from the pipeline; EPS is the existing company-guidance / pre-valuation model input where company guidance is not available.; price = close Nov 12, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance",
+   "ev": 3854872.0,
+   "ebitda": 205691.0,
+   "ev_source": "SEC filings by Nov 12, 2026: 7,426mm shares x price + net debt -29,028mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 24.19569,
+   "g_next": 0.20896421777823737,
+   "rev_g_next": 0.20501061473223903,
+   "beta_raw": 1.047878425328225,
+   "de": 0.0091,
+   "snapshot": "2026-11-16"
+  }
+ ],
+ "market_data": {
+  "as_of": "2026-11-12",
+  "own_beta_raw": 1.2428995172986996,
+  "rf": 0.05103000164031982,
+  "pe_hist": [
+   [
+    2017,
+    172.0
+   ],
+   [
+    2018,
+    232.5
+   ],
+   [
+    2019,
+    106.3
+   ],
+   [
+    2020,
+    1215.4
+   ],
+   [
+    2021,
+    51.5
+   ],
+   [
+    2022,
+    157.2
+   ],
+   [
+    2023,
+    799.9
+   ],
+   [
+    2024,
+    66.9
+   ],
+   [
+    2025,
+    53.7
+   ],
+   [
+    2026,
+    27.2
+   ]
+  ],
+  "short_interest": {
+   "shortPercentOfFloat": 0.0368,
+   "shortRatio": 3.52,
+   "dateShortInterest": 1793318400
+  }
+ },
+ "credit_rating": {
+  "S&P": "A+",
+  "Moody's": "A2",
+  "source": "agency ratings as known to the analyst (Claude Code) in mid-2026 \u2014 the filings name none; verify against S&P / Moody's"
+ },
+ "thesis": {
+  "stance": "neutral on",
+  "recommendation": "The model shows upside but a wide bear-bull range, acquisition execution risk and leverage-funded repurchases make Agentforce/Data 360 revenue conversion the key proof point.",
+  "points": [
+   "1. Growth: FY2027 revenue is tied to guidance, but the company guidance is reported/constant-currency growth including acquired revenue; the base case estimates about 7.8% organic constant-currency growth and records the Informatica plus Contentful/Fin contribution in M&A/FX.",
+   "2. Quality: FY2027 non-GAAP operating margin is held at the 34.3% guide, then the base case fades to 32.2% by FY2032 because the supplied documents do not support a permanent margin hold while AI hosting and integration costs rise.",
+   "3. Capital allocation: the $25bn ASR and FY2028 buyback program lift EPS, but repurchases above free cash flow are debt-funded; the Q2 FY2027 10-Q says the ASR benefited H1 diluted EPS by $0.57, and the model treats the incremental FY2027-FY2028 buyback lift as leverage-aided rather than repeatable operating improvement.",
+   "4. M&A discipline is the swing factor: Contentful and Fin are treated as FY2027 modeled acquisitions based on management's Q3 closing expectation and inclusion in guidance, while Braze remains a signed pending deal until closing."
+  ],
+  "model_says": [
+   "\u2022 At the current price, the reverse DCF implies {irr} versus {wacc}; fair value is {fv}, with the perpetuity DCF at {dcf_pg}, exit DCF at {dcf_exit}, and comps at {comps}.",
+   "\u2022 The downside/upside range is wide: bear value {bear} and bull value {bull}; the bull depends on Agentforce/Data 360 converting to sustained organic growth, while the bear is the numerical breaker case.",
+   "\u2022 Probability-weighted value {pw}, long-run IRR {irr}, and 3-year return {ret3y} determine the engine rating; {irr} is not the 3-year return."
+  ],
+  "risks": [
+   "\u2022 AI cannibalization risk: Agentforce may reduce seats or services work faster than it creates usage-based revenue; the bear case embeds roughly one historical growth sigma below base.",
+   "\u2022 Integration risk: closed and pending acquisitions increase acquired amortization, goodwill and execution complexity.",
+   "\u2022 Balance-sheet risk: FY2027 and FY2028 buybacks exceed free cash flow and are debt-funded, reducing flexibility if growth disappoints.",
+   "\u2022 Multiple risk: software peer multiples can compress if rates remain high or if investors value FCF after stock compensation more strictly."
+  ],
+  "monitor": [
+   "\u2022 Q3 FY2027 results: revenue within $11.42bn-$11.50bn guide and cRPO growth near 14% Y/Y CC.",
+   "\u2022 Q4 FY2027/FY2028 guide: evidence that H2 organic revenue reacceleration is converting to FY2028 revenue.",
+   "\u2022 Agentforce/Data 360 ARR growth and Agentic Work Units: verify usage is monetizing rather than only driving engagement.",
+   "\u2022 ASR final settlement and any incremental open-market repurchases: confirm share count and leverage after October 2026 settlement."
+  ],
+  "about": "Salesforce is the global CRM software leader repositioning around Agentforce, Data 360 and Slack as the operating layer for enterprise AI agents. The model values recurring subscription economics, but penalizes stock compensation, acquired amortization and acquisition premiums as real costs.",
+  "price_implies": "At the current price, the market-implied return is {irr} versus {wacc}, so the price already assumes durable growth and a terminal margin near {req_margin}.",
+  "variant_view": "The base case is no longer set above FY2028 consensus growth; upside now sits in the bull case, where Agentforce/Data 360 conversion and management's FY2030 revenue ambition are tested by the FY2028 guide and Q4 FY2027 cRPO/ARR disclosure.",
+  "catalysts": [
+   "Nov./Dec. 2026 Q3 FY2027 print: revenue within guide and cRPO growth approximately 14% CC without Contentful/Fin contribution.",
+   "Feb. 2027 FY2028 guide: subscription/support growth at or above high-single digits and non-GAAP operating margin at least stable.",
+   "Deal updates before FY2027 year-end: close and integration plans for Contentful, Fin and Braze, including revenue contribution and amortization."
+  ],
+  "breaker": "The breaker is AI monetization failing to offset seat and services cannibalization: if FY2028 organic revenue growth falls below mid-single digits while SBC remains above 8% of revenue, the bear case becomes the base.",
+  "sensitivities": "The two largest sensitivities are the organic growth fade from FY2028-FY2032 and terminal RONIC; margin sensitivity is next because a 1pt change in sustainable GAAP EBIT margin has high flow-through to {dcf_pg}.",
+  "consensus_notes": "FY2027 revenue, reported constant-currency growth including acquired revenue, adjusted EPS, margin and FCF are tied back to company guidance where possible, but the company did not provide an organic-growth guide. FY2028 revenue growth remains close to the consensus-like model output; the FY2030 management revenue target remains in the bull case rather than the base.",
+  "explanations": {
+   "gate 5": "The peer source language that referenced a later consensus snapshot has been removed. No new peer figures were introduced in this pass; the existing peer inputs are treated as company-guidance / pre-valuation model inputs, and the unreliable growth regressions remain rejected under gate 37.",
+   "gate 10": "The ASR share count is updated using the disclosed mechanics: initial delivery of 103mm shares represented 80% of total shares anticipated, implying about 128.75mm total ASR shares and 25.75mm incremental shares at final settlement. Contentful and Fin are treated as modeled FY2027 acquisitions because the Q2 release said they were expected to close in the coming weeks during Q3 and the FY2027 guide incorporated them conditional on closing; no separate closing 8-K was supplied, so the close date remains an estimate. Braze remains pending because the Oct. 20, 2026 8-K only announced a definitive agreement.",
+   "gate 16": "Terminal operating margin remains high versus the 10-year GAAP history because the historical period included acquisition amortization, restructuring and profitability-transition years, while the forecast assumes a mature scaled software model. The base case still fades non-GAAP segment margin from 34.3% in FY2027 to 32.2% by FY2032 rather than holding the FY2027 guide indefinitely.",
+   "gate 17": "Fixed by fading accrued/deferred-revenue/current-liability float to 69.0% of sales by FY2032, rather than letting deferred-revenue/current-liability growth create negative reinvestment while revenue is still growing. Capex remains above PP&E depreciation after FY2027, and the terminal DCF still uses reinvestment from g / RONIC.",
+   "gate 18": "The FY2027 M&A revenue contribution is now explicitly limited to revenue annualization from acquisitions already closed and paid for through opening balance-sheet cash / net debt or FY2027 drivers.acq. It is not a placeholder for undisclosed pending acquisitions; Contentful, Fin and Braze remain in Deals with consideration deducted separately.",
+   "gate 35": "Fixed by reducing FY2028 base growth by about 1pt so the base is no longer above the cited consensus gap. The FY2030 management target remains in the bull case and is tested against FY2028 guidance and Q4 FY2027 cRPO/ARR metrics.",
+   "gate 36": "Fixed: FY2027 M&A / FX is 4.1pt, of which slightly above 3pts is Informatica's annualization (stated in the Q2 FY2027 release) and $200mm Contentful and Fin; organic constant-currency growth is about 7.5%.",
+   "gate 37": "The EV/EBITDA growth regression is rejected because the peer set pays less for higher growth; comps_pe_weight remains 100% P/E and the DCF carries the primary valuation weight.",
+   "gate 39": "FY2027 and FY2028 buybacks remain above free cash flow and are debt-funded: the excess is roughly $12.2bn in FY2027 and $8.5bn in FY2028. At the modeled repurchase prices that is about 51mm and 36mm shares, respectively, which can add roughly $1.0 and $0.8 to run-rate EPS before incremental interest, so the thesis treats the EPS lift as leverage-aided capital allocation rather than operating improvement.",
+   "base case outside company guidance adjusted eps": "The FY2027 buyback share count now uses the supplied ASR initial-delivery mechanics rather than assuming final undisclosed ASR shares at the valuation-date close. This addresses the adjusted-EPS gap through the buyback/share-count driver, not through tax, SBC, restructuring, non-operating income or an interest plug.",
+   "2027e implies rest of year adjusted eps growth": "The implied H2 adjusted-EPS slowdown is intentional: H1 included strategic-investment gains and the ASR/share-count benefit, while H2 carries the post-ASR debt cost and assumes no further strategic-investment gains. The EPS bridge is handled through the buyback/share-count mechanics rather than a tax or non-operating plug.",
+   "gate 1": "Adjusted-EPS definition is corrected by using the checker-implied historical non-GAAP tax rates: FY2025 22.0% and FY2026 21.8%. Salesforce's adjusted EPS includes SBC, purchased-intangible amortization and restructuring add-backs under the model switches already set, while strategic investment gains remain included because the company-reported non-GAAP actuals include them.",
+   "gate 4": "PP&E was shrinking because capex stayed at the FY2027 guide while revenue grew high-single digits. FY2027 capex remains guided at 1.5% of revenue, but FY2028 onward is raised to 2.4% of revenue so replacement and growth capex exceed PP&E depreciation over time.",
+   "gate 11": "The FY2027 interest-rate note is no longer used as an adjusted-EPS calibration; interest remains based on H1 actual expense plus an H2 run-rate estimate. The working-capital deviation is explained separately under the 'working capital' checker key with its cash effect.",
+   "gate 32": "No signed pending acquisition named in the thesis or driver notes is omitted from the Deals tab: Contentful, Fin and Braze are listed. The amortization driver has been reworded to clarify that no post-Q2 signed deal amortization is included in the six-year operating forecast; those deals remain valued separately until closing.",
+   "gate 12": "The FY2028 FCF decline is a working-capital normalization, not a hidden operating plug: FY2027 benefits from strong deferred-revenue/current-liability float, and the forecast fades that float as growth slows and acquired revenue annualizes.",
+   "base case outside company guidance organic growth": "Fixed by setting guidance.organic to null. The supplied company guide is for reported and constant-currency revenue growth and includes acquired revenue; the model's 7.8% FY2027 organic growth is an estimate after moving the acquisition contribution into M&A/FX.",
+   "gate 8": "Fixed by resetting FY2027 interest to the run-rate estimate rather than using interest to hit adjusted-EPS guidance. H1 FY2027 interest was $790mm; adding H2 interest on the $39.288bn Q2 debt balance at about a 5% coupon/run-rate gives roughly $1.8bn for FY2027, which maps to a 6.75% rate on the model's average debt base.",
+   "base case outside company guidance free cash flow": "Fixed by raising FY2027 year-end DSO by about one day, which reduces FY2027 FCF by roughly $140mm and puts the model inside the FCF guide. This is a receivables timing assumption on a fiscal-year-end balance, not a seasonal 10-Q balance carried into the full year.",
+   "gate 38": "Deal synergy credit is reset to zero for Contentful, Fin and Braze because the supplied documents do not quantify revenue or cost synergies. The standalone value checks remain estimate-based: Contentful $300mm revenue x 18% EBITDA margin x 25.0x = $1.35bn versus $1.5bn consideration; Fin $360mm x 30% x 30.0x = $3.24bn versus $3.6bn; Braze $720mm x 24% x 30.0x = $5.18bn versus $5.66bn.",
+   "gate 34": "Fixed by reducing terminal RONIC to 24.1%, equal to the checker-reported FY2032 ROIC including goodwill. No recurring acquisition program is forecast after FY2027, so new terminal capital should not earn above the acquisition-inclusive return.",
+   "pm review": "Organic growth labeling is corrected. The Q2 FY2027 release guides FY2027 revenue to $46.1bn-$46.4bn, up 11%-12% reported and about 11% constant currency, including slightly above 3pts from Informatica; it also says the $200mm raise includes $100mm organic growth, $200mm from pending Contentful and Fin, and a $100mm FX headwind versus prior expectations. Guidance.organic is therefore set to null, FY2027 M&A/FX is raised to 3.6pts, and FY2027 organic constant-currency growth is reduced to an estimated 7.8% while total sales remain inside the guide; the value effect should be limited because total revenue is unchanged, but the quality of growth is lower because more FY2027 growth is acquired.\n\nFY2027 interest is no longer used to land adjusted EPS exactly on guidance. The driver is reset to about $1.8bn of FY2027 interest, calculated as H1 actual interest of $790mm plus H2 interest on the $39.288bn Q2 debt balance at roughly a 5% run-rate. If adjusted EPS is now modestly above the guide, that is left as a model output and explained under the checker key rather than offset with a tax, interest or other-income plug; the value effect is modestly positive versus the prior version because interest expense is lower, but it is supported by the debt run-rate rather than by the share price or valuation gap. Round-5 analyst edit (Claude Code, from the Q2 FY2027 release text): the 'organic 10\u201312%' guidance field was reported growth including slightly above 3pts of Informatica, so it is removed; FY2027 M&A / FX is 4.1pt (Informatica 3.1pt, Contentful and Fin $200mm, FX about 0.5pt) and every revenue line's FY2027 growth is 3.5pt lower, so total revenue is unchanged inside the $46.1\u201346.4bn guide and organic constant-currency growth is about 7.5%. FY2027 interest is at the run-rate (H1 $790mm plus H2 at about 5% on the $39.3bn 10-Q debt, about $1.8bn), and adjusted EPS lands slightly above the guide as a result.",
+   "balance sheet cash turns negative in 956mm buybacks": "Fixed by reducing FY2031-FY2032 buybacks by $5.0bn in total. The change keeps repurchases tied to generated cash rather than forcing the model into a negative cash balance.",
+   "balance sheet cash turns negative in 052mm buybacks": "Fixed by reducing FY2030-FY2032 buybacks by $3.95bn in total. The cash effect is dollar-for-dollar: the cut keeps ending cash positive in the out-years instead of allowing the model to fund repurchases with a negative cash balance.",
+   "working capital": "The plug-table working-capital deviation is an explicit forecast view, not a hidden calibration. The checker quantifies the cash effect at -$4.837bn, or about 10% of FY2027 revenue, versus its default path; using roughly 800mm shares, that is about $6 per share of undiscounted cash effect before timing/discounting. The model accepts that drag because DSO is treated as a fiscal-year-end balance and deferred-revenue/current-liability float is faded rather than allowed to create terminal negative reinvestment."
+  }
+ },
+ "flags": [
+  "Salesforce's reported non-GAAP EPS includes strategic investment gains in actual periods; valuation should focus on operating EPS/FCF after stock compensation rather than treating FY2027 gains as recurring.",
+  "FY2027 and FY2028 buybacks above free cash flow are debt-funded and lift per-share metrics through leverage as well as operating performance.",
+  "Contentful and Fin are treated as closed/modelled FY2027 acquisitions based on management's expected Q3 close and inclusion in guidance, but no separate closing 8-K was supplied in the document set; the close date is therefore a modeling estimate.",
+  "The final ASR settlement share delivery was not supplied; FY2027 EPS uses the supplied initial-delivery mechanics rather than assuming undisclosed final settlement shares."
+ ]
+}

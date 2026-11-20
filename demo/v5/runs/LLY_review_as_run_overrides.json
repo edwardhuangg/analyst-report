@@ -1,0 +1,948 @@
+{
+ "meta": {
+  "ticker": "LLY",
+  "as_of": "2026-11-13",
+  "author": "AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)",
+  "forecast_years": [
+   "2026E",
+   "2027E",
+   "2028E",
+   "2029E",
+   "2030E",
+   "2031E"
+  ],
+  "history_years": [
+   "2023A",
+   "2024A",
+   "2025A"
+  ],
+  "summary": "Base case is anchored to Lilly's raised Oct. 29, 2026 guidance and FY2 revenue consensus, with a product-line build for GLP-1 growth and explicit late-decade normalization for pricing, IRA, and exclusivity risk. The valuation setup still requires proof that tirzepatide/orforglipron volume growth can sustain high margins through the transition to follow-on incretins.",
+  "sources": [
+   "FY 2025 results release filed 2026-02-04",
+   "Q3 2026 results release filed 2026-10-29",
+   "2025 Form 10-K filed 2026-02-12",
+   "Q3 2026 Form 10-Q filed 2026-10-29",
+   "8-K filed 2026-05-20"
+  ]
+ },
+ "market": {
+  "price": {
+   "value": 1443.5,
+   "note": "LLY close Nov 13, 2026 (Yahoo; later splits / spin-off adjustments undone so it matches the share count of the time)"
+  },
+  "basic_shares": {
+   "value": 891.9,
+   "note": "Q3 2026 weighted basic shares: 891.9mm shares outstanding"
+  },
+  "dilutive": {
+   "value": 1.5,
+   "note": "Q3 2026 diluted 893.4mm less basic 891.9mm (10-Q)"
+  }
+ },
+ "scenario": 2,
+ "seg_after_charges": 0,
+ "adj_eps_ex_sbc": 0,
+ "adj_eps_ex_repo": 0.18,
+ "adj_eps_ex_nonrec": 1,
+ "adj_eps_amort_share": 1.0,
+ "adj_eps_tax_hist": [
+  null,
+  null,
+  null
+ ],
+ "framework": "economic",
+ "segments": {
+  "Total company": {
+   "organic_last": 0.447,
+   "growth": {
+    "base": [
+     0.405,
+     0.162,
+     0.11,
+     0.08,
+     0.065,
+     0.055
+    ],
+    "bear": [
+     0.28,
+     0.03,
+     -0.02,
+     -0.025,
+     -0.02,
+     -0.015
+    ],
+    "bull": [
+     0.495,
+     0.255,
+     0.18,
+     0.135,
+     0.105,
+     0.08
+    ]
+   },
+   "margin": {
+    "base": [
+     0.522,
+     0.52,
+     0.516,
+     0.508,
+     0.498,
+     0.485
+    ],
+    "bear": [
+     0.505,
+     0.492,
+     0.485,
+     0.48,
+     0.478,
+     0.478
+    ],
+    "bull": [
+     0.525,
+     0.535,
+     0.542,
+     0.548,
+     0.552,
+     0.555
+    ]
+   },
+   "mna": {
+    "values": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "note": "No acquired revenue is added to the organic product-line build. Q3 2026 release: AtaiBeckley closed in Q3 and Merida closed after quarter-end, but the release describes pipeline/BD transactions and does not disclose commercial revenue; Q3 acquired IPR&D charges are modeled in repo_pct, not as free revenue."
+   },
+   "sotp": {
+    "multiples": [
+     20.0,
+     23.0,
+     26.0
+    ],
+    "note": "Single human-pharmaceutical segment; SOTP weight is zero. Reference range is large-cap innovative pharma / high-growth metabolic peers on EBITDA after recurring SBC and BD charges, not the current LLY trading multiple."
+   },
+   "history": {
+    "sales": [
+     34124.0,
+     45043.0,
+     65179.0
+    ],
+    "profit": [
+     11460.0,
+     18239.0,
+     30810.0
+    ]
+   },
+   "use_lines": true,
+   "lines": {
+    "Mounjaro": {
+     "growth": {
+      "bear": [
+       0.62,
+       0.06,
+       0.0,
+       -0.02,
+       -0.03,
+       -0.03
+      ],
+      "base": [
+       0.76,
+       0.2,
+       0.13,
+       0.09,
+       0.07,
+       0.055
+      ],
+      "bull": [
+       0.86,
+       0.28,
+       0.18,
+       0.13,
+       0.1,
+       0.08
+      ]
+     },
+     "note": "Q3 2026 release: Mounjaro YTD revenue $29.328bn +89% and Q3 revenue $10.723bn +65%; base assumes continued volume growth but lower realized prices, including China NRDL pressure cited in Q3 release.",
+     "history": [
+      5163.0,
+      11540.0,
+      22966.0
+     ]
+    },
+    "Zepbound": {
+     "growth": {
+      "bear": [
+       0.35,
+       0.1,
+       0.05,
+       0.02,
+       0.0,
+       0.0
+      ],
+      "base": [
+       0.5,
+       0.28,
+       0.2,
+       0.14,
+       0.1,
+       0.08
+      ],
+      "bull": [
+       0.62,
+       0.38,
+       0.28,
+       0.2,
+       0.15,
+       0.11
+      ]
+     },
+     "note": "Q3 2026 release: Zepbound YTD revenue $14.440bn +56% and Q3 revenue $5.352bn +49%; base reflects expanded U.S. coverage and Medicare Bridge access, offset by lower realized prices.",
+     "history": [
+      176.0,
+      4926.0,
+      13542.0
+     ]
+    },
+    "Verzenio": {
+     "growth": {
+      "bear": [
+       0.03,
+       -0.03,
+       -0.2,
+       -0.18,
+       -0.15,
+       -0.1
+      ],
+      "base": [
+       0.1,
+       0.03,
+       -0.08,
+       -0.1,
+       -0.08,
+       -0.05
+      ],
+      "bull": [
+       0.15,
+       0.07,
+       0.02,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "note": "FY 2025 release: Verzenio 2025 revenue $5.723bn +8%; Q3 2026 10-Q MD&A: Trulicity and Verzenio selected for IRA government-set prices effective 2028, so base embeds erosion beginning in 2028.",
+     "history": [
+      3863.0,
+      5307.0,
+      5723.0
+     ]
+    },
+    "Immunology": {
+     "growth": {
+      "bear": [
+       0.16,
+       0.08,
+       0.05,
+       0.03,
+       0.02,
+       0.02
+      ],
+      "base": [
+       0.3,
+       0.18,
+       0.14,
+       0.11,
+       0.09,
+       0.07
+      ],
+      "bull": [
+       0.38,
+       0.25,
+       0.2,
+       0.16,
+       0.13,
+       0.1
+      ]
+     },
+     "note": "Q3 2026 release: Key Products in Immunology, Oncology and Neuroscience grew 100% in Q3; Ebglyss YTD $548mm +100% and Omvoh YTD $296mm +67%, supporting above-company growth off a smaller base.",
+     "history": [
+      3798.0,
+      4393.0,
+      5247.0
+     ]
+    },
+    "Trulicity": {
+     "growth": {
+      "bear": [
+       -0.38,
+       -0.35,
+       -0.5,
+       -0.45,
+       -0.35,
+       -0.3
+      ],
+      "base": [
+       -0.275,
+       -0.2,
+       -0.35,
+       -0.3,
+       -0.25,
+       -0.2
+      ],
+      "bull": [
+       -0.15,
+       -0.1,
+       -0.2,
+       -0.18,
+       -0.15,
+       -0.1
+      ]
+     },
+     "note": "FY 2025 10-K product revenue: Trulicity fell 19% to $4.276bn; Q3 2026 10-Q MD&A: Trulicity selected for IRA government-set pricing effective 2028, so base assumes accelerated erosion.",
+     "history": [
+      7132.0,
+      5254.0,
+      4276.0
+     ]
+    },
+    "Other": {
+     "growth": {
+      "bear": [
+       -0.02,
+       -0.03,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "base": [
+       0.087,
+       0.02,
+       0.07,
+       0.06,
+       0.05,
+       0.045
+      ],
+      "bull": [
+       0.15,
+       0.08,
+       0.1,
+       0.09,
+       0.08,
+       0.06
+      ]
+     },
+     "note": "Q3 2026 release: Foundayo launched in Q2 2026 for obesity; Q3 revenue also included about $900mm of benefits, primarily Jardiance milestones and rebate/discount true-ups, with no further Jardiance milestones remaining.",
+     "history": [
+      13992.0,
+      13623.0,
+      13425.0
+     ]
+    }
+   }
+  }
+ },
+ "notes": {
+  "growth": "Base FY1 revenue lands at the Oct. 29, 2026 guidance range of $91-92bn and FY2 approximates the Street revenue growth embedded in the brief. The product build separates GLP-1 volume growth from legacy diabetes erosion and IRA price effects; bear is the thesis breaker with cardiometabolic growth roughly one historical sigma below base.",
+  "margin": "Base uses FY1 performance-margin guidance, then fades by 370bp through FY6 rather than holding peak launch economics indefinitely. The fade reflects the supplied 10-Q risk language on pricing/reimbursement, the voluntary U.S. government access arrangements, expected future IRA selection of significant products, and the need to reinvest in follow-on incretins and other pipeline assets ahead of mid-2030s exclusivity risk; bull remains the reverse-DCF-style case in which scale benefits and successful follow-on products keep margins elevated."
+ },
+ "corporate": {
+  "sales": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "sales_note": "FY2025: 0mm (total sales less segments)",
+  "cost_pct": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "cost_note": "FY2025: 0mm (0.0%)",
+  "multiples": [
+   30.0,
+   30.0,
+   30.0
+  ]
+ },
+ "drivers": {
+  "amort": {
+   "values": [
+    490.0,
+    490.0,
+    490.0,
+    490.0,
+    490.0,
+    490.0
+   ],
+   "note": "FY2025: 488mm; held flat (capped by remaining intangibles)"
+  },
+  "sbc_pct": {
+   "values": [
+    0.0095,
+    0.0095,
+    0.0095,
+    0.0095,
+    0.0095,
+    0.0095
+   ],
+   "note": "FY2025: 626mm = 1.0% of sales"
+  },
+  "repo_pct": {
+   "values": [
+    0.0964,
+    0.072,
+    0.07,
+    0.068,
+    0.066,
+    0.064
+   ],
+   "note": "FY1 includes non-segment charges already incurred, including Q3 2026 acquired IPR&D of $4.2bn primarily related to AtaiBeckley and Curevo (Q3 2026 release). Future years retain recurring BD / restructuring charges in EBIT; Lilly non-GAAP EPS excludes only amortization, asset impairment/restructuring/special charges and investment gains/losses, while acquired IPR&D remains included."
+  },
+  "other_nonop": {
+   "values": [
+    0.0,
+    100.0,
+    100.0,
+    100.0,
+    100.0,
+    100.0
+   ],
+   "note": "Q3 2026 10-Q: other income defined as pre-tax income less EBIT plus interest was approximately $2mm for 9M 2026; forecast keeps this near zero in FY1 and a modest pension/other income run-rate thereafter."
+  },
+  "int_yield": {
+   "values": [
+    0.0425,
+    0.0425,
+    0.0425,
+    0.0425,
+    0.0425,
+    0.0425
+   ],
+   "note": "Interest income not reported separately: estimated at the risk-free rate less 1pt (4.2%) on cash & ST investments"
+  },
+  "int_rate": {
+   "values": [
+    0.0245,
+    0.0255,
+    0.0265,
+    0.0275,
+    0.0285,
+    0.0295
+   ],
+   "note": "FY2025: 895mm / 36,866mm average debt = 2.4%; drifts up as debt refinances"
+  },
+  "etr": {
+   "values": [
+    0.195,
+    0.19,
+    0.19,
+    0.19,
+    0.19,
+    0.19
+   ],
+   "note": "Q3 2026 release guidance: non-GAAP tax rate 19%-20%; Q3 2026 reported tax rate 23.3% and non-GAAP tax rate 24.0% were elevated by nondeductible acquired IPR&D."
+  },
+  "nci_ni": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2025: 0mm"
+  },
+  "cogs_pct": {
+   "values": [
+    0.17,
+    0.17,
+    0.17,
+    0.17,
+    0.17,
+    0.17
+   ],
+   "note": "FY2025: 17.0%"
+  },
+  "da_pct": {
+   "values": [
+    0.023,
+    0.033,
+    0.043,
+    0.052,
+    0.062,
+    0.072
+   ],
+   "note": "FY2025: (1,997 D&A \u2013 488 acquired-intangible amortization) / sales = 2.3%; rises to 7.2% by 2031E as the capex build depreciates"
+  },
+  "capex_pct": {
+   "values": [
+    0.12,
+    0.12,
+    0.115,
+    0.105,
+    0.095,
+    0.085
+   ],
+   "note": "Q3 2026 10-Q: 9M capex $8.437bn; Q3 2026 release/10-Q cite major manufacturing expansions and additional capacity coming online over several years, so capex remains elevated before fading toward steady state."
+  },
+  "dso": {
+   "values": [
+    99.0,
+    99.0,
+    99.0,
+    99.0,
+    99.0,
+    99.0
+   ],
+   "note": "FY2025: 99.5 days"
+  },
+  "dio": {
+   "values": [
+    392.0,
+    454.0,
+    454.0,
+    454.0,
+    454.0,
+    454.0
+   ],
+   "note": "FY1 reset from the prior year-end 454-day carryforward because that created an unsupported Q4 cash drain. Estimate: reducing FY1 inventory days by 62 days lowers modeled year-end inventory by about $2.6bn, calculated as 62 / 365 x 17.0% COGS x $91.5bn FY1 sales, bringing implied Q4 FCF close to the $678mm Q4 2025 comparison instead of a ~$2.0bn outflow. FY2+ returns to the 2025 year-end ratio absent a sourced balance-sheet schedule."
+  },
+  "oca_pct": {
+   "values": [
+    0.2585,
+    0.2585,
+    0.2585,
+    0.2585,
+    0.2585,
+    0.2585
+   ],
+   "note": "FY2025: 25.9%"
+  },
+  "dpo": {
+   "values": [
+    178.0,
+    178.0,
+    178.0,
+    178.0,
+    178.0,
+    178.0
+   ],
+   "note": "FY2025: 177.6 days"
+  },
+  "accrued_pct": {
+   "values": [
+    0.458,
+    0.458,
+    0.458,
+    0.458,
+    0.458,
+    0.458
+   ],
+   "note": "FY2025: 45.8% (accrued & other current liabilities)"
+  },
+  "other_op": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "History: -101, 1,199, 1,643 (restructuring, legal, deferred tax); default 0 \u2014 not a calibration line (FCF guidance is met through working capital)"
+  },
+  "acq": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Enter announced deals (cash paid)"
+  },
+  "intang_share": {
+   "values": [
+    0.7,
+    0.7,
+    0.7,
+    0.7,
+    0.7,
+    0.7
+   ],
+   "note": "Remainder to goodwill; typical for pharma deals"
+  },
+  "debt_iss": {
+   "values": [
+    8635.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "2026E: +8,635mm already issued (repaid) by Sep 30, 2026 (10-Q debt 49,503mm vs 40,868mm at FY2025 end); later years held flat"
+  },
+  "buyback": {
+   "values": [
+    4334.0,
+    30700.0,
+    25000.0,
+    30000.0,
+    35000.0,
+    40000.0
+   ],
+   "note": "FY1 floored at 9M 2026 repurchases of $4.334bn from the 10-Q. From FY2 the company returns excess cash generated by the GLP-1 ramp; buybacks are sized within post-dividend FCF rather than debt-funded.; raised so cash above 11.2% of sales (FY2025's level) is returned (2027E +10,700mm)"
+  },
+  "buyback_px": {
+   "values": [
+    1443.5,
+    1558.98,
+    1683.7,
+    1818.39,
+    1963.87,
+    2120.98
+   ],
+   "note": "Assumes ~8% annual share price appreciation"
+  },
+  "shares_issued": {
+   "values": [
+    3.6,
+    3.6,
+    3.6,
+    3.6,
+    3.6,
+    3.6
+   ],
+   "note": "~0.4% of basic shares per year (options & RSUs)"
+  },
+  "stock_proc": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2025: 0mm"
+  },
+  "dps0": {
+   "values": [
+    6.54
+   ],
+   "note": "FY2025 dividends declared $6.23 \u00d7 1.05"
+  },
+  "div_growth": {
+   "values": [
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1
+   ],
+   "note": "Recent annual increase 10.0%"
+  },
+  "nonrec": {
+   "values": [
+    45.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Q3 2026 non-GAAP reconciliation excludes net gains on investments in equity securities of $0.04 per share; FY1 pre-tax nonrec estimate of ~$45mm keeps GAAP EPS inclusive and adjusted EPS exclusive."
+  },
+  "adj_tax": {
+   "values": [
+    0.195,
+    0.19,
+    0.19,
+    0.19,
+    0.19,
+    0.19
+   ],
+   "note": "Company provides non-GAAP tax-rate guidance rather than using the GAAP ETR: Q3 2026 release updated FY2026 tax-rate guide to 19%-20%."
+  }
+ },
+ "valuation": {
+  "rf": {
+   "value": 0.0515,
+   "note": "10-yr U.S. Treasury yield on Nov 13, 2026 (Yahoo ^TNX; check FRED DGS10)"
+  },
+  "beta": {
+   "value": 0.51,
+   "note": "Method beta = average of bottom-up 0.43 (median unlevered 0.42 across 4 peers, relevered at D/E 4%); own Blume-adjusted 0.59 (raw 0.39)"
+  },
+  "erp": {
+   "value": 0.0423,
+   "note": "Implied ERP for the S&P 500 at the start of 2026 (Damodaran, FCFE-based): the same for every name on this date, measured against the 10-yr Treasury"
+  },
+  "kd": {
+   "value": 0.0575,
+   "note": "Estimated marginal pre-tax borrowing cost; the supplied documents include debt balances and outstanding notes but not an agency-rating report, so the prior synthetic-AAA wording is removed. Keep 5.75% pending a rating source rather than solving to valuation."
+  },
+  "tax_wacc": {
+   "value": 0.18,
+   "note": "Long-run effective rate"
+  },
+  "g": {
+   "value": 0.025,
+   "note": "Post-fade terminal growth reset below nominal GDP to reflect a mature post-launch portfolio, continuing global pricing/access pressure, expected future IRA selection of significant products, and exclusivity risk after the current incretin ramp."
+  },
+  "w_pg": {
+   "value": 0.6,
+   "note": "Primary method: DCF best captures the long GLP-1 capacity and pipeline runway."
+  },
+  "w_exit": {
+   "value": 0.2,
+   "note": "Lower weight because a fixed exit multiple is less reliable for a business transitioning from legacy diabetes/oncology to a concentrated incretin-led mix."
+  },
+  "w_sotp": {
+   "value": 0.0,
+   "note": "Single operating segment; SOTP would duplicate the DCF/comps."
+  },
+  "w_comps": {
+   "value": 0.2,
+   "note": "Comps provide a market cross-check but are imperfect because no peer has Lilly's same GLP-1 growth concentration and capacity cycle."
+  },
+  "peer_discount": {
+   "value": 0.0,
+   "note": "Positive = discount to the peer median (e.g. conglomerate discount); negative = premium"
+  },
+  "exit_pe": {
+   "value": 40.0,
+   "note": "Near the current P/E on FY2025 adjusted EPS (61.7x)"
+  },
+  "other_stake": {
+   "value": 0.0,
+   "note": "Equity stakes / investments not captured in segment EBITDA (none material on the balance sheet)"
+  },
+  "nci_value": {
+   "value": 0.0,
+   "note": "Dec 31, 2025 BS: 0mm + 0mm redeemable"
+  },
+  "fade_years": {
+   "value": 4.0,
+   "note": "FY6 is 2031E; a four-year fade reaches terminal economics around 2035E, used as an estimate for the transition period before mid-2030s incretin exclusivity risk. The exact patent table was not included in the supplied excerpts, so no specific patent-expiry date is cited."
+  },
+  "comps_pe_weight": {
+   "value": 0.85,
+   "note": "Large-cap pharma is primarily valued on company-adjusted P/E; EV/EBITDA is a secondary cross-check because acquired IPR&D, collaboration economics and amortization treatment differ by issuer."
+  },
+  "captive_share": {
+   "value": 0.0,
+   "note": "No captive finance arm"
+  },
+  "ronic": {
+   "value": 0.435,
+   "note": "Reset to the estimated 2031E ROIC including goodwill after the terminal-margin normalization. Recurring BD/acquired-IPR&D costs remain expensed in EBIT, so RONIC is no longer penalized separately for deal-enabled growth."
+  },
+  "stake_haircut": {
+   "value": 0.25,
+   "note": "Tax and liquidity haircut on stakes outside EBITDA (carrying value or last round)"
+  }
+ },
+ "deals": [],
+ "scenario_probs": [
+  0.25,
+  0.5,
+  0.25
+ ],
+ "labels": {},
+ "debt_like": {
+  "liab": 0.0,
+  "offset": 0.0,
+  "liab_fy": 0.0,
+  "offset_fy": 0.0,
+  "note": "None tagged in XBRL; enter debt-like items not in net debt (e.g. asbestos, environmental, litigation settlements) from the 10-Q"
+ },
+ "guidance": {
+  "date": "October 29, 2026",
+  "sales": [
+   91000.0,
+   92000.0
+  ],
+  "margin": [
+   0.52,
+   0.525
+  ],
+  "adj_eps": [
+   35.0,
+   36.0
+  ]
+ },
+ "adjusted_eps": null,
+ "organic": {
+  "fy_total": null,
+  "q_total": null,
+  "q_by_segment": {}
+ },
+ "peers": [
+  {
+   "ticker": "NVO",
+   "name": "Novo Nordisk A/S",
+   "overlap": "Global diabetes / obesity incretin peer",
+   "price": 41.63,
+   "eps": 23.66512,
+   "source": "Yahoo consensus FY ending Dec 2026 (0y, 8 analysts; as of Nov 17, 2026); price = close Nov 13, 2026 (Yahoo, unadjusted for later splits); the analyst's EPS 3.55 (Comparable USD ADR adjusted EPS estimate already carried in the prior assumptions; used because the Yahoo DKK/local-share consensus field was not comparable with the USD ADR price. Price = close Nov. 13, 2026 (Yahoo, from prior assumptions).) is 0.2x consensus (pre-split or another basis): consensus used",
+   "ev_source": "",
+   "eps_next": 23.37311,
+   "g_next": -0.012339257100745793,
+   "rev_g_next": 0.00961846912795239,
+   "beta_raw": 0.6860344988765886,
+   "snapshot": "2026-11-17"
+  },
+  {
+   "ticker": "MRK",
+   "name": "Merck & Company, Inc.",
+   "overlap": "Large-cap innovative pharma",
+   "price": 147.76,
+   "eps": 2.78835,
+   "source": "Yahoo consensus FY ending Dec 2026 (0y, 26 analysts; as of Nov 17, 2026); price = close Nov 13, 2026 (Yahoo, unadjusted for later splits); the analyst's EPS 8.98 (Comparable company-adjusted EPS guidance basis from the prior assumptions; used because the Yahoo GAAP/consensus field was distorted by IPR&D and other one-offs. Price = close Nov. 13, 2026 (Yahoo, from prior assumptions).) is 3.2x consensus (pre-split or another basis): consensus used",
+   "ev": 408392.0,
+   "ebitda": 12922.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 2,465mm shares x price + net debt 44,127mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 8.96457,
+   "g_next": 2.2150088762171176,
+   "rev_g_next": 0.03295827218791647,
+   "beta_raw": 0.10912838720836864,
+   "de": 0.1476,
+   "snapshot": "2026-11-17"
+  },
+  {
+   "ticker": "ABBV",
+   "name": "AbbVie Inc.",
+   "overlap": "Large-cap innovative pharma with immunology / oncology exposure",
+   "price": 295.03,
+   "eps": 13.98,
+   "source": "AbbVie 2026 company adjusted diluted EPS guidance midpoint available before Nov. 13, 2026.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance; price = close Nov 13, 2026 (Yahoo); price = close Nov 13, 2026 (Yahoo); price = close Nov 13, 2026 (Yahoo)",
+   "ev": 591601.0,
+   "ebitda": 28900.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 1,768mm shares x price + net debt 70,101mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 16.20017,
+   "g_next": 0.1585643107294088,
+   "rev_g_next": 0.09125675996765858,
+   "beta_raw": 0.20110663868338696,
+   "de": 0.1551
+  },
+  {
+   "ticker": "AZN",
+   "name": "AstraZeneca PLC",
+   "overlap": "Global innovative pharma with above-peer growth",
+   "price": 184.45,
+   "eps": 10.12,
+   "source": "AstraZeneca 2026 core EPS outlook / company-compiled guidance available before Nov. 13, 2026; core EPS basis.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance; price = close Nov 13, 2026 (Yahoo); price = close Nov 13, 2026 (Yahoo); price = close Nov 13, 2026 (Yahoo)",
+   "ev_source": "",
+   "eps_next": 11.31667,
+   "g_next": 0.1182480237154151,
+   "rev_g_next": 0.06338036514059997,
+   "beta_raw": 0.21983689328928954
+  },
+  {
+   "ticker": "AMGN",
+   "name": "Amgen Inc.",
+   "overlap": "Large-cap biotech / pharma",
+   "price": 465.67,
+   "eps": 23.54,
+   "source": "Amgen 2026 non-GAAP EPS guidance midpoint available before Nov. 13, 2026.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance; price = close Nov 13, 2026 (Yahoo); price = close Nov 13, 2026 (Yahoo); price = close Nov 13, 2026 (Yahoo)",
+   "ev": 292703.0,
+   "ebitda": 17092.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 541mm shares x price + net debt 40,817mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 25.07794,
+   "g_next": 0.06559152623682318,
+   "rev_g_next": 0.04547922713122898,
+   "beta_raw": 0.4280647527262494,
+   "de": 0.2144
+  },
+  {
+   "ticker": "PFE",
+   "name": "Pfizer, Inc.",
+   "overlap": "Large-cap pharma, lower-growth comparator",
+   "price": 28.89,
+   "eps": 3.05,
+   "source": "Pfizer 2026 adjusted diluted EPS guidance midpoint available before Nov. 13, 2026.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance; price = close Nov 13, 2026 (Yahoo); price = close Nov 13, 2026 (Yahoo); price = close Nov 13, 2026 (Yahoo)",
+   "ev": 225516.0,
+   "ebitda": 13468.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 5,700mm shares x price + net debt 60,847mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 2.95408,
+   "g_next": -0.032134619417068744,
+   "rev_g_next": -0.036539349643369134,
+   "beta_raw": 0.3476091790592351,
+   "de": 0.3806
+  }
+ ],
+ "thesis": {
+  "stance": "neutral on",
+  "recommendation": "At this price, the evidence needed is sustained GLP-1 volume growth with no further margin dilution, because the base case remains below the quote even after correcting peer and RONIC inputs.",
+  "points": [
+   "1. Growth: the base case reaches FY2026 revenue guidance and then decelerates from Mounjaro/Zepbound hypergrowth as comps toughen and price/access concessions broaden.",
+   "2. Quality: Lilly has a structurally better mix than its own 10-year history, but the model keeps recurring SBC, acquired amortization, acquired IPR&D and restructuring-like charges in EBIT and DCF cash flows.",
+   "3. Product concentration: Q3 2026 10-Q says Mounjaro, Zepbound and Foundayo were 66% of 9M revenue; this justifies the growth premium but also makes net pricing, safety, access and capacity the critical risks.",
+   "4. Capital allocation: cash generation is returned through materially higher buybacks from FY2 rather than allowed to accumulate on the balance sheet."
+  ],
+  "model_says": [
+   "\u2022 Fair value is {fv}: the DCF cases ({dcf_pg}, {dcf_exit}) are below the share price, comps are {comps}, and the long-run IRR at the price is {irr} versus {wacc}.",
+   "\u2022 The range is wide: bear value is {bear} and bull value is {bull}, so the debate is whether the GLP-1 runway, pricing and margin durability justify what is already capitalized.",
+   "\u2022 Probability-weighted value {pw}, {ret3y} and {irr_spread} do not clear the rule threshold."
+  ],
+  "risks": [
+   "\u2022 Upside risk: faster international Mounjaro/Zepbound uptake, Foundayo/orforglipron launches and retatrutide data could keep growth above the base fade.",
+   "\u2022 Downside risk: broader GLP-1 reimbursement, Medicaid/Medicare access and international reference pricing could lower realized prices faster than volume expands.",
+   "\u2022 Execution risk: Lilly is adding substantial manufacturing capacity; delays, quality issues or under-absorption would pressure both sales and margins.",
+   "\u2022 Regulatory / portfolio risk: the 10-Q notes IRA government-set pricing for Jardiance, Trulicity and Verzenio and expects other significant products to be selected in future years."
+  ],
+  "monitor": [
+   "\u2022 February 2027 Q4/FY print: FY2027 revenue guide, performance-margin guide and whether Q4 2026 revenue lands within $91-92bn FY guidance.",
+   "\u2022 2027 quarterly prints: Mounjaro and Zepbound U.S. realized-price commentary versus volume growth.",
+   "\u2022 Foundayo/orforglipron launch metrics and EU/Japan regulatory progress after the 2026 approvals/submissions cited in the Q3 2026 10-Q.",
+   "\u2022 Capex and capacity start-up milestones for the U.S. and international manufacturing expansions."
+  ],
+  "about": "Eli Lilly is modeled as one human-pharmaceutical segment with product-line revenue detail for the GLP-1 franchise, oncology, immunology, Trulicity and other products.",
+  "price_implies": "The current price implies {irr} and requires either an unusually durable post-launch margin structure or a longer high-growth runway than the base case embeds.",
+  "variant_view": "We are broadly in line with Street FY1/FY2 revenue but less willing to capitalize the full long-term ambition into the base case because Q3 2026 already showed lower realized prices for Mounjaro/Zepbound, the 10-Q highlights pricing/access and IRA risk, and the portfolio must transition before mid-2030s exclusivity risk; this will be tested by FY2027 guidance and Q1/Q2 2027 realized-price disclosures.",
+  "catalysts": [
+   "February 2027 FY2026 results: FY2027 revenue guide above consensus with performance margin at or above the FY2026 range would support the bull case.",
+   "Q1 2027 earnings: Mounjaro/Zepbound combined revenue growth and realized-price bridge showing volume more than offsets access concessions.",
+   "2027 pipeline/regulatory updates: Foundayo/orforglipron type 2 diabetes approvals and retatrutide Phase 3 details."
+  ],
+  "breaker": "Bear case: combined Mounjaro/Zepbound growth falls roughly one historical revenue-growth sigma below base while segment margin drops below 49% by FY2028; that would put value at least 15% below base and break the premium-growth thesis.",
+  "sensitivities": "The two largest sensitivities are the Mounjaro/Zepbound long-run growth fade and terminal operating margin / RONIC; small changes in GLP-1 net pricing have disproportionate value impact.",
+  "consensus_notes": "FY1 revenue and adjusted EPS are anchored to company guidance and consensus. Any model difference after FY2 is intentional: the base assumes GLP-1 realized-price pressure and IRA effects prevent permanent margin expansion, while the bull case captures management's longer-run operating leverage.",
+  "explanations": {
+   "gate 5": "Peer EPS inputs now match the table. NVO is set to $3.55 of USD ADR adjusted EPS rather than the stale DKK/local-share field, and MRK is set to $8.98 of company-adjusted EPS rather than the distorted GAAP/consensus field affected by IPR&D and other one-offs.",
+   "gate 10": "The Q3 release names AtaiBeckley and Merida and says Q3 acquired IPR&D charges of $4.2bn primarily related to AtaiBeckley and Curevo, but the supplied excerpts do not provide consideration, standalone revenue, EBITDA or a peer multiple. The known effect remains modeled in FY1 repo_pct/acquired IPR&D; no standalone deal value is invented.",
+   "gate 12": "The FY2 EPS/FCF step-up is no longer explained as a cash plug unwind. FY1 adjusted EPS includes the Q3 acquired-IPR&D burden, while FY2 has higher GLP-1 revenue on existing launch infrastructure; the FY1 DIO reset removes about $2.6bn of unsupported year-end inventory build from FY1 FCF, so the remaining FY2 FCF increase reflects growth, lower one-off IPR&D and capex/work-cap timing rather than a hidden plug.",
+   "gate 16": "Terminal economics are normalized from the prior peak-margin assumption: base segment margin now fades from 52.2% in FY1 to 48.5% by FY6, terminal growth is cut to 2.5%, and the fade reaches mature economics around 2035E. The historical 10-year median margin is still not a perfect anchor because Lilly's mix has structurally shifted toward GLP-1/incretins, but the model no longer assumes the FY1 performance-margin level persists indefinitely.",
+   "base case outside company guidance adjusted eps": "The adjusted-EPS definition follows the existing Lilly reconciliation: amortization, asset impairment/restructuring/special charges and investment gains/losses are excluded, while acquired IPR&D is included. FY1 operating drivers remain inside sales and performance-margin guidance.",
+   "peer p e outliers vs the 19 8x": "NVO and MRK were mechanical basis errors, not valuation judgments. NVO's EPS is now $3.55 on a USD ADR adjusted basis comparable to the ADR price, and MRK's EPS is now $8.98 of adjusted EPS rather than a distorted GAAP/consensus field.",
+   "cash builds to 169 279mm 45 of total": "Buybacks are increased from FY2 to return excess cash generated by the GLP-1 ramp; the policy is funded by post-dividend FCF and avoids an unrealistic cash balance.",
+   "gate 38": "The prior deal rows had no sourced consideration, revenue, EBITDA or peer multiple, so they have been removed rather than filled with invented economics. AtaiBeckley / Curevo remain reflected through the FY1 acquired-IPR&D charge in repo_pct; Merida has no modeled cash or value effect because no figures were provided.",
+   "gate 8": "The supplied 10-Q excerpt does not include a year-to-date interest-expense line, so I cannot quote a 9M figure without inventing one. The FY1 interest assumption is anchored to the sourced FY2025 interest expense already in the assumptions ($895mm) and the supplied Q3 2026 debt balance of $49.503bn: applying the 2.45% legacy-debt rate to roughly $45.2bn average debt implies about $1.1bn of FY2026 interest expense, so the forecast is a run-rate estimate rather than a plug.",
+   "gate 34": "RONIC is reset to the estimated 2031E ROIC including goodwill after the margin reset, rather than being cut to 22% for deal-enabled growth. That avoids double-counting recurring business-development/acquired-IPR&D costs, which are already expensed in EBIT through repo_pct; exclusivity/pricing risk is carried in margin, terminal growth and fade-year assumptions instead.",
+   "gate 42": "The data now match the explanation: NVO EPS is $3.55 and MRK EPS is $8.98 in the peers table, so the earlier claimed peer-basis fixes are present in the comps inputs.",
+   "gate 43": "The prior FY1 year-end inventory-days assumption created an implied Q4 FCF outflow of about $2.0bn versus $678mm in Q4 2025. FY1 DIO is reset to 392 days, reducing modeled inventory by about $2.6bn using 62 days x FY1 COGS / 365; this is an estimate because the supplied 10-Q excerpt does not include the detailed balance sheet, and FY2+ reverts to the 2025 year-end ratio.",
+   "pm review": "Recommendation rule: thesis.recommendation has been rewritten as one supporting sentence without an explicit generated call or separate bias language, and the stale thesis.stance text is blanked. Value effect: none; this is presentation/rule compliance.\n\nBear-bull calibration: the existing bull case remains above the price, and the bull margin path is left as the reverse-DCF-style scenario where scale benefits and successful follow-on incretins sustain elevated economics. Value effect: none from this pass; no assumption was moved merely to close a price gap.\n\nRONIC framework: RONIC is raised from 22.0% to 43.5%, the estimated post-reset ROIC including goodwill, because acquired IPR&D/BD costs are already expensed in EBIT and should not also depress reinvestment returns. Value effect: directionally positive; the PM's own estimate was roughly +$60-80/share before the offsetting terminal normalization.\n\nValuation-gap trade package: no borrow/crowding/pair package is added because the thesis is not expressed as a borrow-dependent trade; the model discussion stays valuation-based and catalyst/monitor based. Value effect: none.\n\nGate 42 / peer fixes: NVO EPS is corrected to $3.55 on a USD ADR basis and MRK EPS to $8.98 on a company-adjusted basis, replacing the 1.8x and 53.2x distorted P/E inputs. Value effect: comps should now use comparable peer P/E inputs rather than the stale local-share/GAAP-basis outliers.\n\nCost of debt: the synthetic-AAA wording is removed. The supplied documents do not include an agency-rating report, so kd is left at 5.75% as a high-grade marginal estimate pending a rating source rather than changed without evidence. Value effect: none.\n\nTerminal LOE and margin: because the supplied patent table was not included, I do not cite an exact patent-expiry date; instead, the model uses a 2035E terminal-transition estimate, cuts terminal growth to 2.5%, reduces fade years to four after FY6, and lowers base segment margin to 48.5% by FY6. Value effect: negative versus the prior terminal-margin/growth setup and intended to offset the overly optimistic perpetual economics.\n\nQ4 FY26 FCF: FY1 DIO is reset from 454 to 392 days, removing about $2.6bn of unsupported inventory build and bringing implied Q4 FCF closer to last year's Q4 comparison. Value effect: modestly positive to near-term DCF, but mainly removes a timing distortion."
+  }
+ },
+ "flags": [
+  "Lilly's non-GAAP EPS includes acquired IPR&D; the model therefore keeps acquired IPR&D in EBIT/DCF and excludes only a minority share of repo_pct for adjusted EPS.",
+  "Q3 2026 revenue included about $900mm of benefits, primarily Jardiance milestones and rebate/discount true-ups; no further Jardiance milestones remain.",
+  "No free-cash-flow guidance was provided in the Oct. 29, 2026 release excerpt, so FCF is driven by capex and working-capital assumptions rather than a guidance tie.",
+  "The exact tirzepatide patent-expiry table was not included in the supplied excerpts; the 2035 terminal transition is an estimate used to reflect mid-2030s exclusivity risk without inventing a specific patent date."
+ ]
+}

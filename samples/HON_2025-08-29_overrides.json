@@ -1,0 +1,838 @@
+{
+ "framework": "reference",
+ "meta": {
+  "author": "Reference: HON_Valuation_Model_2025-08-29.xlsx judgments (AI-assisted analyst build)",
+  "summary": "Long HON into the three-way separation; SOTP carries extra weight, conglomerate discount on comps.",
+  "sources": [
+   "https://www.sec.gov/Archives/edgar/data/773840/000077384025000062/exhibit99-q22025earningsre.htm",
+   "https://www.sec.gov/Archives/edgar/data/773840/000077384025000064/hon-20250630.htm",
+   "Solstice Form 10 (Aug 21, 2025)"
+  ]
+ },
+ "market": {
+  "basic_shares": {
+   "value": 635.0,
+   "note": "10-Q Q2 2025 cover / Solstice Form 10 (634.9mm at Sep 19, 2025)"
+  }
+ },
+ "segments": {
+  "Aerospace Technologies": {
+   "organic_last": 0.11,
+   "growth": {
+    "bear": [
+     0.06,
+     0.04,
+     0.04,
+     0.04,
+     0.04,
+     0.04
+    ],
+    "base": [
+     0.08,
+     0.07,
+     0.065,
+     0.06,
+     0.06,
+     0.055
+    ],
+    "bull": [
+     0.09,
+     0.09,
+     0.08,
+     0.075,
+     0.07,
+     0.065
+    ]
+   },
+   "margin": {
+    "bear": [
+     0.25,
+     0.248,
+     0.246,
+     0.245,
+     0.245,
+     0.245
+    ],
+    "base": [
+     0.255,
+     0.259,
+     0.263,
+     0.267,
+     0.271,
+     0.275
+    ],
+    "bull": [
+     0.26,
+     0.266,
+     0.272,
+     0.278,
+     0.284,
+     0.29
+    ]
+   },
+   "mna": {
+    "values": [
+     0.03,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "note": "CAES acquisition (Sep 2024) annualizes in 2025"
+   },
+   "sotp": {
+    "multiples": [
+     17,
+     20,
+     23
+    ],
+    "note": "GE Aerospace, RTX, Eaton aerospace"
+   }
+  },
+  "Industrial Automation": {
+   "organic_last": -0.07,
+   "growth": {
+    "bear": [
+     -0.01,
+     -0.01,
+     0.01,
+     0.02,
+     0.02,
+     0.02
+    ],
+    "base": [
+     0,
+     0.02,
+     0.03,
+     0.035,
+     0.035,
+     0.035
+    ],
+    "bull": [
+     0.01,
+     0.04,
+     0.045,
+     0.05,
+     0.05,
+     0.05
+    ]
+   },
+   "margin": {
+    "bear": [
+     0.19,
+     0.19,
+     0.192,
+     0.194,
+     0.196,
+     0.198
+    ],
+    "base": [
+     0.195,
+     0.2,
+     0.205,
+     0.21,
+     0.215,
+     0.22
+    ],
+    "bull": [
+     0.2,
+     0.208,
+     0.216,
+     0.224,
+     0.232,
+     0.24
+    ]
+   },
+   "mna": {
+    "values": [
+     -0.05,
+     -0.03,
+     0,
+     0,
+     0,
+     0
+    ],
+    "note": "PPE business sold May 2025 ($1.3bn); 2026 carries the remaining months"
+   },
+   "sotp": {
+    "multiples": [
+     12,
+     13,
+     15
+    ],
+    "note": "Emerson, Rockwell"
+   }
+  },
+  "Building Automation": {
+   "organic_last": 0.02,
+   "growth": {
+    "bear": [
+     0.05,
+     0.03,
+     0.03,
+     0.03,
+     0.03,
+     0.03
+    ],
+    "base": [
+     0.06,
+     0.06,
+     0.055,
+     0.05,
+     0.05,
+     0.05
+    ],
+    "bull": [
+     0.07,
+     0.08,
+     0.07,
+     0.065,
+     0.06,
+     0.06
+    ]
+   },
+   "margin": {
+    "bear": [
+     0.255,
+     0.255,
+     0.256,
+     0.257,
+     0.258,
+     0.259
+    ],
+    "base": [
+     0.26,
+     0.263,
+     0.266,
+     0.269,
+     0.272,
+     0.275
+    ],
+    "bull": [
+     0.265,
+     0.27,
+     0.275,
+     0.28,
+     0.285,
+     0.29
+    ]
+   },
+   "mna": {
+    "values": [
+     0.06,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "note": "Carrier Global Access Solutions (Jun 2024) annualizes"
+   },
+   "sotp": {
+    "multiples": [
+     15,
+     17,
+     19
+    ],
+    "note": "Johnson Controls, Carrier, Trane"
+   }
+  },
+  "Energy & Sustainability Solutions": {
+   "organic_last": 0.02,
+   "growth": {
+    "bear": [
+     0.02,
+     0,
+     0.02,
+     0.02,
+     0.02,
+     0.02
+    ],
+    "base": [
+     0.03,
+     0.03,
+     0.04,
+     0.04,
+     0.04,
+     0.04
+    ],
+    "bull": [
+     0.04,
+     0.05,
+     0.055,
+     0.055,
+     0.05,
+     0.05
+    ]
+   },
+   "margin": {
+    "bear": [
+     0.235,
+     0.235,
+     0.236,
+     0.237,
+     0.238,
+     0.239
+    ],
+    "base": [
+     0.24,
+     0.243,
+     0.246,
+     0.249,
+     0.252,
+     0.255
+    ],
+    "bull": [
+     0.245,
+     0.25,
+     0.255,
+     0.26,
+     0.265,
+     0.27
+    ]
+   },
+   "mna": {
+    "values": [
+     0.05,
+     0.05,
+     0,
+     0,
+     0,
+     0
+    ],
+    "note": "2025: Sundyne (Jun 2025) + LNG; 2026: Johnson Matthey Catalyst Technologies (expected H1 2026)"
+   },
+   "sotp_split": [
+    {
+     "name": "Solstice Advanced Materials",
+     "ebitda": 1000,
+     "multiples": [
+      8,
+      10,
+      13
+     ],
+     "note": "Form 10 (Aug 21, 2025): 2024 adj. EBITDA $1.1bn less ~$100mm standalone costs"
+    },
+    {
+     "name": "UOP & process technology",
+     "remainder": true,
+     "multiples": [
+      12,
+      14,
+      16
+     ],
+     "note": "Stays with Honeywell Automation"
+    }
+   ]
+  }
+ },
+ "notes": {
+  "growth": "Analyst judgment. Base: Aero high-single digits on aftermarket and defense; IA recovers slowly; BA mid-single digits",
+  "margin": "Q2 2025 actual: Aero 25.5%, IA 19.2%, BA 26.2%, ESS 24.1% (Q2 2025 release, Table 3)"
+ },
+ "corporate": {
+  "sales": [
+   20,
+   20,
+   20,
+   20,
+   20,
+   20
+  ],
+  "sales_note": "FY2024: $24mm (10-K segment note)",
+  "cost_pct": [
+   -0.009,
+   -0.009,
+   -0.009,
+   -0.009,
+   -0.009,
+   -0.009
+  ],
+  "cost_note": "FY2024: \u2013$454mm (\u20131.2%); H1 2025: \u2013$161mm (\u20130.8%)",
+  "multiples": [
+   12,
+   12,
+   12
+  ],
+  "multiple_note": "Negative value: three head offices cost money"
+ },
+ "drivers": {
+  "amort": {
+   "values": [
+    600,
+    650,
+    640,
+    620,
+    600,
+    580
+   ],
+   "note": "2025E guide: ~$480mm after tax + ~$120mm tax = ~$600mm (Q2 2025 release, adj. EPS reconciliation)"
+  },
+  "sbc_pct": {
+   "values": [
+    0.005,
+    0.005,
+    0.005,
+    0.005,
+    0.005,
+    0.005
+   ],
+   "note": "FY2024: $194mm = 0.5% of sales"
+  },
+  "repo_pct": {
+   "values": [
+    0.008,
+    0.008,
+    0.008,
+    0.008,
+    0.008,
+    0.008
+   ],
+   "note": "Repositioning, pension service cost, acquisition costs; FY2024 ex-impairments ~1.0%"
+  },
+  "other_nonop": {
+   "values": [
+    450,
+    400,
+    400,
+    375,
+    350,
+    325
+   ],
+   "note": "Non-service pension income net of other expense; H1 2025 pension ongoing income $240mm; declines over time"
+  },
+  "int_yield": {
+   "values": [
+    0.035,
+    0.0325,
+    0.03,
+    0.03,
+    0.03,
+    0.03
+   ],
+   "note": "FY2024: $426mm interest income on ~$8\u201311bn cash"
+  },
+  "int_rate": {
+   "values": [
+    0.0375,
+    0.039,
+    0.04,
+    0.041,
+    0.042,
+    0.0425
+   ],
+   "note": "H1 2025 annualized: $1,232mm / ~$33.8bn avg debt = 3.6%; rising as low-coupon debt refinances"
+  },
+  "etr": {
+   "values": [
+    0.2,
+    0.205,
+    0.205,
+    0.205,
+    0.205,
+    0.205
+   ],
+   "note": "FY2024: 20.4%; H1 2025: 19.1%"
+  },
+  "nci_ni": {
+   "values": [
+    30,
+    30,
+    30,
+    30,
+    30,
+    30
+   ],
+   "note": "FY2024: $35mm; H1 2025: $17mm"
+  },
+  "cogs_pct": {
+   "values": [
+    0.619,
+    0.619,
+    0.619,
+    0.619,
+    0.619,
+    0.619
+   ],
+   "note": "FY2024: 61.9%"
+  },
+  "da_pct": {
+   "values": [
+    0.024,
+    0.024,
+    0.024,
+    0.024,
+    0.024,
+    0.024
+   ],
+   "note": "FY2024: ($671 dep + $663 amort \u2013 $415 acquired-intangible amort) / sales = 2.4%"
+  },
+  "capex_pct": {
+   "values": [
+    0.032,
+    0.031,
+    0.03,
+    0.03,
+    0.03,
+    0.03
+   ],
+   "note": "2025 guide ~$1.3bn (Q2 2025 release); FY2024 3.0%"
+  },
+  "dso": {
+   "values": [
+    74,
+    74,
+    74,
+    74,
+    74,
+    74
+   ],
+   "note": "FY2024: 74.1 days"
+  },
+  "dio": {
+   "values": [
+    99,
+    99,
+    99,
+    99,
+    99,
+    99
+   ],
+   "note": "FY2024: 98.6 days"
+  },
+  "oca_pct": {
+   "values": [
+    0.0345,
+    0.0345,
+    0.0345,
+    0.0345,
+    0.0345,
+    0.0345
+   ],
+   "note": "FY2024: 3.5%"
+  },
+  "dpo": {
+   "values": [
+    105,
+    105,
+    105,
+    105,
+    105,
+    105
+   ],
+   "note": "FY2024: 105.4 days"
+  },
+  "accrued_pct": {
+   "values": [
+    0.217,
+    0.217,
+    0.217,
+    0.217,
+    0.217,
+    0.217
+   ],
+   "note": "FY2024: 21.7%"
+  },
+  "other_op": {
+   "values": [
+    -700,
+    -300,
+    -300,
+    -300,
+    -300,
+    -300
+   ],
+   "note": "Repositioning & asbestos payments, deferred tax; calibrated so FY2025E FCF \u2248 $5.6bn guide midpoint"
+  },
+  "acq": {
+   "values": [
+    2200,
+    2400,
+    0,
+    0,
+    0,
+    0
+   ],
+   "note": "2025: Sundyne $2.2bn (closed Jun 2025); 2026: Johnson Matthey CT \u00a31.8bn \u2248 $2.4bn"
+  },
+  "intang_share": {
+   "values": [
+    0.3,
+    0.3,
+    0.3,
+    0.3,
+    0.3,
+    0.3
+   ],
+   "note": "Remainder to goodwill; typical for industrial deals"
+  },
+  "debt_iss": {
+   "values": [
+    3000,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "note": "H1 2025 net borrowing +$4.6bn; Base holds debt flat after 2025"
+  },
+  "buyback": {
+   "values": [
+    4500,
+    3000,
+    3000,
+    3000,
+    3000,
+    3000
+   ],
+   "note": "H1 2025: $3.6bn; mgmt targets \u22651% share count reduction"
+  },
+  "buyback_px": {
+   "values": [
+    215,
+    232,
+    251,
+    271,
+    293,
+    316
+   ],
+   "note": "Assumes ~8% annual share price appreciation"
+  },
+  "shares_issued": {
+   "values": [
+    2.5,
+    2.5,
+    2.5,
+    2.5,
+    2.5,
+    2.5
+   ],
+   "note": "Historical ~2\u20134mm per year"
+  },
+  "stock_proc": {
+   "values": [
+    300,
+    300,
+    300,
+    300,
+    300,
+    300
+   ],
+   "note": "FY2022\u201324 average ~$350mm"
+  },
+  "dps0": {
+   "values": [
+    4.52
+   ],
+   "note": "$1.13 quarterly \u00d7 4"
+  },
+  "div_growth": {
+   "values": [
+    0.05,
+    0.05,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "note": "Recent annual increases ~5%"
+  }
+ },
+ "valuation": {
+  "rf": {
+   "value": 0.0425,
+   "note": "Approx. 10-yr yield late Aug 2025 (check FRED DGS10)"
+  },
+  "beta": {
+   "value": 1.0,
+   "note": "Approx. 5-yr monthly beta vs S&P 500 (check Bloomberg/FactSet)"
+  },
+  "erp": {
+   "value": 0.0475,
+   "note": "Analyst judgment; Damodaran implied ERP ~4.3\u20134.5% in 2025"
+  },
+  "kd": {
+   "value": 0.05,
+   "note": "Approx. yield on HON A-rated long-dated bonds"
+  },
+  "tax_wacc": {
+   "value": 0.205,
+   "note": "Long-run effective rate"
+  },
+  "g": {
+   "value": 0.03,
+   "note": "Nominal GDP-like; below WACC"
+  },
+  "exit_mult": {
+   "value": 15,
+   "note": "HON traded ~15\u201317x forward EBITDA historically (approx.)"
+  },
+  "w_pg": {
+   "value": 0.25
+  },
+  "w_exit": {
+   "value": 0.25
+  },
+  "w_sotp": {
+   "value": 0.3,
+   "note": "Breakup thesis \u2014 the SOTP carries extra weight"
+  },
+  "w_comps": {
+   "value": 0.2
+  },
+  "peer_discount": {
+   "value": 0.2,
+   "note": "Until separation completes"
+  },
+  "exit_pe": {
+   "value": 22,
+   "note": "Near HON\u2019s historical forward P/E"
+  },
+  "other_stake": {
+   "value": 2700,
+   "note": "~54% of ~$5bn 2024 round valuation (approx.)"
+  },
+  "nci_value": {
+   "value": 542,
+   "note": "Dec 31, 2024 BS: $535mm + $7mm"
+  },
+  "fade_years": {
+   "value": 0,
+   "note": "Two-stage DCF, as in the reference model"
+  },
+  "comps_pe_weight": {
+   "value": 1,
+   "note": "P/E comps only, as in the reference model (peers' own FY2025 guidance)"
+  }
+ },
+ "labels": {
+  "peer_discount": "Conglomerate discount",
+  "other_stake": "Quantinuum stake",
+  "debt_like": "Asbestos-related liabilities",
+  "debt_like_offset": "Insurance recoveries for asbestos liabilities",
+  "debt_like_net": "Asbestos liability, net of insurance"
+ },
+ "debt_like": {
+  "liab": 1243,
+  "offset": 166,
+  "liab_fy": 1325,
+  "offset_fy": 171,
+  "note": "Q2 2025 release balance sheet; FY2024 10-K"
+ },
+ "guidance": {
+  "date": "July 24, 2025",
+  "sales": [
+   40800,
+   41300
+  ],
+  "organic": [
+   0.04,
+   0.05
+  ],
+  "margin": [
+   0.23,
+   0.232
+  ],
+  "adj_eps": [
+   10.45,
+   10.65
+  ],
+  "fcf": [
+   5400,
+   5800
+  ]
+ },
+ "adjusted_eps": {
+  "fy": 9.89,
+  "fy_prior": 9.52,
+  "ytd_cur": 5.26,
+  "ytd_prior": 4.74
+ },
+ "organic": {
+  "fy_total": 0.03,
+  "q_total": 0.05,
+  "q_by_segment": {
+   "Aerospace Technologies": 0.06,
+   "Industrial Automation": 0.0,
+   "Building Automation": 0.08,
+   "Energy & Sustainability Solutions": 0.06
+  }
+ },
+ "peers": [
+  {
+   "ticker": "GE",
+   "name": "GE Aerospace",
+   "overlap": "Aerospace",
+   "price": 275.2,
+   "eps": 5.7,
+   "source": "Q2 2025 release: $5.60\u20135.80"
+  },
+  {
+   "ticker": "RTX",
+   "name": "RTX",
+   "overlap": "Aerospace (Collins)",
+   "price": 158.6,
+   "eps": 5.875,
+   "source": "Q2 2025 release: $5.80\u20135.95"
+  },
+  {
+   "ticker": "ETN",
+   "name": "Eaton",
+   "overlap": "Aerospace, electrical",
+   "price": 349.14,
+   "eps": 12.07,
+   "source": "Q2 2025 release: $11.97\u201312.17"
+  },
+  {
+   "ticker": "EMR",
+   "name": "Emerson",
+   "overlap": "Process & industrial automation",
+   "price": 132.0,
+   "eps": 6.0,
+   "source": "FQ3 2025 release: ~$6.00 (FY Sep)"
+  },
+  {
+   "ticker": "ROK",
+   "name": "Rockwell Automation",
+   "overlap": "Industrial automation",
+   "price": 343.43,
+   "eps": 10.0,
+   "source": "FQ3 2025 release: $9.80\u201310.20 (FY Sep)"
+  },
+  {
+   "ticker": "JCI",
+   "name": "Johnson Controls",
+   "overlap": "Building automation",
+   "price": 106.89,
+   "eps": 3.665,
+   "source": "FQ3 2025 release: $3.65\u20133.68 (FY Sep)"
+  }
+ ],
+ "thesis": {
+  "stance": "long",
+  "recommendation": "Long HON at $219.50 and hold through both spin-offs, so the position becomes Honeywell Automation, Honeywell Aerospace and Solstice.",
+  "points": [
+   "1. Proven playbook. GE\u2019s 2021\u20132024 breakup turned one share into a package worth ~4.4\u00d7 by July 2025. Honeywell is running the same three-way split.",
+   "2. Quality at a discount. 23% segment margin, record $36.6bn backlog, ~86% FCF conversion \u2014 yet HON trades at ~21\u00d7 earnings vs 22\u201348\u00d7 for focused peers.",
+   "3. Hidden asset. Solstice (refrigerants, chip materials, nuclear fuel conversion) is invisible inside ESS; its Form 10 (Aug 21, 2025) shows $1.1bn EBITDA.",
+   "4. Dated catalysts. Solstice spin Q4 2025, sale of PSS/WWS, Aerospace spin H2 2026, possible Quantinuum funding round."
+  ],
+  "model_says": [
+   "\u2022 The DCF alone says HON is roughly fairly valued: today\u2019s cash flows do not justify a big discount being closed by themselves.",
+   "\u2022 The SOTP shows ~5\u201310% upside from separation alone; the rest of the return must come from earnings compounding after the split, as at GE.",
+   "\u2022 Base case assumes aerospace margins recover from 25.5% toward 27.5% by 2030. That single assumption drives most of the value: check it in the Bear case."
+  ],
+  "risks": [
+   "\u2022 Aerospace margins keep falling (27.6% in 2023 \u2192 25.5% in Q2 2025) and the spun company launches with heavy debt.",
+   "\u2022 Debt rose $16bn in 18 months; net debt is ~2.8\u00d7 EBITDA. Leverage allocation at the spins is the key unknown.",
+   "\u2022 Separation and stranded costs; short-cycle Industrial Automation stays weak (ISM below 50 since March 2025); tariffs.",
+   "\u2022 Peer multiples are near record highs; the SOTP borrows them. Rising rates would compress the re-rating."
+  ],
+  "monitor": [
+   "\u2022 Q3 2025 results (Oct 23): aerospace margin, H2 free cash flow vs the $5.4\u20135.8bn guide. \u2022 Solstice investor day (Oct 8) and first trading.",
+   "\u2022 Aerospace Form 10: debt allocation and leadership. \u2022 Peer multiples for GE, RTX, Emerson, Rockwell."
+  ],
+  "about": "Judgment layer reproduced from the reference HON model (overrides file); numbers above are live links."
+ }
+}

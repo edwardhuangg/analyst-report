@@ -1,0 +1,79 @@
+  .. Looking up the company on SEC EDGAR…
+  .. Reading the FY 10-K XBRL (Feb 13, 2026)…
+  .. Reading the latest 10-Q (Sep 30, 2026)…
+  .. Pulling market data (Yahoo Finance)…
+  .. Reading the earnings releases (AI)…
+  .. Peer DE…
+  .. Peer PCAR…
+  .. Peer CMI…
+  .. Peer ETN…
+  .. Peer HON…
+  .. Peer URI…
+  .. AI analyst is reviewing the built model (6 issues from the checker, and the PM's critique)…
+  .. … gpt-5.5 still reasoning (33s)
+  .. … gpt-5.5 still reasoning (65s)
+  .. Version bridge: the previous version on today's engine…
+  .. Version bridge: Terminal value: RONIC, terminal growth, fade years, exit multiple…
+  .. Version bridge: Cost of capital: beta, cost of debt, tax rate…
+  .. Version bridge: Method weights, peer discount, comps blend, SOTP multiples…
+  .. Version bridge: Revenue growth and M&A…
+  .. Version bridge: Margins and their basis…
+  .. Version bridge: Working capital…
+  .. Version bridge: Capital return, acquisitions, financing…
+  .. Version bridge: Tax, interest, other income, one-offs…
+  .. Version bridge: Share count, definitions, guidance…
+Previous version: fair value $438.12, rule rating Neutral; this version: $391.24, rule rating Neutral. Judgment inputs carry 88% of the gross move.
+  [judgment] Terminal value: RONIC, terminal growth, fade years, exit multiple: +15.33/share (valuation.ronic, valuation.fade_years)
+  [judgment] Cost of capital: beta, cost of debt, tax rate: -7.59/share (valuation.beta, valuation.kd)
+  [judgment] Method weights, peer discount, comps blend, SOTP multiples: -16.18/share (valuation.w_pg, valuation.w_exit, valuation.w_sotp, segments.Construction Industries.sotp, segments.Financial Products.sotp, segments.Power Energy.sotp, segments.Resource Industries.sotp)
+  [judgment] Margins and their basis: -17.63/share (segments.Construction Industries.margin, segments.Financial Products.margin, segments.Power Energy.margin, segments.Resource Industries.margin, notes.margin)
+  [judgment] Working capital: -11.48/share (drivers.accrued_pct)
+  [data] Tax, interest, other income, one-offs: -3.17/share (drivers.etr, drivers.int_rate, drivers.nonrec)
+  [data] Share count, definitions, guidance: -6.15/share (adj_eps_ex_repo, drivers.adj_tax)
+wrote demo/v5/runs/CAT_review2_as_run.xlsx (109,788 bytes); provenance: Defaults: derived from the filings and market data (rules in valuation/spec.py) | AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort), applied from an overrides file: 4 segments (growth, margin, M&A, SOTP), 28 drivers, 19 valuation inputs, market.price, market.basic_shares, market.dilutive, corporate sales, corporate costs, debt-like items, guidance, adjusted EPS = model definition, 6 peers, thesis, scenario probabilities | AI analyst review (gpt-5.5, medium effort): 3 segments (margin), 1 drivers, thesis
+wrote demo/v5/runs/CAT_review2_as_run_overrides.json
+round trip: demo/v5/runs/CAT_review2_as_run_overrides.json rebuilds to fair value 391.24 vs 391.24
+Analyst summary: Base case still treats 2026 as a strong execution year but no longer assumes a Q4 working-capital cash drain inconsistent with the year-to-date cash generation. Bear case is rebuilt around the stated breaker: 2027 destocking, slower Power Energy conversion and lower segment margins; SOTP is given less weight because it capitalizes near-term segment profit while the DCF exit case uses normalized terminal cash flow.
+AI cost: ~$0.55 for 2 AI calls (42,913 input / 11,478 output tokens, of which 11,478 reasoning)
+  read earnings releases (reused) gpt-4.1-mini   in       0 (cached 0) out      0 (reasoning 0)      0s $0.000
+  review pass                  gpt-5.5        in  42,913 (cached 2,816) out 11,478 (reasoning 11,478)     91s $0.546
+11 data notes:
+  - Net income includes discontinued operations / other after-tax items: shown on their own IS line
+  - FY2024 cash includes 7mm restricted cash (ties to the cash flow statement); other current assets reduced to match
+  - FY2025 cash includes 6mm restricted cash (ties to the cash flow statement); other current assets reduced to match
+  - Captive finance arm (Financial Products) presented in its own columns: 32,617mm of the 43,330mm debt (75%) funds its receivables and is excluded from net debt; its interest (1,359mm in FY2025) is already an operating cost, so the interest line carries the industrial debt only
+  - Adjusted EPS read from the releases (FY 7.2, prior FY 4.95) looks wrong (7.2 is implausible against GAAP EPS 18.81 for FY2025): the model's definition is used
+  - 2026E buybacks raised to the 7,745mm already made year to date
+  - 2026E acquisitions raised to the 893mm already made year to date
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): Caterpillar provides qualitative FY2026 sales, restructuring, capex and tax guidance in the Q3 2026 release / 10-Q, but no explicit FY2026 adjusted EPS or free-cash-flow range in the provided documents.
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): The 10-Q acquisition note discloses consideration / PPA components but not target revenue by segment; acquisitions are charged in cash paid, with no undisclosed acquired revenue added to segment organic growth.
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): Cat Financial is modeled as operating: captive finance debt funds finance receivables and its interest cost is part of segment economics, not excess financial leverage.
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): The bull case is a reverse-DCF calibration case: it shows what the share price requires rather than the analyst's base underwriting case.
+  check                    OK
+  price                    600.2000
+  ev                       282,941.1300
+  pe_fy1                   22.8558
+  ev_ebitda_fy1            15.8512
+  dcf_pg                   362.0708
+  dcf_exit                 349.0786
+  sotp                     563.7977
+  comps                    423.3161
+  fair_value               391.2445
+  upside                   -0.3481
+  irr_3y                   -0.0459
+  wacc                     0.1003
+  tv_share_pg              0.5285
+  implied_exit_multiple    8.8131
+  implied_g_from_exit      0.0383
+  implied_irr              0.0750
+  req_terminal_g           > 7%
+  req_terminal_margin      0.3436
+  req_fade_years           > 20
+  exit_pe_3y               14.4056
+  roic_gw_t                0.2008
+Problems:
+  - 2026E implies rest-of-year adjusted eps growth of 10% vs 48% year to date (Interim tab): explain (guidance, seasonality, deal, one-off) or fix
+  - Gate warning (10): Post-balance-sheet events (closings, signings, issuance, share-count settlements) — No 8-K with a deal, debt or impairment item since the balance sheet; check press releases: none entered (deals)
+  - Gate warning (12): FY2 growth vs FY1: a gap over 5pt has drivers that are not plug unwinds (EPS and FCF) — operating EPS growth 2026E +37.6%, 2027E +20.8%; free cash flow 2026E +24.1%, 2027E -2.5%
+  - Gate warning (16): Terminal margin within the 10–90th percentile of 10-year history; cyclicals at mid-cycle — terminal operating margin 18.3% at the 80% percentile of 10 years (median 14.3%): a cyclical's terminal year sits at mid-cycle — bring it to the median, or state the structural change (mix, pricing) with its margin effect in pt
+  - Gate warning (35): Base case at consensus, or the gap is a stated variant view (a management target belongs in the bull case) — 2027E revenue growth 7.8% vs consensus 11.6% (-3.7pt): a base above (below) consensus needs the variant view that justifies it and the date it is tested; otherwise base at consensus and the target in the bull

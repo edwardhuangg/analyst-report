@@ -1,0 +1,55 @@
+  .. Looking up the company on SEC EDGAR…
+  .. Reading the FY 10-K XBRL (Mar 18, 2026)…
+  .. Reading the latest 10-Q (Aug 02, 2026)…
+  .. Pulling market data (Yahoo Finance)…
+  .. Peer LOW…
+  .. Peer TSCO…
+  .. Peer FND…
+  .. Peer WSM…
+  .. Peer SHW…
+  .. Peer BBY…
+  .. Version bridge: the previous version on today's engine…
+  .. Version bridge: Terminal value: RONIC, terminal growth, fade years, exit multiple…
+  .. Version bridge: Cost of capital: beta, cost of debt, tax rate…
+  .. Version bridge: Revenue growth and M&A…
+  .. Version bridge: Margins and their basis…
+  .. Version bridge: Capital return, acquisitions, financing…
+Previous version: fair value $273.77, rule rating Neutral; this version: $295.06, rule rating Neutral. Judgment inputs carry 100% of the gross move.
+  [judgment] Terminal value: RONIC, terminal growth, fade years, exit multiple: +11.84/share (valuation.ronic)
+  [judgment] Cost of capital: beta, cost of debt, tax rate: -2.50/share (valuation.kd)
+  [judgment] Margins and their basis: +11.95/share (segments.Total company.margin, notes.margin)
+wrote demo/v5/HD_Valuation_Model.xlsx (102,377 bytes); provenance: Defaults: derived from the filings and market data (rules in valuation/spec.py) | AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort), applied from an overrides file: 1 segment (growth, margin, M&A, SOTP), 28 drivers, 18 valuation inputs, credit rating, market.price, market.basic_shares, market.dilutive, Total company KPI build, corporate sales, corporate costs, debt-like items, guidance, 6 peers, thesis, scenario probabilities
+wrote demo/v5/HD_Valuation_Model_overrides.json
+round trip: demo/v5/HD_Valuation_Model_overrides.json rebuilds to fair value 295.06 vs 295.06
+Analyst summary: Base case now includes a measured housing/Pro recovery and normalizes FY2031 operating margin to the PM-cited mid-cycle median rather than leaving the terminal year below mid-cycle. RONIC is reset to the model's ROIC including goodwill default, bull is calibrated to the reverse-DCF margin the current price requires, and excess cash is returned through post-FY2026 repurchases consistent with HD's stated capital-allocation order.
+6 data notes:
+  - No usable segment disclosure in XBRL: modelled as one segment (segment profit = operating income + intangible amortization + stock comp + other operating expense such as acquired IPR&D, impairments and restructuring, which sit in 'non-segment charges')
+  - 2026E acquisitions raised to the 1,333mm already made year to date
+  - 1 line(s) built as volume x price on the KPIs tab
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): HD did not provide a free-cash-flow dollar guidance range in the Feb. 24 or Aug. 18, 2026 releases; the explicit company cash-flow guide available is capex at approximately 2.5% of sales.
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): The KPI build uses retail-store count and consolidated sales per store as a proxy, but SRS/GMS locations are not equivalent to Home Depot stores; acquired-revenue contribution is therefore separated in mna.
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): Aug. 12, 2026 8-K disclosed CEO Ted Decker's temporary medical leave and interim management plan, with no deal, debt or share-count impact.
+  check                    OK
+  price                    348.6900
+  ev                       399,396.3930
+  pe_fy1                   23.2798
+  ev_ebitda_fy1            15.4852
+  dcf_pg                   296.4048
+  dcf_exit                 284.5171
+  sotp                     343.1214
+  comps                    312.6511
+  fair_value               295.0575
+  upside                   -0.1538
+  irr_3y                   0.0324
+  wacc                     0.0891
+  tv_share_pg              0.7586
+  implied_exit_multiple    11.6406
+  implied_g_from_exit      0.0373
+  implied_irr              0.0822
+  req_terminal_g           0.0472
+  req_terminal_margin      0.1713
+  req_fade_years           n/a: growth already at terminal
+  exit_pe_3y               17.6172
+  roic_gw_t                0.3140
+Problems:
+  - Gate warning (10): Post-balance-sheet events (closings, signings, issuance, share-count settlements) — No 8-K with a deal, debt or impairment item since the balance sheet; check press releases: none entered (deals)

@@ -1,0 +1,16 @@
+PM on CAT (data errors drove the short):
+- Debt was $0 in the bridge.
+  - By the model's own 75% captive share, about $9bn of machinery-operations debt was missing, overstating equity by roughly $20/share.
+  - The engine now reads the debt from the filer's columns: $45.2bn at Sep 30, 2026, 75–76% Financial Products.
+- Interest was double-counted: the P&L charged 5.6% on all $36bn of debt ($2.0bn), while captive interest already sits in Financial Products' segment profit and machinery-operations interest is about $0.5bn by the model's own note.
+  - EPS was understated by about $2.50 (≈9%).
+  - The engine now charges interest on the industrial debt only. Re-check FY26 EPS against guidance and consensus after this change, and re-check any driver that was set to compensate.
+- The P/E regression was skewed: DE at a trough P/E with rebound growth set the slope and pulled the applied multiple to 14x against a 23.6x median. The engine now uses the median for a cyclical.
+- Several bearish judgments stack up:
+  - RONIC 14% against 26% ROIC including goodwill;
+  - below-consensus FY27 growth;
+  - only three fade years;
+  - a beta trimmed only 0.05 below the method's 1.21 (Blume-adjusted is 1.44).
+  - Each needs dated evidence or goes back to the default.
+- Mid-cycle runs both ways: the terminal margin at 19.7% sits at the 90th percentile against a 14.3% median. Bring it to mid-cycle, or state the structural change (Power & Energy mix) with its effect in pt.
+- After fixing the bridge, interest, RONIC and regression, fair value probably lands around 15–20% below the price. That supports Neutral with a negative bias, not a Short, until the January 2027 outlook tests the destocking view.

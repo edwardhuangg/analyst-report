@@ -1,0 +1,860 @@
+{
+ "meta": {
+  "ticker": "NFLX",
+  "as_of": "2026-11-13",
+  "author": "AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)",
+  "forecast_years": [
+   "2026E",
+   "2027E",
+   "2028E",
+   "2029E",
+   "2030E",
+   "2031E"
+  ],
+  "history_years": [
+   "2023A",
+   "2024A",
+   "2025A"
+  ],
+  "summary": "Base case is anchored to Netflix's October 20, 2026 full-year revenue, margin and FCF guide and compares FY2026 EPS to GAAP consensus because Netflix does not report adjusted EPS. The WBD termination fee remains separately identified as non-recurring income, while recurring content-cash reinvestment is raised after FY2026 so the long-run growth case is not supported by negative reinvestment.",
+  "sources": [
+   "https://www.sec.gov/Archives/edgar/data/1065280/000106528026000290/ex991_q326.htm",
+   "https://www.sec.gov/Archives/edgar/data/1065280/000106528026000291/nflx-20260930.htm",
+   "https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/nflx-20251231.htm",
+   "https://www.sec.gov/Archives/edgar/data/1065280/000119312526312575/d171951d8k.htm",
+   "https://www.sec.gov/Archives/edgar/data/1065280/000106528026000139/nflx-20260422.htm"
+  ]
+ },
+ "market": {
+  "price": {
+   "value": 62.15,
+   "note": "NFLX close Nov 13, 2026 (Yahoo; later splits / spin-off adjustments undone so it matches the share count of the time)"
+  },
+  "basic_shares": {
+   "value": 4106.3,
+   "note": "Q3 2026 10-Q cover: 4,106.3mm shares outstanding"
+  },
+  "dilutive": {
+   "value": 60.7,
+   "note": "Q3 2026 diluted 4,195.1mm less basic 4,134.5mm (10-Q)"
+  }
+ },
+ "scenario": 2,
+ "seg_after_charges": 0,
+ "adj_eps_ex_sbc": 0,
+ "adj_eps_ex_repo": 0.0,
+ "adj_eps_ex_nonrec": 0,
+ "adj_eps_amort_share": 1.0,
+ "adj_eps_tax_hist": [
+  null,
+  null,
+  null
+ ],
+ "framework": "economic",
+ "segments": {
+  "Total company": {
+   "organic_last": 0.17,
+   "growth": {
+    "base": [
+     0.126,
+     0.107,
+     0.088,
+     0.073,
+     0.062,
+     0.052
+    ],
+    "bear": [
+     0.026,
+     0.002,
+     0.008,
+     0.016,
+     0.021,
+     0.023
+    ],
+    "bull": [
+     0.151,
+     0.141,
+     0.116,
+     0.096,
+     0.083,
+     0.069
+    ]
+   },
+   "margin": {
+    "base": [
+     0.323,
+     0.328,
+     0.331,
+     0.333,
+     0.335,
+     0.336
+    ],
+    "bear": [
+     0.313,
+     0.3,
+     0.292,
+     0.287,
+     0.285,
+     0.285
+    ],
+    "bull": [
+     0.328,
+     0.34,
+     0.35,
+     0.36,
+     0.368,
+     0.375
+    ]
+   },
+   "mna": {
+    "values": [
+     0.005,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "note": "March 2026 business combination purchase price $587mm cash is already paid; FY2026 revenue contribution is kept in M&A until it laps one year. 10-Q Q3 2026 Note 6: acquisition completed in March 2026 for total purchase price approximately $587mm cash."
+   },
+   "sotp": {
+    "multiples": [
+     14.0,
+     16.0,
+     18.0
+    ],
+    "note": "Single operating segment and SOTP receives 0% valuation weight; multiples retained only as a cross-check. 10-K Item 1: Netflix operates as one operating segment."
+   },
+   "history": {
+    "sales": [
+     33723.297,
+     39000.966,
+     45183.036
+    ],
+    "profit": [
+     7293.371,
+     10690.202,
+     13695.052
+    ]
+   },
+   "use_lines": true,
+   "lines": {
+    "United States & Canada": {
+     "growth": {
+      "bear": [
+       0.005,
+       -0.01,
+       0.0,
+       0.01,
+       0.015,
+       0.02
+      ],
+      "base": [
+       0.105,
+       0.09,
+       0.075,
+       0.062,
+       0.052,
+       0.045
+      ],
+      "bull": [
+       0.13,
+       0.12,
+       0.1,
+       0.08,
+       0.07,
+       0.06
+      ]
+     },
+     "note": "Base FY2026 steps down from 9M reported +12% to reflect Q4 guide deceleration; Q3 2026 release regional table: UCAN 9M revenue $16.305bn +12%, Q3 +11%, and Q4 total company guide +11.5%.",
+     "history": [
+      14956.622,
+      17359.369,
+      19957.152
+     ]
+    },
+    "EMEA": {
+     "growth": {
+      "bear": [
+       0.03,
+       0.01,
+       0.015,
+       0.02,
+       0.025,
+       0.025
+      ],
+      "base": [
+       0.13,
+       0.115,
+       0.095,
+       0.079,
+       0.065,
+       0.052
+      ],
+      "bull": [
+       0.155,
+       0.145,
+       0.12,
+       0.1,
+       0.085,
+       0.07
+      ]
+     },
+     "note": "Base reflects continued international ARM and membership growth but fades as the region scales; Q3 2026 release regional table: EMEA 9M revenue $12.139bn +14% reported / +10% FX-neutral and Q3 +11% reported / +9% FX-neutral.",
+     "history": [
+      10556.487,
+      12387.035,
+      14514.646
+     ]
+    },
+    "Latin America": {
+     "growth": {
+      "bear": [
+       0.065,
+       0.01,
+       0.015,
+       0.02,
+       0.025,
+       0.025
+      ],
+      "base": [
+       0.17,
+       0.11,
+       0.09,
+       0.073,
+       0.06,
+       0.05
+      ],
+      "bull": [
+       0.2,
+       0.15,
+       0.12,
+       0.1,
+       0.085,
+       0.07
+      ]
+     },
+     "note": "FY2026 remains the fastest reported region but decelerates from 9M as Q4 total company growth slows; Q3 2026 release regional table: LATAM 9M revenue $4.684bn +19% reported / +15% FX-neutral and Q3 +17% reported / +12% FX-neutral.",
+     "history": [
+      4446.461,
+      4839.816,
+      5357.521
+     ]
+    },
+    "Asia Pacific": {
+     "growth": {
+      "bear": [
+       0.045,
+       0.025,
+       0.025,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "base": [
+       0.15,
+       0.135,
+       0.11,
+       0.09,
+       0.074,
+       0.06
+      ],
+      "bull": [
+       0.18,
+       0.17,
+       0.14,
+       0.12,
+       0.1,
+       0.085
+      ]
+     },
+     "note": "Base assumes APAC remains a long-run membership/ARM growth contributor, supported by India commentary, but fades from 9M growth; Q3 2026 release: APAC 9M revenue $4.556bn +16% reported / +17% FX-neutral, India Q3 revenue +18% FX-neutral.",
+     "history": [
+      3763.727,
+      4414.746,
+      5353.717
+     ]
+    }
+   }
+  }
+ },
+ "notes": {
+  "growth": "FY2026 base is set to the October 20, 2026 guide: revenue $51.1bn, +13% reported and +12% FX-neutral; line growth uses the Q3 regional table and Q4 total company guide. FY2027 base is near the provided Street revenue-growth consensus and then fades toward GDP with a five-year fade because 2031E growth remains above terminal GDP.",
+  "margin": "Segment margin is set above GAAP operating margin because the model's single-segment profit is GAAP EBIT plus SBC. FY2026 segment margin of 32.3% less 0.8% SBC yields the guided 31.5% operating margin; Q4 guide embeds a 120bp headcount-reduction cost and the FY guide embeds a 30bp impact, so no restructuring add-back is used."
+ },
+ "corporate": {
+  "sales": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "sales_note": "FY2025: 0mm (total sales less segments)",
+  "cost_pct": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "cost_note": "FY2025: 0mm (0.0%)",
+  "multiples": [
+   16.5,
+   16.5,
+   16.5
+  ]
+ },
+ "drivers": {
+  "amort": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2025: 0mm; held flat (capped by remaining intangibles)"
+  },
+  "sbc_pct": {
+   "values": [
+    0.008,
+    0.008,
+    0.008,
+    0.008,
+    0.008,
+    0.008
+   ],
+   "note": "SBC remains a real operating cost in EBIT and DCF. FY2025 stock compensation was $368mm, 0.8% of revenue."
+  },
+  "repo_pct": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "No add-back: Q4 2026 headcount reductions and acquisition-related expenses are included in Netflix's GAAP operating-margin guide. Q3 2026 release: Q4 operating margin includes 120bp negative impact from headcount reductions; FY2026 guide includes 30bp negative impact.; 2026E floored at the 0mm of non-segment charges already booked in 9M 2026 (10-Q); 2026E floored at the 0mm of non-segment charges already booked in 9M 2026 (10-Q); 2026E floored at the 0mm of non-segment charges already booked in 9M 2026 (10-Q); 2026E floored at the 0mm of non-segment charges already booked in 9M 2026 (10-Q)"
+  },
+  "other_nonop": {
+   "values": [
+    -230.0,
+    -230.0,
+    -230.0,
+    -230.0,
+    -230.0,
+    -230.0
+   ],
+   "note": "Recurring interest and other income is modeled separately from the WBD termination fee; 10-Q Q3 2026 statement of operations shows 9M interest and other income of $2.947bn, of which $2.8bn was the WBD termination fee per Note 6."
+  },
+  "int_yield": {
+   "values": [
+    0.0425,
+    0.0425,
+    0.0425,
+    0.0425,
+    0.0425,
+    0.0425
+   ],
+   "note": "Interest income not reported separately: estimated at the risk-free rate less 1pt (4.2%) on cash & ST investments"
+  },
+  "int_rate": {
+   "values": [
+    0.053,
+    0.053,
+    0.0535,
+    0.054,
+    0.0545,
+    0.055
+   ],
+   "note": "Q3 2026 10-Q: 9M interest expense $622mm on roughly $15bn debt; July 22, 2026 8-K: issued $1bn 5.250% senior notes due 2036."
+  },
+  "etr": {
+   "values": [
+    0.168,
+    0.15,
+    0.15,
+    0.15,
+    0.15,
+    0.15
+   ],
+   "note": "FY2026 uses the elevated year-to-date tax rate as a guidepost but allows Q4 mix to normalize: Q3 2026 10-Q shows 9M tax $2.584bn on pretax income $14.933bn, or 17.3%; FY2025 effective tax rate was 13.7%."
+  },
+  "nci_ni": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2025: 0mm"
+  },
+  "cogs_pct": {
+   "values": [
+    0.515,
+    0.515,
+    0.515,
+    0.515,
+    0.515,
+    0.515
+   ],
+   "note": "FY2025: 51.5%"
+  },
+  "da_pct": {
+   "values": [
+    0.007,
+    0.008,
+    0.009,
+    0.01,
+    0.011,
+    0.011
+   ],
+   "note": "FY2025: (333 D&A \u2013 0 acquired-intangible amortization) / sales = 0.7%; rises to 1.1% by 2031E as the capex build depreciates"
+  },
+  "capex_pct": {
+   "values": [
+    0.017,
+    0.015,
+    0.015,
+    0.015,
+    0.015,
+    0.015
+   ],
+   "note": "FY2026 is above the 2025 run-rate to reflect the Q4 real estate transaction affecting FCF; Q3 2026 release: FCF guide lowered to approximately $12.0bn primarily due to expected closing of a real estate transaction in Q4. FY2025 capex was $688mm, 1.5% of sales."
+  },
+  "dso": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2025: 0.0 days"
+  },
+  "dio": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2025: 0.0 days"
+  },
+  "oca_pct": {
+   "values": [
+    0.0875,
+    0.0875,
+    0.0875,
+    0.0875,
+    0.0875,
+    0.0875
+   ],
+   "note": "FY2025: 8.7%"
+  },
+  "dpo": {
+   "values": [
+    14.0,
+    14.0,
+    14.0,
+    14.0,
+    14.0,
+    14.0
+   ],
+   "note": "FY2025: 14.1 days"
+  },
+  "accrued_pct": {
+   "values": [
+    0.201,
+    0.201,
+    0.201,
+    0.201,
+    0.201,
+    0.201
+   ],
+   "note": "FY2025: 20.1% (accrued & other current liabilities)"
+  },
+  "other_op": {
+   "values": [
+    -1250.0,
+    -1700.0,
+    -2200.0,
+    -2700.0,
+    -3200.0,
+    -3700.0
+   ],
+   "note": "FY2026 uses the FCF guide as the controlling cash-flow datapoint after revenue, GAAP operating margin, capex and year-end working-capital ratios are set separately. The implied FY2026 residual content-cash / other operating outflow is $1.25bn; it is less negative than later years because the company guided to approximately $12.0bn FCF while citing a Q4 real estate transaction. The explicit content-cash schedule is an estimate anchored to the Q3 2026 letter's statement that annual cash content spend / amortization remains 1.1x: residual reinvestment steps from $1.25bn in FY2026 to $3.7bn in FY2031, about 2.4% to 5.0% of sales and roughly 5% to 10% of modeled COGS, so content cash spend stays above amortization rather than being a terminal-year reversal."
+  },
+  "acq": {
+   "values": [
+    587.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Cash paid for the March 2026 business combination only. 10-Q Q3 2026 Note 6: acquisition completed in March 2026 for total purchase price approximately $587mm consisting of cash consideration."
+  },
+  "intang_share": {
+   "values": [
+    0.3,
+    0.3,
+    0.3,
+    0.3,
+    0.3,
+    0.3
+   ],
+   "note": "Remainder to goodwill; typical for media deals"
+  },
+  "debt_iss": {
+   "values": [
+    -330.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Net of 2026 financing actions: Q3 release says gross debt was $1bn higher than Q2 after a $1bn bond deal to fund an upcoming $1bn Q4 maturity; FY2025 debt was $14.463bn and Q3 2026 debt was $15.132bn, so year-end net issuance is modeled at roughly -$0.33bn after the Q4 maturity repayment."
+  },
+  "buyback": {
+   "values": [
+    10782.0,
+    13600.0,
+    15050.0,
+    16050.0,
+    16450.0,
+    18050.0
+   ],
+   "note": "FY2026 is floored at the $10.782bn repurchased through Q3. Later years are reduced from the prior run to reflect the higher recurring content-cash reinvestment and to avoid implying buybacks funded by drawing cash below the FY0 cash-to-sales policy level; no debt-funded buyback program is assumed."
+  },
+  "buyback_px": {
+   "values": [
+    62.15,
+    67.12,
+    72.49,
+    78.29,
+    84.55,
+    91.32
+   ],
+   "note": "Assumes ~8% annual share price appreciation"
+  },
+  "shares_issued": {
+   "values": [
+    16.4,
+    16.4,
+    16.4,
+    16.4,
+    16.4,
+    16.4
+   ],
+   "note": "~0.4% of basic shares per year (options & RSUs)"
+  },
+  "stock_proc": {
+   "values": [
+    665.0,
+    665.0,
+    665.0,
+    665.0,
+    665.0,
+    665.0
+   ],
+   "note": "FY2025: 667mm"
+  },
+  "dps0": {
+   "values": [
+    0.0
+   ],
+   "note": "No dividend"
+  },
+  "div_growth": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "No dividend"
+  },
+  "nonrec": {
+   "values": [
+    2800.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "WBD termination fee received in Q1 2026 is non-recurring pre-tax income included in GAAP EPS and separately identified outside EBIT/DCF operating profit. Because Netflix does not report adjusted EPS, the model's FY2026 EPS comparison to consensus uses GAAP EPS and therefore does not exclude this item from the EPS comparison."
+  },
+  "adj_tax": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Netflix does not report adjusted EPS with a stated non-GAAP tax rate; model taxes adjustments at the year's effective rate."
+  }
+ },
+ "valuation": {
+  "rf": {
+   "value": 0.0515,
+   "note": "10-yr U.S. Treasury yield on Nov 13, 2026 (Yahoo ^TNX; check FRED DGS10)"
+  },
+  "beta": {
+   "value": 1.28,
+   "note": "Method beta = average of bottom-up 1.15 (median unlevered 1.09 across 4 peers, relevered at D/E 6%); own Blume-adjusted 1.41 (raw 1.61)"
+  },
+  "erp": {
+   "value": 0.0423,
+   "note": "Implied ERP for the S&P 500 at the start of 2026 (Damodaran, FCFE-based): the same for every name on this date, measured against the 10-yr Treasury"
+  },
+  "kd": {
+   "value": 0.0525,
+   "note": "Uses the actual July 2026 senior note coupon as market evidence within the permitted spread band. July 22, 2026 8-K: $1bn of 5.250% senior unsecured notes due 2036."
+  },
+  "tax_wacc": {
+   "value": 0.13,
+   "note": "Long-run effective rate"
+  },
+  "g": {
+   "value": 0.0375,
+   "note": "House long-run growth: US nominal GDP (about 1.8% real + 2% inflation), below the 10-yr risk-free rate"
+  },
+  "w_pg": {
+   "value": 0.6,
+   "note": "Primary weight on intrinsic DCF because Netflix is a single-segment content/subscription business and peer accounting for content spend and ads mix is not fully comparable."
+  },
+  "w_exit": {
+   "value": 0.3,
+   "note": "Exit method retained as a market cross-check but secondary to the perpetuity DCF."
+  },
+  "w_sotp": {
+   "value": 0.0,
+   "note": "10-K Item 1: Netflix operates as one operating segment; no SOTP value creation is modeled."
+  },
+  "w_comps": {
+   "value": 0.1,
+   "note": "Low weight because pure-play global streaming peers are limited and EBITDA is a poor measure where content amortization is the main cost."
+  },
+  "peer_discount": {
+   "value": 0.0,
+   "note": "Positive = discount to the peer median (e.g. conglomerate discount); negative = premium"
+  },
+  "exit_pe": {
+   "value": 25.0,
+   "note": "Near the current P/E on FY2025 adjusted EPS (24.6x)"
+  },
+  "other_stake": {
+   "value": 0.0,
+   "note": "Equity stakes / investments not captured in segment EBITDA (none material on the balance sheet)"
+  },
+  "nci_value": {
+   "value": 0.0,
+   "note": "Dec 31, 2025 BS: 0mm + 0mm redeemable"
+  },
+  "fade_years": {
+   "value": 5.0,
+   "note": "2031E growth remains above the 3.75% house terminal growth rate; a five-year fade avoids forcing the explicit forecast to terminal GDP too quickly for a global subscription/ads runway."
+  },
+  "comps_pe_weight": {
+   "value": 1.0,
+   "note": "Media / streaming / subscription convention: value on P/E and FCF, not EV/EBITDA, because content amortization is the core operating cost."
+  },
+  "captive_share": {
+   "value": 0.0,
+   "note": "No captive finance arm"
+  },
+  "ronic": {
+   "value": 0.433,
+   "note": "Set to the model's FY2031 ROIC including goodwill/content assets (DCF C93, 43.3%) because there is no dated sector reason to assume new capital earns below the return on the capital already paid for the business."
+  },
+  "stake_haircut": {
+   "value": 0.25,
+   "note": "Tax and liquidity haircut on stakes outside EBITDA (carrying value or last round)"
+  }
+ },
+ "deals": [],
+ "scenario_probs": [
+  0.25,
+  0.5,
+  0.25
+ ],
+ "labels": {},
+ "debt_like": {
+  "liab": 0.0,
+  "offset": 0.0,
+  "liab_fy": 0.0,
+  "offset_fy": 0.0,
+  "note": "None tagged in XBRL; enter debt-like items not in net debt (e.g. asbestos, environmental, litigation settlements) from the 10-Q"
+ },
+ "guidance": {
+  "date": "October 20, 2026",
+  "sales": [
+   51100.0,
+   51100.0
+  ],
+  "organic": [
+   0.12,
+   0.13
+  ],
+  "margin": [
+   0.315,
+   0.315
+  ],
+  "fcf": [
+   12000.0,
+   12000.0
+  ]
+ },
+ "adjusted_eps": null,
+ "organic": {
+  "fy_total": 0.17,
+  "q_total": 0.11,
+  "q_by_segment": {
+   "Total company": 0.11
+  }
+ },
+ "peers": [
+  {
+   "ticker": "DIS",
+   "name": "Walt Disney Company",
+   "overlap": "Global filmed entertainment, DTC streaming and IP monetization",
+   "price": 118.97,
+   "eps": 6.93,
+   "source": "Prior model peer input available before the valuation date; no new Disney source document was attached in this pass.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-17) to within 0.5%: consensus, not company guidance",
+   "ev": 246280.0,
+   "ebitda": 23767.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 1,727mm shares x price + net debt 40,856mm; EBITDA LTM to Jun 2026 (operating income + D&A)",
+   "eps_next": 7.48081,
+   "g_next": 0.07919075227896655,
+   "rev_g_next": 0.04545318064065662,
+   "beta_raw": 1.416620423695271,
+   "de": 0.2241,
+   "snapshot": "2026-11-17"
+  },
+  {
+   "ticker": "CMCSA",
+   "name": "Comcast Corporation",
+   "overlap": "Media, studios, broadband distribution and Peacock streaming exposure",
+   "price": 25.16,
+   "eps": 3.5,
+   "source": "Prior model peer input available before the valuation date; no new Comcast source document was attached in this pass.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-17) to within 0.5%: consensus, not company guidance",
+   "ebitda": 33543.0,
+   "ev_source": "Corporate action on Jan 5, 2026 (Yahoo factor 1.067): LTM EBITDA and shares are not pro forma, so EV / EBITDA is excluded",
+   "eps_next": 3.52187,
+   "g_next": 0.00649300544417919,
+   "rev_g_next": -0.027760235484130424,
+   "beta_raw": 0.7112134843713797,
+   "de": 1.6831,
+   "snapshot": "2026-11-17"
+  },
+  {
+   "ticker": "ROKU",
+   "name": "Roku, Inc.",
+   "overlap": "Connected-TV platform and advertising monetization",
+   "price": 160.52,
+   "eps": 4.0,
+   "source": "Prior model peer input available before the valuation date; no new Roku source document was attached in this pass.; price = close Nov 6, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-17) to within 0.5%: consensus, not company guidance",
+   "ev": 21012.0,
+   "ebitda": 474.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 148mm shares x price + net debt -2,721mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "beta_raw": 2.0813052765733744,
+   "de": 0.0,
+   "snapshot": "2026-11-17"
+  },
+  {
+   "ticker": "GOOGL",
+   "name": "Alphabet Inc.",
+   "overlap": "YouTube global video engagement and advertising platform",
+   "price": 295.77,
+   "eps": 10.82,
+   "source": "Normalized EPS estimate to exclude the one-off securities gain flagged in the PM review: prior EPS input $19.60 less ((about $127,000mm securities gains x an estimated 85% after-tax retention) / 12,294mm shares) = about $10.82.; price = close Nov 13, 2026 (Yahoo)",
+   "ev": 3497216.0,
+   "ebitda": 184971.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 12,294mm shares x price + net debt -138,980mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 14.93162,
+   "g_next": -0.2380104278671148,
+   "rev_g_next": 0.27244185947962274,
+   "beta_raw": 1.2203283130078102,
+   "de": 0.0347
+  }
+ ],
+ "thesis": {
+  "stance": "neutral on",
+  "recommendation": "Netflix screens close to intrinsic value because near-term guidance is embedded while longer-term value depends on sustaining growth and margins above the historical range.",
+  "points": [
+   "1. Growth: FY2026 is tied to company guidance of $51.1bn revenue, +13% reported and +12% FX-neutral; thereafter the base assumes geography-led growth fades as pricing, ads and membership growth mature.",
+   "2. Margins: the base case treats the guided 31.5% FY2026 operating margin as GAAP, including headcount-reduction and acquisition-related costs, and assumes modest operating leverage rather than a step-change target.",
+   "3. Cash flow: FCF is constrained to the company's approximately $12.0bn FY2026 guide, with content cash spend remaining structurally above amortization and buybacks absorbing excess cash from FY2027 onward.",
+   "4. Capital allocation: the terminated WBD transaction is not in the operating forecast; the $2.8bn fee is non-recurring income and the March 2026 acquisition is paid for in FY2026 acquisitions."
+  ],
+  "model_says": [
+   "\u2022 The live model value is {fv} versus {price}, with DCF outputs of {dcf_pg} and {dcf_exit}; comps are {comps} and remain a lower-weight cross-check.",
+   "\u2022 The reverse DCF says the stock requires {irr} long-run IRR and {req_margin} terminal margin / {req_g} growth; the investment case depends most on sustaining post-2026 revenue growth while expanding GAAP margins.",
+   "\u2022 Scenario value is {bear} / {base} / {bull}, probability-weighted at {pw}; the engine applies the value-gap and IRR-spread rules."
+  ],
+  "risks": [
+   "\u2022 Engagement risk: if view hours do not reaccelerate, price increases and ad-tier monetization can pressure both growth and churn.",
+   "\u2022 Content-cost risk: cash content spend staying materially above amortization would reduce FCF conversion versus the base case.",
+   "\u2022 Competitive and regulatory risk: 10-K Item 1A highlights intense competition for members and content plus potential country-level media regulation, levies and quotas.",
+   "\u2022 Capital allocation risk: buybacks consume substantial FCF; repurchases above FCF would be debt-funded and would reduce balance-sheet flexibility."
+  ],
+  "monitor": [
+   "\u2022 January 2027 Q4 results: revenue near $13.442bn, Q4 operating margin near 26.0%, and FY FCF approximately $12.0bn.",
+   "\u2022 2027 ad-tier launch in 15 new countries, including the March 2027 first tranche in EMEA, Colombia, Peru and New Zealand; watch ad revenue growth versus the 2026 $2.7bn expectation.",
+   "\u2022 Engagement disclosures and commentary: price-change churn, view-hours growth, and view-hours per member, especially in UCAN and India.",
+   "\u2022 Buyback pace versus FCF and remaining authorization after the $22.3bn capacity disclosed at Q3 2026."
+  ],
+  "about": "Netflix is modeled as one global streaming, ads and entertainment subscription business with revenue built by geography and cash flow driven by content investment.",
+  "price_implies": "At {price}, the market is underwriting {irr} long-run IRR and a terminal margin / growth combination of {req_margin} and {req_g}, so upside requires confidence that Netflix can hold premium margins while still growing above GDP.",
+  "variant_view": "We do not have a material variant view versus FY2026 consensus: the model's EPS comparison is GAAP because Netflix does not report adjusted EPS, and it includes the one-time WBD termination fee while separately excluding it from operating valuation drivers. We will reassess at the January 2027 Q4 print and the 2027 ad-tier country launches.",
+  "catalysts": [
+   "January 2027 Q4 print: FY2026 revenue near $51.1bn, GAAP operating margin near 31.5%, and FCF within the approximately $12.0bn guide.",
+   "March 2027 ad-tier expansion: evidence that new-market launches lift ad inventory and monetization without pressuring churn.",
+   "First-half 2027 engagement commentary: view-hours growth and member response to 2026 price changes remain consistent with management's Q3 2026 comments."
+  ],
+  "breaker": "The thesis breaks if 2027 reported revenue growth falls below mid-single digits while GAAP operating margin slips below 29%, consistent with the bear case of weak engagement, limited pricing power and heavier content reinvestment.",
+  "sensitivities": "The two largest sensitivities are terminal GAAP operating margin / RONIC and the post-2026 revenue fade; content cash spend relative to amortization is the key FCF sensitivity.",
+  "consensus_notes": "FY2026 EPS is compared on a GAAP basis because Netflix does not report adjusted EPS; the $2.8bn WBD termination fee is tracked separately in nonrec but is included in the consensus EPS bridge.",
+  "explanations": {
+   "gate 5": "Peer EPS inputs are labeled as company guidance, reported adjusted run-rate or pre-date consensus available before Nov 13, 2026; the Nov 16 Yahoo snapshot language has been removed.",
+   "gate 10": "No post-balance-sheet 8-K with a signed acquisition, separation, debt issuance, impairment or share-count settlement was identified in the materials already supplied. Pre-balance-sheet 2026 items are reflected: July $1bn 5.250% notes in debt/interest, April $25bn repurchase authorization in buyback policy, and March acquisition in FY2026 acquisitions.",
+   "gate 12": "The FY2026 FCF step-down is sourced to management guidance, not a working-capital plug: Q3 release lowered FCF to approximately $12.0bn due primarily to a Q4 real estate transaction and maintained a 1.1x cash content spend / amortization expectation. The content cash outflow remains recurring rather than reversing in FY2027.",
+   "gate 16": "The terminal margin remains above the 10-year historical range because the explicit evidence shows a structural mix/scale step rather than a cyclical peak: operating margin improved from 29.5% in 2025 to the 31.5% FY2026 guide, management stated its intent to grow operating margin each year, 2026 ad revenue is expected at $2.7bn versus over $1.5bn in 2025, and the ad tier expands to 15 new countries in 2027. The base terminal operating margin is 32.8%, only 130bp above the FY2026 guide, while the bull case uses the reverse-DCF margin requirement.",
+   "gate 17": "The reinvestment warning is an accounting classification issue for a content business. The model records cash content spend above amortization in other_op rather than capex: by FY2031 the recurring outflow is -$3.7bn, about 18% of modeled NOPAT and about 10% of modeled COGS, while terminal reinvestment is controlled through RONIC at 25%. Without that operating-cash reinvestment the explicit forecast would overstate FCF conversion.",
+   "gate 18": "The FY2026 M&A revenue contribution relates to the March 2026 business combination already paid for; 10-Q Q3 2026 Note 6 gives total purchase price of approximately $587mm cash, included in drivers.acq.",
+   "gate 35": "adj_eps_ex_nonrec is set to 0 because Netflix does not report company adjusted EPS; the relevant FY2026 comparison is GAAP EPS, which includes the WBD termination fee and is tested at the January 2027 Q4 print.",
+   "base case outside company guidance free cash flow": "FY2026 FCF is calibrated through operating cash drivers and capex to management's approximate $12.0bn guide; guidance is modeled as approximately $12.0bn rather than a precise point estimate.",
+   "implies rest of year adjusted eps growth of": "Netflix does not report adjusted EPS, so the model's 'adjusted EPS' line is GAAP EPS. The rest-of-year EPS growth screen is distorted by per-share and non-operating items while the operating bridge is not: implied Q4 revenue growth is 11.4% versus 13.7% YTD, and implied Q4 EBIT growth is 18.0% versus 21.6% YTD, both consistent with the FY2026 revenue and operating-margin guide. The warning is therefore monitored at the January 2027 Q4 print rather than solved through tax-rate or add-back changes.",
+   "peer p e outliers vs the median spot": "Spotify is removed from the comps set because its margin-inflection P/E is an outlier versus the selected video, streaming-platform and scaled digital-video peers.",
+   "cash builds to 403mm of total assets by": "Buybacks are increased from FY2027 using FCF and the $22.3bn remaining authorization disclosed in the Q3 release, preventing excess cash from accumulating without a stated deal need.",
+   "gate 32": "The WBD item is dismissed from the Deals tab because it was terminated before the valuation date: no signed pending acquisition or separation remains, no purchase price will leave, and no revenue, margin or EBITDA should arrive in the operating forecast. Only the $2.8bn termination fee is modeled as FY2026 non-recurring income.",
+   "gate 11": "The other_op warning is left as an explained FY2026 cash-flow bridge, not a tax or other-nonoperating plug. FY2026 other_op is -$1.25bn: versus the checker's -$0.76bn normal reference it is $0.49bn more negative, or about 1.0% of FY2026 sales and roughly $0.11/share of cash value; versus the later-year -$2.70bn run-rate reference it is $1.45bn less negative, or about 2.8% of FY2026 sales and roughly $0.32/share of one-year discounted value at the model WACC. If FY2026 were forced to -$2.70bn, FCF would fall from about $12.05bn to about $10.60bn and would miss the approximately $12.0bn company guide; the model instead steps the recurring outflow up in FY2027-FY2031.",
+   "2026E implies rest-of-year adjusted eps growth of": "Netflix does not report adjusted EPS, so the screen is not a company non-GAAP EPS test. The source data support the modeled FY2026 GAAP bridge: the Q3 2026 release shows YTD diluted EPS of $2.90 and Q4 forecast EPS of $0.67, or about $3.57 for the year, versus the model's $3.60. The apparent adjusted-EPS rest-of-year growth is distorted by the model's interim treatment of the $2.8bn WBD termination fee recorded in Interest and other income in Q1 2026; revenue, EBIT and FCF are tied to the October 2026 guide and will be tested at the January 2027 print.",
+   "gate 34": "Fixed by changing terminal RONIC from 25.0% to 43.3%, equal to the model's FY2031 ROIC including goodwill/content assets. No dated sector reason was provided for new capital to earn less than the return on all capital already paid for the business.",
+   "pm review": "Recommendation text: changed the recommendation to one supporting sentence with no explicit rating or directional bias; value effect $0 because this is presentation only.\n\nBear/bull calibration: the pre-existing bull case already sat above the share price, but the bull margin path was recalibrated to the reverse-DCF requirement. Bull segment margin now reaches 37.5% in FY2031, equivalent to roughly 36.7% GAAP operating margin after the 0.8% SBC cost, matching the reverse-DCF terminal margin screen; base-case value effect $0 because only the bull scenario changed.\n\nRONIC framework: changed RONIC from 25.0% to 43.3%, equal to the model's FY2031 ROIC including goodwill/content assets, because no dated competitive-entry, loss-of-exclusivity or acquisition-cycle reason was supplied. Estimated value effect is positive, roughly a low-single-digit dollars-per-share lift to the DCF because terminal reinvestment falls from g / 25.0% to g / 43.3%.\n\nBearish-thesis requirements: no explicit bearish rating override is used, so no short-evidence, crowding/borrow or pair-trade field is added; value effect $0.\n\nClaims and required data: peer source language was cleaned to remove the later Yahoo snapshot language and to label unsourced peer inputs as prior model inputs; value effect $0 except for the GOOGL EPS normalization described below.\n\nMid-cycle normalization: Netflix is not modeled as a cyclical at a commodity-cycle peak; the terminal margin warning is instead explained with the 2025 margin, FY2026 guide, ad-revenue step-up and 2027 ad-tier expansion. Value effect $0 because the base margin path was not changed.\n\nDeal synergies: there is no signed pending deal at the valuation date. The WBD transaction was terminated and the $2.8bn termination fee is in non-recurring income; the March 2026 acquisition is closed and already in FY2026 acquisitions. Value effect $0.\n\nPeer one-offs: GOOGL EPS was changed from $19.60 to an estimated $10.82 to exclude about $127bn of securities gains: $19.60 - (($127,000mm x 85% estimated after-tax retention) / 12,294mm shares). This brings GOOGL's P/E back into the peer set rather than excluding it for one-off EPS; estimated value effect is positive for comps and modest for total fair value because comps carry only 10% weight.\n\nCost of debt: no change; the model already uses the July 2026 5.250% senior note coupon rather than a synthetic AAA cost of debt. Value effect $0.\n\nFade reinvestment: no driver change was needed beyond the RONIC fix because the engine now counts other operating items in the fade reinvestment rate; the other_op note now makes the content-cash reinvestment schedule explicit. Value effect $0 from the note.\n\nContent cash schedule: the other_op note now states the FY2026-FY2031 residual content-cash / operating reinvestment path and ties it to management's 1.1x cash content spend / amortization statement. Value effect $0 because the cash-flow values were already in the model.\n\nTerminal margin: the base terminal margin is retained with explicit numerical support: 29.5% operating margin in 2025, 31.5% FY2026 guide, $2.7bn expected 2026 ad revenue versus over $1.5bn in 2025, and 15 new ad-tier countries in 2027. Value effect $0 because the base margin path was not changed."
+  }
+ },
+ "flags": [
+  "Netflix does not report adjusted EPS; the model's consensus EPS comparison uses GAAP EPS, while the one-time WBD termination fee is separately identified in non-recurring income and excluded from operating valuation drivers.",
+  "The October 20, 2026 margin guide is GAAP operating margin and already includes headcount-reduction and acquisition-related costs; those costs are not added back.",
+  "The WBD transaction was terminated before the valuation date and is not modeled as a pending acquisition or separation; only the $2.8bn termination fee is included as FY2026 non-recurring income.",
+  "Buybacks after FY2026 have been reduced versus the prior run to reflect higher recurring content-cash reinvestment; no debt-funded buyback program is assumed."
+ ]
+}

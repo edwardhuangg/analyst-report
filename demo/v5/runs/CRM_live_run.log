@@ -1,0 +1,90 @@
+  .. Looking up the company on SEC EDGAR…
+  .. Reading the FY 10-K XBRL (Mar 02, 2026)…
+  .. Reading the latest 10-Q (Jul 31, 2026)…
+  .. Pulling market data (Yahoo Finance)…
+  .. Reading the earnings releases (AI)…
+  .. Peer ADBE…
+  .. Peer NOW…
+  .. Peer ORCL…
+  .. Peer HUBS…
+  .. Peer WDAY…
+  .. Peer MSFT…
+  .. AI analyst is reviewing the built model (7 issues from the checker, and the PM's critique)…
+  .. … gpt-5.5 still reasoning (31s)
+  .. … gpt-5.5 still reasoning (63s)
+  .. … gpt-5.5 still reasoning (95s)
+  .. … gpt-5.5 still reasoning (127s)
+  .. AI analyst is fixing 5 remaining issue(s)…
+  .. … gpt-5.5 still reasoning (33s)
+  .. … gpt-5.5 still reasoning (65s)
+  warning: Guidance organic: the analyst's 7.5%–8.0% differs from the release's 10.0%–12.0%; the release figure is kept
+  .. Version bridge: the previous version on today's engine…
+  .. Version bridge: Terminal value: RONIC, terminal growth, fade years, exit multiple…
+  .. Version bridge: Deals (probability, synergies, multiples are judgment)…
+  .. Version bridge: Revenue growth and M&A…
+  .. Version bridge: Margins and their basis…
+  .. Version bridge: Working capital…
+  .. Version bridge: Capital return, acquisitions, financing…
+  .. Version bridge: Tax, interest, other income, one-offs…
+  .. Version bridge: Share count, definitions, guidance…
+Previous version: fair value $253.12, rule rating Neutral; this version: $224.60, rule rating Neutral. Judgment inputs carry 79% of the gross move.
+  [judgment] Terminal value: RONIC, terminal growth, fade years, exit multiple: -0.75/share (valuation.ronic)
+  [judgment] Deals (probability, synergies, multiples are judgment): -7.29/share (deals)
+  [judgment] Revenue growth and M&A: -3.65/share (segments.Total company.growth, segments.Total company.lines, notes.growth)
+  [judgment] Margins and their basis: -21.72/share (segments.Total company.margin, notes.margin)
+  [judgment] Working capital: +0.39/share (drivers.dso, drivers.accrued_pct)
+  [judgment] Capital return, acquisitions, financing: -5.94/share (drivers.buyback, drivers.acq)
+  [data] Tax, interest, other income, one-offs: +1.07/share (drivers.int_rate)
+  [data] Share count, definitions, guidance: +9.36/share (market, organic)
+wrote demo/v5/runs/CRM_review_as_run.xlsx (108,643 bytes); provenance: Defaults: derived from the filings and market data (rules in valuation/spec.py) | AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file + AI analyst review (gpt-5.5, medium effort), applied from an overrides file + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file: 1 segment (growth, margin, M&A, SOTP), 28 drivers, 19 valuation inputs, market.price, market.basic_shares, market.dilutive, adjusted EPS definition, Total company lines, corporate sales, corporate costs, debt-like items, guidance, 6 peers, thesis, 3 deal(s), scenario probabilities | AI analyst review (gpt-5.5, medium effort): 1 segment (growth, margin, M&A), 2 drivers, 2 valuation inputs, market.basic_shares, market.dilutive, Total company lines, guidance, thesis, 3 deal(s) | AI analyst review (gpt-5.5, medium effort): 1 segment (growth, M&A), 4 drivers, 1 valuation inputs, Total company lines, thesis
+wrote demo/v5/runs/CRM_review_as_run_overrides.json
+round trip: demo/v5/runs/CRM_review_as_run_overrides.json rebuilds to fair value 224.60 vs 224.60
+Analyst summary: Base case now puts FY2027 organic growth at the low end of the company guide and reduces the FY2027 M&A/FX contribution so total revenue remains inside the sales guide. The failed RONIC gate is fixed by capping terminal RONIC below the model's return including goodwill, while later-year buybacks and working-capital float are normalized so cash does not turn negative.
+AI cost: ~$1.12 for 3 AI calls (58,219 input / 28,007 output tokens, of which 28,007 reasoning)
+  read earnings releases (reused) gpt-4.1-mini   in       0 (cached 0) out      0 (reasoning 0)      0s $0.000
+  review pass                  gpt-5.5        in  40,213 (cached 0) out 19,077 (reasoning 19,077)    140s $0.773
+  review pass                  gpt-5.5        in  18,006 (cached 2,816) out  8,930 (reasoning 8,930)     78s $0.345
+13 data notes:
+  - D&A tag below acquired amortization (1,200 < 1,687mm): the largest D&A tag (3,631mm, cash-flow statement) is used
+  - No usable segment disclosure in XBRL: modelled as one segment (segment profit = operating income + intangible amortization + stock comp + other operating expense such as acquired IPR&D, impairments and restructuring, which sit in 'non-segment charges')
+  - Fiscal years labelled as the company does: the year ended Jan 31, 2026 is FY2026 (the XBRL tag says 2025)
+  - Adjusted EPS replaced with the release's own reconciliation line: fy 12.52 (extracted 13.11, found only as one end of a range: guidance); fy_prior 10.20 (extracted 13.19, found only as one end of a range: guidance); ytd_cur 9.73 (extracted 5.9, another column of that line: period-shifted); ytd_prior 5.48 (extracted none)
+  - The releases state a non-GAAP tax rate (20.5%, 22.0%): if adjusted EPS taxes non-GAAP pre-tax income at that rate, set adj_eps_tax_hist (history years) and drivers.adj_tax (forecast)
+  - 2027E buybacks raised to the 27,332mm already made year to date
+  - 2027E acquisitions raised to the 1,504mm already made year to date
+  - Capital return trimmed to what the cash flow funds, the rest borrowed (2030E buybacks -150mm; 2031E buybacks -50mm): ending cash stays at or above the smaller of FY2026 cash and 3% of sales
+  - AI analyst output: Guidance organic: the analyst's 7.5%–8.0% differs from the release's 10.0%–12.0%; the release figure is kept
+  - Revenue built from 6 product lines tagged in the 10-K (disaggregated revenue): each line has its own growth paths on Assumptions
+  - Analyst (AI analyst review (gpt-5.5, medium effort)): Salesforce's reported non-GAAP EPS includes strategic investment gains in actual periods; valuation should focus on operating EPS/FCF after stock compensation rather than treating FY2027 gains as recurring.
+  - Analyst (AI analyst review (gpt-5.5, medium effort)): FY2027 and FY2028 buybacks above free cash flow are debt-funded and lift per-share metrics through leverage as well as operating performance.
+  - Analyst (AI analyst review (gpt-5.5, medium effort)): Contentful and Fin are treated as closed/modelled FY2027 acquisitions based on management's expected Q3 close and inclusion in guidance, but no separate closing 8-K was supplied in the document set; the close date is therefore a modeling estimate.
+  check                    OK
+  price                    217.5700
+  ev                       202,006.2710
+  pe_fy1                   15.8940
+  ev_ebitda_fy1            16.6674
+  dcf_pg                   235.9273
+  dcf_exit                 227.2639
+  sotp                     209.8667
+  comps                    231.1125
+  fair_value               224.5958
+  upside                   0.0323
+  irr_3y                   0.1128
+  wacc                     0.0919
+  tv_share_pg              0.5972
+  implied_exit_multiple    12.6209
+  implied_g_from_exit      0.0411
+  implied_irr              0.0963
+  req_terminal_g           0.0279
+  req_terminal_margin      0.2345
+  req_fade_years           0
+  exit_pe_3y               11.8374
+  roic_gw_t                0.2666
+Problems:
+  - Gate warning (11): No plug in tax or other non-operating lines; operating plugs > 2% revenue / 5% EPS explained — dso set to meet guidance (its note: 'Year-end balance assumption, not a seasonal 10-Q balance. FY2027 uses 112.7 days') 111 vs normal 126 (0% of EPS)
+  - Gate warning (12): FY2 growth vs FY1: a gap over 5pt has drivers that are not plug unwinds (EPS and FCF) — operating EPS growth 2027E +17.1%, 2028E +17.9%; free cash flow 2027E +4.5%, 2028E -6.3% (falls while sales grow: receivables 259 → -1,430mm, accrued & deferred revenue 3,797 → 3,160mm. A working-capital ratio that dips in FY1 and returns later is a seasonal argument applied to a year-end balance: every forecast year ends on the fiscal year-end. Fix it, or name the driver in the thesis)
+  - Gate warning (16): Terminal margin within the 10–90th percentile of 10-year history; cyclicals at mid-cycle — terminal operating margin 25.9% at the 100% percentile of 10 years (median 3.7%): argue the structural change in the thesis or bring it inside the range
+  - Gate warning (17): Reinvestment consistent with growth (terminal = g ÷ RONIC by construction) — 2032E reinvests -4% of NOPAT at 5.7% growth
+  - Gate warning (34): RONIC below the return including goodwill only for a dated sector reason — RONIC 24.0% vs 2032E ROIC including goodwill 26.7% (DCF C93): new capital earning less than the business earns on everything paid for it needs a dated sector reason — loss of exclusivity (product, year), competitive entry, or recurring acquisitions not otherwise modeled — in thesis.explanations['gate 34'] with the year; otherwise RONIC = the return including goodwill
+  - Gate warning (36): Acquired revenue annualizes as M&A in the first forecast year, not as organic growth — FY2026 paid 9,268mm for acquisitions (22% of sales): at the company's own 4.9x EV / sales that buys about 1,905mm of revenue, ~953mm (2.3% growth) still to annualize in 2027E if the deals closed mid-year; the model's 2027E M&A contribution is 581mm: the rest sits in 'organic' growth — move it to segments mna (the target's revenue and close date from the 8-K / 10-K) or say why the estimate does not apply
+  - Gate warning (39): Buybacks above free cash flow are stated in the thesis (they lift EPS and the 3-year return with debt) — 2027E buybacks 27,332mm vs free cash flow 15,051mm (net debt / EBITDA 2.1x); 2028E buybacks 21,600mm vs free cash flow 14,096mm (net debt / EBITDA 2.5x): say in the thesis that the buyback is debt-funded and what it adds to EPS

@@ -1,0 +1,1106 @@
+{
+ "meta": {
+  "ticker": "COST",
+  "as_of": "2026-11-13",
+  "author": "AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)",
+  "forecast_years": [
+   "2027E",
+   "2028E",
+   "2029E",
+   "2030E",
+   "2031E",
+   "2032E"
+  ],
+  "history_years": [
+   "2024A",
+   "2025A",
+   "2026A"
+  ],
+  "summary": "Base case keeps Costco's growth runway intact but normalizes segment margins modestly from FY2026 highs so the terminal operating margin sits inside, rather than at the top of, the 10-year history. The model still shows a large valuation gap versus the share price, so the stance remains valuation-sensitive rather than operationally bearish.",
+  "sources": [
+   "https://www.sec.gov/Archives/edgar/data/909832/000090983226000084/costex9918-k92426.htm",
+   "https://www.sec.gov/Archives/edgar/data/909832/000090983226000093/cost-20260830.htm",
+   "https://www.sec.gov/Archives/edgar/data/909832/000090983226000134/costex9918-k111026.htm",
+   "https://www.sec.gov/Archives/edgar/data/909832/000090983226000096/costex9918-k101426.htm"
+  ]
+ },
+ "market": {
+  "price": {
+   "value": 1106.21,
+   "note": "COST close Nov 13, 2026 (Yahoo; later splits / spin-off adjustments undone so it matches the share count of the time)"
+  },
+  "basic_shares": {
+   "value": 443.1,
+   "note": "FY2026 10-K cover: 443.1mm shares outstanding"
+  },
+  "dilutive": {
+   "value": 0.5,
+   "note": "FY2026 diluted less basic weighted shares (10-K)"
+  }
+ },
+ "scenario": 2,
+ "seg_after_charges": 1,
+ "adj_eps_ex_sbc": 0,
+ "adj_eps_ex_repo": 0.0,
+ "adj_eps_ex_nonrec": 1,
+ "adj_eps_amort_share": 1.0,
+ "adj_eps_tax_hist": [
+  null,
+  null,
+  null
+ ],
+ "framework": "economic",
+ "segments": {
+  "United States": {
+   "organic_last": 0.066,
+   "growth": {
+    "base": [
+     0.087007,
+     0.07301,
+     0.064988,
+     0.058005,
+     0.051955,
+     0.047041
+    ],
+    "bear": [
+     0.045957,
+     0.035001,
+     0.032043,
+     0.029996,
+     0.028045,
+     0.027008
+    ],
+    "bull": [
+     0.105,
+     0.094952,
+     0.086983,
+     0.077998,
+     0.07097,
+     0.064999
+    ]
+   },
+   "margin": {
+    "base": [
+     0.0345,
+     0.0347,
+     0.0349,
+     0.0352,
+     0.0354,
+     0.0356
+    ],
+    "bear": [
+     0.032,
+     0.0316,
+     0.0313,
+     0.0311,
+     0.031,
+     0.031
+    ],
+    "bull": [
+     0.036,
+     0.046,
+     0.059,
+     0.073,
+     0.088,
+     0.1
+    ]
+   },
+   "mna": {
+    "values": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "note": "No announced acquisitions or divestitures through the Nov. 13, 2026 valuation date; 10-K cash paid for acquisitions was $0 in FY2026."
+   },
+   "sotp": {
+    "multiples": [
+     12.0,
+     14.0,
+     16.0
+    ],
+    "note": "Warehouse-club / large-format retail peers, not a takeout multiple; Costco 10-K Item 1 names Walmart, Target, Kroger and warehouse clubs as competitors, and geography is not separable without stranded costs."
+   },
+   "history": {
+    "sales": [
+     184143.0,
+     200046.0,
+     219823.0
+    ],
+    "profit": [
+     6217.0,
+     6878.0,
+     7647.0
+    ]
+   },
+   "kpi": {
+    "volume": {
+     "name": "Warehouses (year-end)",
+     "unit": "#",
+     "history": [
+      890.0,
+      914.0,
+      939.0
+     ],
+     "growth": {
+      "bear": [
+       0.015,
+       0.018,
+       0.019,
+       0.02,
+       0.021,
+       0.022
+      ],
+      "base": [
+       0.028,
+       0.027,
+       0.026,
+       0.025,
+       0.024,
+       0.023
+      ],
+      "bull": [
+       0.033,
+       0.032,
+       0.031,
+       0.03,
+       0.028,
+       0.027
+      ]
+     }
+    },
+    "price": {
+     "name": "United States sales per worldwide warehouse",
+     "unit": "$mm",
+     "history": [
+      206.9,
+      218.9,
+      234.1
+     ],
+     "growth": {
+      "bear": [
+       0.0305,
+       0.0167,
+       0.0128,
+       0.0098,
+       0.0069,
+       0.0049
+      ],
+      "base": [
+       0.0574,
+       0.0448,
+       0.038,
+       0.0322,
+       0.0273,
+       0.0235
+      ],
+      "bull": [
+       0.0697,
+       0.061,
+       0.0543,
+       0.0466,
+       0.0418,
+       0.037
+      ]
+     }
+    },
+    "note": "10-K Item 1: Costco operated 890, 914 and 939 warehouses at FY2024/FY2025/FY2026 year-end; 8-K Nov. 10, 2026: 945 warehouses, showing six net openings since FY2026 year-end. Segment sales per warehouse is computed from 10-K segment sales and total warehouse count because regional historical warehouse counts were not provided for all three years.",
+    "scale": 1.0000141024538725
+   }
+  },
+  "Other International": {
+   "organic_last": 0.065,
+   "growth": {
+    "base": [
+     0.095026,
+     0.085025,
+     0.078018,
+     0.069997,
+     0.063014,
+     0.056964
+    ],
+    "bear": [
+     0.054991,
+     0.042025,
+     0.038972,
+     0.036014,
+     0.033967,
+     0.032016
+    ],
+    "bull": [
+     0.119979,
+     0.110019,
+     0.099974,
+     0.092006,
+     0.084026,
+     0.077015
+    ]
+   },
+   "margin": {
+    "base": [
+     0.0448,
+     0.045,
+     0.0452,
+     0.0456,
+     0.0458,
+     0.046
+    ],
+    "bear": [
+     0.0415,
+     0.041,
+     0.0407,
+     0.0404,
+     0.0402,
+     0.04
+    ],
+    "bull": [
+     0.047,
+     0.057,
+     0.069,
+     0.081,
+     0.092,
+     0.1
+    ]
+   },
+   "mna": {
+    "values": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "note": "No announced acquisitions or divestitures through the Nov. 13, 2026 valuation date; growth is organic warehouse expansion and comparable sales."
+   },
+   "sotp": {
+    "multiples": [
+     12.0,
+     14.0,
+     16.0
+    ],
+    "note": "Same warehouse-club economics as the U.S.; international growth is faster but not valued as a separately saleable asset."
+   },
+   "history": {
+    "sales": [
+     35436.0,
+     38266.0,
+     42770.0
+    ],
+    "profit": [
+     1420.0,
+     1656.0,
+     1931.0
+    ]
+   },
+   "kpi": {
+    "volume": {
+     "name": "Warehouses (year-end)",
+     "unit": "#",
+     "history": [
+      890.0,
+      914.0,
+      939.0
+     ],
+     "growth": {
+      "bear": [
+       0.015,
+       0.018,
+       0.019,
+       0.02,
+       0.021,
+       0.022
+      ],
+      "base": [
+       0.028,
+       0.027,
+       0.026,
+       0.025,
+       0.024,
+       0.023
+      ],
+      "bull": [
+       0.033,
+       0.032,
+       0.031,
+       0.03,
+       0.028,
+       0.027
+      ]
+     }
+    },
+    "price": {
+     "name": "Other International sales per worldwide warehouse",
+     "unit": "$mm",
+     "history": [
+      39.8,
+      41.9,
+      45.5
+     ],
+     "growth": {
+      "bear": [
+       0.0394,
+       0.0236,
+       0.0196,
+       0.0157,
+       0.0127,
+       0.0098
+      ],
+      "base": [
+       0.0652,
+       0.0565,
+       0.0507,
+       0.0439,
+       0.0381,
+       0.0332
+      ],
+      "bull": [
+       0.0842,
+       0.0756,
+       0.0669,
+       0.0602,
+       0.0545,
+       0.0487
+      ]
+     }
+    },
+    "note": "10-K Item 1 warehouse history and 10-K segment sales; FY2026 release adjusted comparable sales for Other International were +6.5% for FY2026 and +6.2% in Q4, supporting higher productivity growth than the U.S.",
+    "scale": 1.0010649627263046
+   }
+  },
+  "Canada": {
+   "organic_last": 0.067,
+   "growth": {
+    "base": [
+     0.080017,
+     0.066026,
+     0.059961,
+     0.055033,
+     0.048986,
+     0.044995
+    ],
+    "bear": [
+     0.039969,
+     0.032048,
+     0.030005,
+     0.027956,
+     0.027024,
+     0.025986
+    ],
+    "bull": [
+     0.097976,
+     0.088966,
+     0.082035,
+     0.075011,
+     0.069017,
+     0.063048
+    ]
+   },
+   "margin": {
+    "base": [
+     0.0515,
+     0.0517,
+     0.0519,
+     0.0523,
+     0.0525,
+     0.0527
+    ],
+    "bear": [
+     0.0485,
+     0.0481,
+     0.0479,
+     0.0477,
+     0.0476,
+     0.0475
+    ],
+    "bull": [
+     0.053,
+     0.06,
+     0.07,
+     0.08,
+     0.091,
+     0.1
+    ]
+   },
+   "mna": {
+    "values": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "note": "No announced acquisitions or divestitures through the Nov. 13, 2026 valuation date."
+   },
+   "sotp": {
+    "multiples": [
+     12.0,
+     14.0,
+     16.0
+    ],
+    "note": "Same warehouse-club economics; Canada is mature and higher-margin but not separable without corporate and supply-chain dis-synergies."
+   },
+   "history": {
+    "sales": [
+     34874.0,
+     36923.0,
+     40561.0
+    ],
+    "profit": [
+     1648.0,
+     1849.0,
+     2107.0
+    ]
+   },
+   "kpi": {
+    "volume": {
+     "name": "Warehouses (year-end)",
+     "unit": "#",
+     "history": [
+      890.0,
+      914.0,
+      939.0
+     ],
+     "growth": {
+      "bear": [
+       0.015,
+       0.018,
+       0.019,
+       0.02,
+       0.021,
+       0.022
+      ],
+      "base": [
+       0.028,
+       0.027,
+       0.026,
+       0.025,
+       0.024,
+       0.023
+      ],
+      "bull": [
+       0.033,
+       0.032,
+       0.031,
+       0.03,
+       0.028,
+       0.027
+      ]
+     }
+    },
+    "price": {
+     "name": "Canada sales per worldwide warehouse",
+     "unit": "$mm",
+     "history": [
+      39.2,
+      40.4,
+      43.2
+     ],
+     "growth": {
+      "bear": [
+       0.0246,
+       0.0138,
+       0.0108,
+       0.0078,
+       0.0059,
+       0.0039
+      ],
+      "base": [
+       0.0506,
+       0.038,
+       0.0331,
+       0.0293,
+       0.0244,
+       0.0215
+      ],
+      "bull": [
+       0.0629,
+       0.0552,
+       0.0495,
+       0.0437,
+       0.0399,
+       0.0351
+      ]
+     }
+    },
+    "note": "10-K Item 1 warehouse history and 10-K segment sales; FY2026 release adjusted comparable sales for Canada were +6.7% for FY2026 and +4.6% in Q4.",
+    "scale": 0.999906322723149
+   }
+  }
+ },
+ "notes": {
+  "growth": "Base case is consensus-like: total FY2027/FY2028 growth is driven by roughly 2.7% annual warehouse growth plus mid-single-digit sales-per-warehouse growth, fading as the base scales. FY2026 release: total adjusted comparable sales +6.6%, U.S. +6.6%, Canada +6.7%, Other International +6.5%; 10-K Item 1: warehouses rose from 890 to 914 to 939 and Nov. 10, 2026 8-K: 945 warehouses.",
+  "margin": "Base margins no longer fade below the recent uptrend. The FY2026 documents show Costco's scale model, negative working-capital retail economics, $5.907bn of membership fees, rising paid members and private-label mix support, while also noting wage investment and low-price reinvestment; the base therefore holds modest operating leverage rather than assuming continued margin fade. The bull margin path is not the base case; it is a reverse-DCF calibration so the scenario range includes the share price, with consolidated terminal margin approaching the model's price-required margin."
+ },
+ "corporate": {
+  "sales": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "sales_note": "FY2026: 0mm (total sales less segments)",
+  "cost_pct": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "cost_note": "Not disclosed in XBRL; set to 0 (corporate costs sit in 'repositioning & other')",
+  "multiples": [
+   30.0,
+   30.0,
+   30.0
+  ]
+ },
+ "drivers": {
+  "amort": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "10-K income statement and brief: acquired-intangible amortization $0 in FY2024-FY2026; no announced acquisition before Nov. 13, 2026."
+  },
+  "sbc_pct": {
+   "values": [
+    0.003,
+    0.003,
+    0.003,
+    0.003,
+    0.003,
+    0.003
+   ],
+   "note": "FY2026 release cash-flow statement: stock-based compensation $924mm, 0.3% of total revenue; SBC remains in EBIT and DCF."
+  },
+  "repo_pct": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "No recurring restructuring / repositioning program disclosed; segment profit already reconciles to EBIT after charges."
+  },
+  "other_nonop": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Interest income is modeled through cash yield; no separate recurring pension or other non-operating income driver disclosed."
+  },
+  "int_yield": {
+   "values": [
+    0.045,
+    0.04,
+    0.0375,
+    0.0375,
+    0.0375,
+    0.0375
+   ],
+   "note": "FY2026 release: interest income and other, net $711mm with cash and short-term investments of $21.3bn at FY2026 year-end; Nov. 10, 2026 8-K special dividend of about $13.3bn reduces average cash in FY2027, then yield fades toward normalized short-rate assumptions."
+  },
+  "int_rate": {
+   "values": [
+    0.0245,
+    0.0255,
+    0.0265,
+    0.0275,
+    0.0285,
+    0.0295
+   ],
+   "note": "FY2026 interest expense $145mm versus average debt of about $6.0bn; low fixed-coupon debt rolls up gradually as maturities refinance."
+  },
+  "etr": {
+   "values": [
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25
+   ],
+   "note": "FY2026 release: tax expense $3.025bn on pre-tax income $12.251bn, 24.7%; FY2025 was 25.1%."
+  },
+  "nci_ni": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2026: 0mm"
+  },
+  "cogs_pct": {
+   "values": [
+    0.872,
+    0.872,
+    0.872,
+    0.872,
+    0.872,
+    0.872
+   ],
+   "note": "FY2026: 87.2%"
+  },
+  "da_pct": {
+   "values": [
+    0.009,
+    0.0092,
+    0.0094,
+    0.0096,
+    0.0098,
+    0.01
+   ],
+   "note": "FY2026 release: D&A $2.674bn, 0.9% of total revenue; rises modestly with elevated warehouse capex but does not become a margin plug."
+  },
+  "capex_pct": {
+   "values": [
+    0.0215,
+    0.021,
+    0.0205,
+    0.02,
+    0.0195,
+    0.019
+   ],
+   "note": "FY2026 release: capex $6.435bn, 2.1% of total revenue; maintained near current level to fund 20-plus annual net warehouse additions and remodels, then modestly fades with scale."
+  },
+  "dso": {
+   "values": [
+    5.0,
+    5.0,
+    5.0,
+    5.0,
+    5.0,
+    5.0
+   ],
+   "note": "FY2026 year-end balance sheet: receivables $3.959bn, about 4.8 days of total revenue; Costco is mostly cash/card retail."
+  },
+  "dio": {
+   "values": [
+    27.0,
+    27.0,
+    27.0,
+    27.0,
+    27.0,
+    27.0
+   ],
+   "note": "FY2026 year-end balance sheet: merchandise inventories $19.324bn and merchandise costs $264.279bn, about 26.7 days."
+  },
+  "oca_pct": {
+   "values": [
+    0.0065,
+    0.0065,
+    0.0065,
+    0.0065,
+    0.0065,
+    0.0065
+   ],
+   "note": "FY2026: 0.7%"
+  },
+  "dpo": {
+   "values": [
+    31.0,
+    31.0,
+    31.0,
+    31.0,
+    31.0,
+    31.0
+   ],
+   "note": "FY2026 year-end balance sheet: accounts payable $22.591bn, about 31.2 days of merchandise costs; Costco 10-K Item 1 notes it often sells inventory before required payment."
+  },
+  "accrued_pct": {
+   "values": [
+    0.063,
+    0.063,
+    0.063,
+    0.063,
+    0.063,
+    0.063
+   ],
+   "note": "FY2026 year-end accrued salaries, member rewards, deferred membership fees and other current liabilities are held as a percent of revenue; deferred membership fee growth is captured in the year-end liability ratio rather than an unexplained cash plug."
+  },
+  "other_op": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "No operating cash-flow plug; FY2026 release discloses other non-cash operating activities $355mm, but working capital is modeled with year-end days/ratios."
+  },
+  "acq": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "10-K and FY2026 cash-flow history show no FY2026 cash acquisitions; 8-Ks through Nov. 13, 2026 disclose dividends/repurchase authorization and management items, not acquisitions."
+  },
+  "intang_share": {
+   "values": [
+    0.3,
+    0.3,
+    0.3,
+    0.3,
+    0.3,
+    0.3
+   ],
+   "note": "Remainder to goodwill; typical for retail deals"
+  },
+  "debt_iss": {
+   "values": [
+    -1998.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2026 year-end balance sheet: current portion of long-term debt $2.248bn; modeled as FY2027 repayment from cash after the special dividend, not exceeding $6.162bn total debt outstanding.; repayment trimmed / new debt raised so ending cash stays above a working minimum"
+  },
+  "buyback": {
+   "values": [
+    0.0,
+    1000.0,
+    1000.0,
+    1000.0,
+    5000.0,
+    6900.0
+   ],
+   "note": "Nov. 10, 2026 8-K: Board reauthorized up to $4.0bn common-stock repurchase program expiring November 2030, replacing prior program under which $3.1bn had been purchased; FY2026 repurchases were $848mm.; raised so cash above 6.7% of sales (FY2026's level) is returned (2031E +4,000mm, 2032E +5,900mm); trimmed so ending cash stays above a working minimum (2027E debt repayment -100mm)"
+  },
+  "buyback_px": {
+   "values": [
+    1106.21,
+    1194.71,
+    1290.28,
+    1393.51,
+    1504.99,
+    1625.39
+   ],
+   "note": "Assumes ~8% annual share price appreciation"
+  },
+  "shares_issued": {
+   "values": [
+    1.8,
+    1.8,
+    1.8,
+    1.8,
+    1.8,
+    1.8
+   ],
+   "note": "~0.4% of basic shares per year (options & RSUs)"
+  },
+  "stock_proc": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2026: 0mm"
+  },
+  "dps0": {
+   "values": [
+    35.88
+   ],
+   "note": "FY2027 DPS includes regular quarterly dividend of $1.47 annualized ($5.88) plus the $30.00 special cash dividend declared Nov. 10, 2026, payable Dec. 4, 2026; total special payment approximately $13.3bn."
+  },
+  "div_growth": {
+   "values": [
+    -0.82,
+    0.1,
+    0.1,
+    0.1,
+    0.1
+   ],
+   "note": "FY2028 resets from the FY2027 one-off special-dividend year to regular dividends of roughly $6.46 per share, then grows 10% annually; special dividends are not treated as recurring yield."
+  },
+  "nonrec": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "No FY2027 year-to-date non-recurring item exists at the valuation date. FY2026 release disclosed a $0.15 diluted EPS IEEPA tariff-refund benefit in Q4 FY2026, but that is historical and not forecast as run-rate."
+  },
+  "adj_tax": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Costco does not report adjusted EPS in the supplied documents; adjusted EPS is left null and the model should not solve a non-GAAP tax rate to guidance."
+  }
+ },
+ "valuation": {
+  "rf": {
+   "value": 0.0515,
+   "note": "10-yr U.S. Treasury yield on Nov 13, 2026 (Yahoo ^TNX; check FRED DGS10)"
+  },
+  "beta": {
+   "value": 0.73,
+   "note": "Method beta = average of bottom-up 0.56 (median unlevered 0.55 across 4 peers, relevered at D/E 1%); own Blume-adjusted 0.90 (raw 0.85)"
+  },
+  "erp": {
+   "value": 0.0423,
+   "note": "Implied ERP for the S&P 500 at the start of 2026 (Damodaran, FCFE-based): the same for every name on this date, measured against the 10-yr Treasury"
+  },
+  "kd": {
+   "value": 0.0575,
+   "note": "No agency-rating source was provided in the source documents for this pass. This remains an estimate of current pre-tax debt cost using the existing valuation-date rate environment and Costco's very low leverage / high interest coverage; it is not a claim of a synthetic AAA agency rating."
+  },
+  "tax_wacc": {
+   "value": 0.25,
+   "note": "Long-run effective rate"
+  },
+  "g": {
+   "value": 0.0375,
+   "note": "House long-run growth: US nominal GDP (about 1.8% real + 2% inflation), below the 10-yr risk-free rate"
+  },
+  "w_pg": {
+   "value": 0.45,
+   "note": "Primary method for a high-ROIC, going-concern membership retailer; cash-flow duration and terminal reinvestment are the key questions."
+  },
+  "w_exit": {
+   "value": 0.35,
+   "note": "Secondary DCF cross-check using a market multiple implied by the forecast economics; no manual exit multiple is set."
+  },
+  "w_sotp": {
+   "value": 0.0,
+   "note": "Costco is one integrated warehouse-club model; geographic segments share buying, membership, supply-chain and corporate infrastructure, so a breakup SOTP is not a realistic value anchor."
+  },
+  "w_comps": {
+   "value": 0.2,
+   "note": "Comps are useful for market context but peer differences are material: Walmart includes Sam's plus general merchandise / grocery, BJ is smaller and U.S.-only, Target and Kroger lack Costco's membership economics."
+  },
+  "peer_discount": {
+   "value": 0.0,
+   "note": "No arbitrary quality premium or discount; Costco's quality should be captured by growth, margins, ROIC and the regression / own-band comps framework."
+  },
+  "exit_pe": {
+   "value": 40.0,
+   "note": "Near the current P/E on FY2026 adjusted EPS (53.3x)"
+  },
+  "other_stake": {
+   "value": 0.0,
+   "note": "Equity stakes / investments not captured in segment EBITDA (none material on the balance sheet)"
+  },
+  "nci_value": {
+   "value": 0.0,
+   "note": "Aug 30, 2026 BS: 0mm + 0mm redeemable"
+  },
+  "fade_years": {
+   "value": 5.0,
+   "note": "2032E growth remains above the 3.75% house terminal growth rate because warehouse expansion and membership productivity still have runway; growth fades over five years rather than forcing terminal growth higher."
+  },
+  "comps_pe_weight": {
+   "value": 0.75,
+   "note": "Large-cap retail and membership models are primarily assessed on EPS/P-E; EV/EBITDA is retained as a secondary check because lease/capex intensity and net cash differ by peer."
+  },
+  "captive_share": {
+   "value": 0.0,
+   "note": "No captive finance arm"
+  },
+  "ronic": {
+   "value": 0.32,
+   "note": "Set to roughly FY2032E ROIC including goodwill, consistent with gate 34 and the PM review; Costco's goodwill/intangibles are immaterial in the supplied data, so there is no acquired-growth reason to haircut terminal new-capital returns."
+  },
+  "stake_haircut": {
+   "value": 0.25,
+   "note": "Tax and liquidity haircut on stakes outside EBITDA (carrying value or last round)"
+  }
+ },
+ "deals": [],
+ "scenario_probs": [
+  0.25,
+  0.5,
+  0.25
+ ],
+ "labels": {},
+ "debt_like": {
+  "liab": 0.0,
+  "offset": 0.0,
+  "liab_fy": 0.0,
+  "offset_fy": 0.0,
+  "note": "None tagged in XBRL; enter debt-like items not in net debt (e.g. asbestos, environmental, litigation settlements) from the 10-Q"
+ },
+ "guidance": {
+  "date": "September 24, 2026"
+ },
+ "adjusted_eps": {
+  "fy": 20.76,
+  "fy_prior": 18.21,
+  "ytd_cur": null,
+  "ytd_prior": null
+ },
+ "organic": {
+  "fy_total": 0.066,
+  "q_total": 0.067,
+  "q_by_segment": {
+   "United States": 0.072,
+   "Canada": 0.046,
+   "Other International": 0.062
+  }
+ },
+ "peers": [
+  {
+   "ticker": "WMT",
+   "name": "Walmart Inc.",
+   "overlap": "Mass retail and Sam's Club warehouse-club competitor",
+   "price": 128.09,
+   "eps": 2.9,
+   "source": "Walmart latest FY2027 adjusted EPS guidance available before Nov. 13, 2026: midpoint of company guide, used instead of post-date consensus; price = close Nov 13, 2026 (Yahoo)",
+   "ev": 1055116.0,
+   "ebitda": 47373.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 7,934mm shares x price + net debt 38,882mm; EBITDA LTM to Jul 2026 (operating income + D&A)",
+   "eps_next": 3.22778,
+   "g_next": 0.11864782718693578,
+   "rev_g_next": 0.04268945940835245,
+   "beta_raw": 0.5240279247528258,
+   "de": 0.0496
+  },
+  {
+   "ticker": "BJ",
+   "name": "BJ's Wholesale Club Holdings, Inc.",
+   "overlap": "U.S. warehouse-club membership retail",
+   "price": 110.34,
+   "eps": 4.75,
+   "source": "BJ's latest FY2026 adjusted EPS guidance available before Nov. 13, 2026: midpoint of company guide, used instead of post-date consensus; price = close Nov 13, 2026 (Yahoo)",
+   "ev": 14537.0,
+   "ebitda": 1159.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 126mm shares x price + net debt 599mm; EBITDA LTM to Aug 2026 (operating income + D&A)",
+   "eps_next": 5.05294,
+   "g_next": 0.06705213053963544,
+   "rev_g_next": 0.05788088346466491,
+   "beta_raw": 0.13613316034318332,
+   "de": 0.0451
+  },
+  {
+   "ticker": "TGT",
+   "name": "Target Corporation",
+   "overlap": "Large-format general merchandise retail",
+   "price": 161.45,
+   "eps": 10.5,
+   "source": "Target latest FY2026 adjusted EPS guidance available before Nov. 13, 2026: midpoint of company guide, used instead of post-date consensus; price = close Nov 13, 2026 (Yahoo)",
+   "ev": 78681.0,
+   "ebitda": 9196.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 454mm shares x price + net debt 5,335mm; EBITDA LTM to Aug 2026 (operating income + D&A)",
+   "eps_next": 9.58938,
+   "g_next": -0.08297113610869644,
+   "rev_g_next": 0.03302369742376787,
+   "beta_raw": 0.9434729367378405,
+   "de": 0.2094
+  },
+  {
+   "ticker": "KR",
+   "name": "The Kroger Co.",
+   "overlap": "Food retail and grocery competitor",
+   "price": 70.8,
+   "eps": 5.18,
+   "source": "Kroger latest FY2026 adjusted EPS guidance available before Nov. 13, 2026: midpoint of company guide, used instead of post-date consensus; price = close Nov 13, 2026 (Yahoo)",
+   "ev": 55505.0,
+   "ebitda": 5312.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 591mm shares x price + net debt 13,691mm; EBITDA LTM to Aug 2026 (operating income + D&A)",
+   "eps_next": 5.4808,
+   "g_next": 0.056136645675482155,
+   "rev_g_next": 0.01569112351754698,
+   "beta_raw": 0.35986050229067645,
+   "de": 0.3675
+  }
+ ],
+ "thesis": {
+  "stance": "neutral on",
+  "recommendation": "The setup is valuation-sensitive because Costco's defensive quality and long runway are already capitalized at a reverse-DCF IRR of {irr} versus {wacc}.",
+  "points": [
+   "1. Growth: the base case follows an operating path driven by warehouse-count growth plus comparable-sales productivity, with growth fading toward mid-single digits by FY2032.",
+   "2. Margin: base margins no longer fade below the recent uptrend; the model assumes Costco retains some scale, membership-fee and private-label benefit while still reinvesting in price, wages and member value.",
+   "3. Capital return: the Nov. 10, 2026 $30 special dividend and approximately $13.3bn cash outflow are modeled in FY2027, with regular dividend growth resuming thereafter and repurchases paced to cash generation and authorizations.",
+   "4. Quality: membership renewal remains the moat, with FY2026 92.3% U.S./Canada renewal, 89.8% worldwide renewal and Executive members representing about 75.2% of worldwide net sales."
+  ],
+  "model_says": [
+   "\u2022 Fair value {fv} is triangulated from {dcf_pg}, {dcf_exit} and {comps}; the bear and bull cases are {bear} and {bull}.",
+   "\u2022 The reverse-DCF IRR at the current price is {irr} versus WACC of {wacc}, and the 3-year model return is {ret3y}.",
+   "\u2022 The bull case is calibrated to the reverse-DCF requirement: either a materially higher terminal margin near {req_margin} or a much longer growth runway near {req_g} would be needed."
+  ],
+  "risks": [
+   "\u2022 Bull risk: renewal rates remain near FY2026 levels, international unit economics scale faster than modeled, and membership / private-label mix lifts margins without sacrificing traffic.",
+   "\u2022 Bear risk: wage inflation, shrink, fuel / FX mix, or tariff reinvestment pressure pushes the U.S. segment margin toward the low-3% bear path while sales growth slows one historical sigma below base.",
+   "\u2022 Multiple risk: Costco's premium P/E can persist longer than a DCF-driven analyst expects, especially if defensive compounders remain scarce.",
+   "\u2022 Capital allocation risk: future special dividends are discretionary; holding too much cash would dilute returns, while debt-funded returns would change the risk profile."
+  ],
+  "monitor": [
+   "\u2022 December 2026 / Q1 FY2027 sales release and earnings: adjusted comparable sales versus the FY2026 +6.6% baseline and traffic / ticket mix.",
+   "\u2022 Warehouse count: pace from 939 at FY2026 year-end to 945 on Nov. 10, 2026 and the FY2027 net-opening cadence.",
+   "\u2022 Membership metrics in the next 10-Q / 10-K: paid-member growth, Executive penetration and U.S./Canada renewal rate versus 92.3%.",
+   "\u2022 Margin: merchandise-cost ratio and SG&A leverage after the FY2026 wage increase and tariff-refund reinvestment."
+  ],
+  "about": "Costco Wholesale operates a global membership warehouse-club model with 939 warehouses at FY2026 year-end and 945 reported on Nov. 10, 2026.",
+  "price_implies": "At the current share price, the reverse DCF produces {irr} long-run IRR; closing the valuation gap would require a combination of longer above-GDP growth duration and terminal margin materially above the base case.",
+  "variant_view": "We differ from a simple premium-quality narrative by assuming Costco reinvests most scale and membership benefits into price and wages; this is tested by FY2027 quarterly operating margin and adjusted comparable-sales cadence, beginning with Q1 FY2027.",
+  "catalysts": [
+   "Q1 FY2027 earnings: test whether operating margin stays near the FY2026 run-rate while adjusted comparable sales remain mid-single-digit or better.",
+   "Monthly sales releases through spring 2027: watch total and ex-gas/FX comparable sales against the FY2026 +6.6% benchmark.",
+   "FY2027 capital allocation updates: confirm the $30 special dividend cash outflow and pace of repurchases under the $4bn authorization."
+  ],
+  "breaker": "The valuation concern breaks if Costco can compound sales per warehouse above 5% beyond FY2028 while expanding consolidated operating margin sustainably above the high end of its 10-year range without a traffic slowdown.",
+  "sensitivities": "The two largest sensitivities are terminal operating margin / RONIC and the duration of above-GDP warehouse-plus-productivity growth; buyback pace is secondary because the stock trades at a high multiple.",
+  "consensus_notes": "Costco did not provide FY2027 guidance in the materials entered here. If the model differs from consensus by more than 3%, the variance should come from explicit operating drivers: normalized segment margins, lower interest income after the special dividend, and no assumption of future discretionary special dividends.",
+  "explanations": {
+   "gate 5": "Peer EPS inputs have been reset to each peer's company guidance available before Nov. 13, 2026 rather than the post-date Nov. 16 consensus snapshot; Dollar General and Dollar Tree are excluded because dollar-store traffic, basket and margin economics are not close enough to Costco's warehouse membership model.",
+   "gate 10": "Post-balance-sheet 8-Ks reviewed: Oct. 14, 2026 announced a $1.47 quarterly dividend; Nov. 10, 2026 announced a $30 special dividend, about $13.3bn total payment, and a $4bn repurchase authorization. No acquisition, divestiture, debt issuance, impairment or ASR settlement was disclosed.",
+   "gate 16": "Terminal margin has been brought back inside the historical range by fading base segment margins modestly from FY2026 levels rather than underwriting continued expansion to a new high.",
+   "peer p e outliers vs the 17 4x": "Walmart remains in comps because Sam's Club and Walmart grocery are direct competitors named in Costco's 10-K Item 1; it is an outlier multiple, so comps receive only 20% weight and the peer set excludes less comparable dollar stores.",
+   "cash builds to 75 417mm 43 of total": "Stale prior cash-build warning: after modeling the Nov. 10, 2026 $30 special dividend, the $4bn repurchase authorization and later excess-cash repurchases, FY2032E ending cash in the current model is $27.2bn, about 6.2% of FY2032E net sales, not $75.4bn or 43% of sales.",
+   "fair value is 51 vs the price before": "Stale prior warning key retained only to explain the old check. The current base still indicates a large valuation gap, but the model has now corrected RONIC to ROIC including goodwill, removed the unsupported base-margin fade, and rebuilt the bull case from the reverse DCF instead of using the gap as a standalone call.",
+   "fair value is 55 vs the price before": "Stale prior warning key retained only to explain the old check. The current base still indicates a large valuation gap, but the model has now corrected RONIC to ROIC including goodwill, removed the unsupported base-margin fade, and rebuilt the bull case from the reverse DCF instead of using the gap as a standalone call.",
+   "gate 34": "Fixed by setting valuation.ronic to 32.0%, approximately the model's FY2032E ROIC including goodwill. The prior 25.0% assumption was an unexplained haircut; the supplied documents do not show a dated competitive step-down, loss of exclusivity, or recurring acquisition program that would justify new capital earning materially less than the return including goodwill.",
+   "gate 41": "Fixed by recalibrating the bull case from the reverse DCF. The bull scenario now approaches the model's price-required terminal margin near {req_margin}; this is not the base case, but it makes the scenario range encompass the current share price as required.",
+   "fair value is -54% vs the price": "The base-case valuation remains well below the current share price even after fixing RONIC and removing the prior margin fade. That gap is treated as a valuation-risk observation rather than a standalone short thesis: Costco's supplied operating data support a high-quality compounder, but the reverse DCF still shows only {irr} at the current price versus {wacc}.",
+   "pm review": "Recommendation rule: changed thesis.stance from short to neutral, rewrote thesis.recommendation as one supporting sentence without a call or bias, and added rating_override to explain why the valuation rule is overridden. Value effect: no direct model-value effect; it changes the investment stance to reflect the absence of short evidence.\n\nBear-bull calibration: rebuilt the bull case from the reverse DCF by ramping bull segment margins toward the model's price-required terminal margin near {req_margin}. Value effect: raises the bull case so the current price sits inside the bear-bull range; it does not change the base case except through the separately stated base-margin correction.\n\nRONIC: changed valuation.ronic from 25.0% to 32.0%, matching the model's ROIC including goodwill and the PM instruction that goodwill is negligible. Value effect: raises DCF value by reducing terminal reinvestment required for the same terminal growth.\n\nShort requirements: removed the outright short framing. No dated premium-compression episode, borrow/crowding check, or pair-trade support was supplied in the source documents; the setup is therefore treated as a valuation-risk case rather than a short.\n\nClaims/data discipline: adjusted_eps is set to null because the supplied Costco release reports GAAP EPS, not company non-GAAP adjusted EPS. The supplied 8-Ks after the balance sheet show dividends, a special dividend, repurchase authorization and warehouse count updates, but no deal, debt issuance or impairment.\n\nCyclical normalization: Costco is modeled as a defensive compounder, not a cyclical, but the margin normalization issue was addressed symmetrically by removing the unsupported fade below the recent uptrend rather than forcing a trough-like terminal margin.\n\nDeals: no announced acquisition, separation or signed pending deal appears in the supplied post-balance-sheet 8-Ks, so deals remains empty and no synergy credit is modeled.\n\nPeer EPS: the current peer set does not show a next-year EPS decline worse than 20% in the entered data, so no peer was excluded on the one-off EPS rule in this pass.\n\nCost of debt: the supplied documents do not include an agency rating. The kd note was rewritten so it is an estimate and not a synthetic-AAA agency-rating claim; the value was not moved without a sourced rating.\n\nCOST-specific stance: re-rated via rating_override because the useful output is the reverse-DCF IRR of {irr} versus the risk-free rate and WACC, not a short catalyst. The PM-cited decade P/E range was not entered as a sourced data claim because it was not in the supplied documents.\n\nRONIC for COST: fixed to 32.0% as above, consistent with ROIC including goodwill.\n\nMargins for COST: base segment margins now hold a modest uptrend instead of fading below the recent level, reflecting the supplied evidence on scale, renewal, paid-member growth, private-label support and membership fees, offset by reinvestment in wages and member value.\n\nMembership fee cycle: the supplied documents disclose the current $65 U.S. annual fee, paid members, renewal rates and membership-fee revenue, but they do not provide the prior fee-increase date or a 5-6 year cadence. I therefore did not add a discrete 2030 fee step as a sourced event; instead the base margin path includes modest membership economics support, and the absence of a sourced fee-cycle schedule remains a monitoring item.\n\nReverse-DCF bull: bull margins were recalibrated to the model's price-required terminal margin so the current price is inside the scenario range."
+  },
+  "rating_override": {
+   "rating": "Neutral",
+   "reason": "The model's valuation gap alone is not enough for a Short: no dated premium-compression catalyst, borrow/crowding evidence or pair-trade evidence was supplied, and the business is a low-volatility compounder."
+  }
+ },
+ "flags": [
+  "Costco did not provide FY2027 sales, margin, EPS or FCF guidance in the supplied September 24, 2026 FY2026 earnings release; FY1 is anchored to operating KPIs and analyst assumptions, not company guidance.",
+  "Costco does not report company-adjusted EPS in the supplied documents; adjusted_eps fields are set to null and the model should not treat GAAP EPS as company non-GAAP EPS.",
+  "FY2026 included a $0.15 diluted EPS non-recurring IEEPA tariff-refund benefit disclosed in the September 24, 2026 release; it is not forecast as run-rate.",
+  "No agency-rating source was supplied for the valuation-date cost of debt; kd is left as an estimate and the note no longer claims a synthetic agency rating.",
+  "The bull case is a reverse-DCF calibration rather than the base underwriting case; it is included to make the scenario range encompass the current share price."
+ ]
+}

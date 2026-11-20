@@ -1,0 +1,11 @@
+PM follow-up on the CRM review pass (verified against the Q2 FY27 release, 8-K EX-99.1 filed Aug 26, 2026):
+- "Organic" is still mislabeled.
+  - The release guides FY27 revenue to $46.1–46.4bn, "up 11% - 12% Y/Y and 11% Y/Y in CC, including slightly above 3pts Informatica contribution".
+  - The $200mm raise "reflects $100 million of organic growth, $200 million from the pending Contentful and Fin acquisitions, and $100M FX headwind".
+  - The company gives no organic growth guide: guidance.organic [10%, 12%] is reported growth including Informatica. Set guidance.organic to null.
+  - Set FY27 mna to the acquired contribution (Informatica slightly above 3pts plus Contentful and Fin's share of the year), so FY27 organic constant-currency growth is about 7.5–8% and total revenue stays inside the $46.1–46.4bn sales guide.
+  - Gate 36 (acquired revenue annualizes as M&A) is the check.
+  - Later years' growth follows consensus (FY28 9.7%) unless a variant view says otherwise.
+- FY27 interest at a 7.7% model rate "to bring adjusted EPS back inside guidance" is a plug: interest is a non-operating line, and gate 11 now fails it.
+  - Use the run-rate: H1 interest $790mm, plus the rest of the year on the $39.3bn 10-Q debt at its coupon (about 5%), so FY27 is about $1.8bn.
+  - If adjusted EPS then lands slightly above the guide, leave it there and explain the gap with its number under the checker's key. Never move interest, tax or other income to close it.

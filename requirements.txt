@@ -6,4 +6,4 @@ openai>=1.40
 XlsxWriter>=3.2
 requests>=2.31
 jinja2>=3.1.5
-
+formulas>=1.2      # recalculates the workbook: checks, and computed values stored in the file

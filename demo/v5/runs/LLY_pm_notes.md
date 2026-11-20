@@ -1,0 +1,23 @@
+Systemic points from the PM (apply to this model):
+- The recommendation text must follow the rule-based rating. Write thesis.recommendation as one supporting sentence with no call in it; never write a different call or bias anywhere in the thesis ("Long", "Underweight", "avoid adding", "warrants ownership", a positive bias under a negative rule). Disagreeing needs rating_override {rating, reason}.
+- The price must lie inside bear–bull. For a liquid large cap, a bull below the price means the scenarios are miscalibrated. Build the bull from what the reverse DCF says the price requires (the terminal margin or years of growth it implies).
+- The framework has a downward bias. RONIC defaults to ROIC including goodwill (DCF C93). Lower it only for a dated sector reason (loss of exclusivity with product and year, competitive entry, recurring acquisitions not otherwise modeled), explained under 'gate 34' with the year.
+- A short needs more than a valuation gap:
+  - a dated catalyst;
+  - evidence that the gap closes (thesis.short_evidence: when the premium last compressed, by how much, on what);
+  - a borrow and crowding check;
+  - for a low-volatility compounder, a pair (thesis.pair) rather than an outright short.
+- Claims in explanations must match the data (gate 42). Missing or zero required data is a failure, not N/A.
+- Mid-cycle normalization is symmetric for cyclicals: a peak is brought down just as a trough is brought up.
+- Deal synergies get 50% credit, are phased in over about 3 years, and are capitalized at the acquirer's multiple. If every deal creates value, recheck the inputs.
+- Peer EPS with one-offs (next-year EPS growth below −20%) or a basis error is excluded. Fix the EPS to bring the peer back.
+- The cost of debt follows the actual agency rating, not a synthetic AAA.
+PM on LLY (two large errors that offset in direction):
+- The terminal ignores loss of exclusivity.
+  - The model holds a 43.5% operating margin in perpetuity on a portfolio that is about 66% tirzepatide, which loses exclusivity in the mid-2030s. Verify the patent dates in the 10-K.
+  - Reflect the LOE in the lines and the terminal (fade years, terminal growth) with dates, and the risk-adjusted pipeline that replaces it (orforglipron, retatrutide), as far as the documents support.
+- RONIC penalizes deal-driven growth twice.
+  - Recurring business development and acquired IPR&D (about 6–7% of sales) are already expensed in EBIT, yet RONIC was then cut from 46% to 22% for "deal-enabled growth".
+  - Fixing that alone is roughly +$60–80 of fair value. RONIC now defaults to ROIC including goodwill; lower it only for a dated sector reason (the LOE is one, with its year), and do not double count it with the LOE erosion.
+- Peer fixes were claimed but not applied: the thesis says the NVO and MRK EPS errors were fixed, but the comps table still shows 1.8x (NVO: DKK EPS vs a USD ADR price) and 53.2x (MRK: EPS after an IPR&D charge). Either enter the corrected EPS (USD per ADR; company-adjusted) with its source, or let the engine exclude them, and never claim a fix the data do not show (gate 42).
+- Q4 FY26 FCF is implied at −$2bn. Year-end working-capital ratios (inventory at 454 days) create a $5.2bn build with no basis in the run-rate. Set the FY1 working capital from the 10-Q balances (gate 43).

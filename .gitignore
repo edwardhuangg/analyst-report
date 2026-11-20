@@ -1,1 +1,13 @@
+# Holds the OpenAI key and the app password: set them in the host's secrets instead
 .streamlit/secrets.toml
+.claude/settings.local.json
+__pycache__/
+*.pyc
+.DS_Store
+~$*.xlsx
+# working files: local test runs (screenshots), earlier demo rounds, the old single-file apps (in this repo's history)
+localservertestruns/
+demo/*
+!demo/v5/
+legacy/
+current.py

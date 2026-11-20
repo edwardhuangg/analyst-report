@@ -1,0 +1,54 @@
+  .. Looking up the company on SEC EDGAR…
+  .. Reading the FY 10-K XBRL (Oct 07, 2026)…
+  .. Pulling market data (Yahoo Finance)…
+  .. Peer WMT…
+  .. Peer TGT…
+  .. Peer BJ…
+  .. Peer DG…
+  .. Peer KR…
+  .. Peer DLTR…
+  .. Version bridge: the previous version on today's engine…
+  .. Version bridge: Terminal value: RONIC, terminal growth, fade years, exit multiple…
+  .. Version bridge: Cost of capital: beta, cost of debt, tax rate…
+  .. Version bridge: Margins and their basis…
+Previous version: fair value $509.36, rule rating Neutral; this version: $542.43, rule rating Neutral. Judgment inputs carry 100% of the gross move.
+  [judgment] Terminal value: RONIC, terminal growth, fade years, exit multiple: +11.36/share (valuation.ronic)
+  [judgment] Cost of capital: beta, cost of debt, tax rate: -0.05/share (valuation.beta, valuation.kd)
+  [judgment] Margins and their basis: +21.77/share (segments.Canada.margin, segments.Other International.margin, segments.United States.margin, notes.margin)
+wrote demo/v5/COST_Valuation_Model.xlsx (106,704 bytes); provenance: Defaults: derived from the filings and market data (rules in valuation/spec.py) | AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort), applied from an overrides file: 3 segments (growth, margin, M&A, SOTP), 28 drivers, 18 valuation inputs, credit rating, market.price, market.basic_shares, market.dilutive, United States KPI build, Other International KPI build, Canada KPI build, corporate sales, corporate costs, debt-like items, guidance, 4 peers, thesis, scenario probabilities
+wrote demo/v5/COST_Valuation_Model_overrides.json
+round trip: demo/v5/COST_Valuation_Model_overrides.json rebuilds to fair value 542.43 vs 542.43
+Analyst summary: Base case keeps Costco's growth runway intact but normalizes segment margins modestly from FY2026 highs so the terminal operating margin sits inside, rather than at the top of, the 10-year history. The model still shows a large valuation gap versus the share price, so the stance remains valuation-sensitive rather than operationally bearish.
+6 data notes:
+  - 3 line(s) built as volume x price on the KPIs tab
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): Costco did not provide FY2027 sales, margin, EPS or FCF guidance in the supplied September 24, 2026 FY2026 earnings release; FY1 is anchored to operating KPIs and analyst assumptions, not company guidance.
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): Costco does not report company-adjusted EPS in the supplied documents; adjusted_eps fields are set to null and the model should not treat GAAP EPS as company non-GAAP EPS.
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): FY2026 included a $0.15 diluted EPS non-recurring IEEPA tariff-refund benefit disclosed in the September 24, 2026 release; it is not forecast as run-rate.
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): No agency-rating source was supplied for the valuation-date cost of debt; kd is left as an estimate and the note no longer claims a synthetic agency rating.
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): The bull case is a reverse-DCF calibration rather than the base underwriting case; it is included to make the scenario range encompass the current share price.
+  check                    OK
+  price                    1,106.2100
+  ev                       475,575.7560
+  pe_fy1                   49.5296
+  ev_ebitda_fy1            30.5556
+  dcf_pg                   532.8067
+  dcf_exit                 515.8645
+  sotp                     525.3354
+  comps                    610.5780
+  fair_value               542.4312
+  upside                   -0.5096
+  irr_3y                   -0.1491
+  wacc                     0.0815
+  tv_share_pg              0.6755
+  implied_exit_multiple    12.6383
+  implied_g_from_exit      0.0381
+  implied_irr              0.0586
+  req_terminal_g           0.0664
+  req_terminal_margin      0.0944
+  req_fade_years           > 20
+  exit_pe_3y               22.9950
+  roic_gw_t                0.3369
+Problems:
+  - Fair value is -51% vs the price: before calling the market that wrong, check the drivers that set the gap — for a cyclical, mid-cycle (not trough or peak) volumes and margins in the last forecast years and the terminal value; for a compounder, the growth runway (fade_years); the cost of capital. Keep the call only if the thesis shows why the market is wrong
+  - Gate warning (10): Post-balance-sheet events (closings, signings, issuance, share-count settlements) — No 8-K with a deal, debt or impairment item since the balance sheet; check press releases: none entered (deals)
+  - Gate warning (16): Terminal margin within the 10–90th percentile of 10-year history; cyclicals at mid-cycle — terminal operating margin 3.9% at the 100% percentile of 10 years (median 3.4%): argue the structural change in the thesis or bring it inside the range

@@ -1,0 +1,64 @@
+  .. Looking up the company on SEC EDGAR…
+  .. Reading the FY 10-K XBRL (Jan 23, 2026)…
+  .. Reading the latest 10-Q (Sep 30, 2026)…
+  .. Pulling market data (Yahoo Finance)…
+  .. Peer DIS…
+  .. Peer WBD…
+$WBD: possibly delisted; no price data found  (1d 2026-11-03 -> 2026-11-14)
+  .. Peer CMCSA…
+  .. Peer SPOT…
+  .. Peer ROKU…
+  .. Peer GOOGL…
+  warning: Cost of debt 5.25% from the analyst outside the rating-based 6.36% ± 0.75%: set to 5.61%
+  .. Version bridge: the previous version on today's engine…
+  .. Version bridge: Terminal value: RONIC, terminal growth, fade years, exit multiple…
+  .. Version bridge: Cost of capital: beta, cost of debt, tax rate…
+  .. Version bridge: Peers (set and EPS)…
+  .. Version bridge: Margins and their basis…
+Previous version: fair value $54.43, rule rating Neutral; this version: $61.45, rule rating Neutral. Judgment inputs carry 36% of the gross move.
+  [judgment] Terminal value: RONIC, terminal growth, fade years, exit multiple: +2.51/share (valuation.ronic)
+  [judgment] Cost of capital: beta, cost of debt, tax rate: -0.11/share (valuation.kd)
+  [data] Peers (set and EPS): +4.62/share (peers)
+wrote demo/v5/NFLX_Valuation_Model.xlsx (102,226 bytes); provenance: Defaults: derived from the filings and market data (rules in valuation/spec.py) | AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort), applied from an overrides file: 1 segment (growth, margin, M&A, SOTP), 28 drivers, 19 valuation inputs, saved market data, credit rating, market.price, market.basic_shares, market.dilutive, adjusted EPS definition, Total company lines, corporate sales, corporate costs, debt-like items, guidance, adjusted EPS = model definition, 4 peers, thesis, scenario probabilities
+wrote demo/v5/NFLX_Valuation_Model_overrides.json
+round trip: demo/v5/NFLX_Valuation_Model_overrides.json rebuilds to fair value 61.45 vs 61.45
+Analyst summary: Base case is anchored to Netflix's October 20, 2026 full-year revenue, margin and FCF guide and compares FY2026 EPS to GAAP consensus because Netflix does not report adjusted EPS. The WBD termination fee remains separately identified as non-recurring income, while recurring content-cash reinvestment is raised after FY2026 so the long-run growth case is not supported by negative reinvestment.
+11 data notes:
+  - FY2024 cash includes 3mm restricted cash (ties to the cash flow statement); other current assets reduced to match
+  - FY2025 cash includes 6mm restricted cash (ties to the cash flow statement); other current assets reduced to match
+  - No usable segment disclosure in XBRL: modelled as one segment (segment profit = operating income + intangible amortization + stock comp + other operating expense such as acquired IPR&D, impairments and restructuring, which sit in 'non-segment charges')
+  - 2026E buybacks raised to the 10,782mm already made year to date
+  - 2026E acquisitions raised to the 586mm already made year to date
+  - Market data not returned today (risk-free rate): the values saved with the model are used (as of 2026-11-13)
+  - Revenue built from 4 geography lines tagged in the 10-K (disaggregated revenue): each line has its own growth paths on Assumptions
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): Netflix does not report adjusted EPS; the model's consensus EPS comparison uses GAAP EPS, while the one-time WBD termination fee is separately identified in non-recurring income and excluded from operating valuation drivers.
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): The October 20, 2026 margin guide is GAAP operating margin and already includes headcount-reduction and acquisition-related costs; those costs are not added back.
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): The WBD transaction was terminated before the valuation date and is not modeled as a pending acquisition or separation; only the $2.8bn termination fee is included as FY2026 non-recurring income.
+  - Analyst (AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)): Buybacks after FY2026 have been reduced versus the prior run to reflect higher recurring content-cash reinvestment; no debt-funded buyback program is assumed.
+  check                    OK
+  price                    62.1500
+  ev                       265,888.4910
+  pe_fy1                   20.4073
+  ev_ebitda_fy1            16.1577
+  dcf_pg                   59.7530
+  dcf_exit                 57.5806
+  sotp                     61.5274
+  comps                    83.2496
+  fair_value               61.4509
+  upside                   -0.0112
+  irr_3y                   0.1015
+  wacc                     0.1025
+  tv_share_pg              0.5639
+  implied_exit_multiple    12.1908
+  implied_g_from_exit      0.0387
+  implied_irr              0.1001
+  req_terminal_g           0.0421
+  req_terminal_margin      0.3450
+  req_fade_years           > 20
+  exit_pe_3y               15.5559
+  roic_gw_t                0.4335
+Problems:
+  - 2026E implies rest-of-year adjusted eps growth of 126% vs 18% year to date (Interim tab): explain (guidance, seasonality, deal, one-off) or fix
+  - Gate warning (10): Post-balance-sheet events (closings, signings, issuance, share-count settlements) — No 8-K with a deal, debt or impairment item since the balance sheet; check press releases: none entered (deals)
+  - Gate warning (11): No plug in tax or other non-operating lines; operating plugs > 2% revenue / 5% EPS explained — Other operating cash items -1.25e+03 vs normal -2.7e+03 (0% of EPS)
+  - Gate warning (16): Terminal margin within the 10–90th percentile of 10-year history; cyclicals at mid-cycle — terminal operating margin 32.8% at the 100% percentile of 10 years (median 18.1%): argue the structural change in the thesis or bring it inside the range

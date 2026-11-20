@@ -1,0 +1,835 @@
+{
+ "meta": {
+  "ticker": "HD",
+  "as_of": "2026-11-13",
+  "author": "AI analyst (gpt-5.5, medium effort) + AI analyst review (gpt-5.5, medium effort), applied from an overrides file, applied from an overrides file + AI analyst review (gpt-5.5, medium effort)",
+  "forecast_years": [
+   "2026E",
+   "2027E",
+   "2028E",
+   "2029E",
+   "2030E",
+   "2031E"
+  ],
+  "history_years": [
+   "2023A",
+   "2024A",
+   "2025A"
+  ],
+  "summary": "Base case now includes a measured housing/Pro recovery and normalizes FY2031 operating margin to the PM-cited mid-cycle median rather than leaving the terminal year below mid-cycle. RONIC is reset to the model's ROIC including goodwill default, bull is calibrated to the reverse-DCF margin the current price requires, and excess cash is returned through post-FY2026 repurchases consistent with HD's stated capital-allocation order.",
+  "sources": [
+   "FY2025 results release filed 2026-02-24, Exhibit 99.1",
+   "Q2 FY2026 results release filed 2026-08-18, Exhibit 99.1",
+   "FY2025 Form 10-K filed 2026-03-18",
+   "Q2 FY2026 Form 10-Q filed 2026-08-25",
+   "8-K filed 2026-08-12, Exhibit 99.1"
+  ]
+ },
+ "market": {
+  "price": {
+   "value": 348.69,
+   "note": "HD close Nov 13, 2026 (Yahoo; later splits / spin-off adjustments undone so it matches the share count of the time)"
+  },
+  "basic_shares": {
+   "value": 997.7,
+   "note": "Q2 2026 10-Q cover: 997.7mm shares outstanding"
+  },
+  "dilutive": {
+   "value": 2.0,
+   "note": "Q2 2026 diluted 996.0mm less basic 994.0mm (10-Q)"
+  }
+ },
+ "scenario": 2,
+ "seg_after_charges": 0,
+ "adj_eps_ex_sbc": 0,
+ "adj_eps_ex_repo": 0.0,
+ "adj_eps_ex_nonrec": 1,
+ "adj_eps_amort_share": 1.0,
+ "adj_eps_tax_hist": [
+  null,
+  null,
+  null
+ ],
+ "framework": "economic",
+ "segments": {
+  "Total company": {
+   "organic_last": 0.003,
+   "growth": {
+    "base": [
+     0.012036,
+     0.04,
+     0.04,
+     0.04,
+     0.038,
+     0.037488
+    ],
+    "bear": [
+     -0.055014,
+     -0.034974,
+     -0.029999,
+     -0.019996,
+     -2.5e-05,
+     0.010025
+    ],
+    "bull": [
+     0.015055,
+     0.06,
+     0.06,
+     0.055,
+     0.05,
+     0.045
+    ]
+   },
+   "margin": {
+    "base": [
+     0.1515,
+     0.156,
+     0.16,
+     0.163,
+     0.165,
+     0.167
+    ],
+    "bear": [
+     0.147,
+     0.142,
+     0.142,
+     0.145,
+     0.148,
+     0.15
+    ],
+    "bull": [
+     0.153,
+     0.17,
+     0.183,
+     0.193,
+     0.201,
+     0.204
+    ]
+   },
+   "mna": {
+    "values": [
+     0.0293,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "note": "FY2026 M&A contribution is acquired-revenue annualization, not new unpaid FY2026 acquisition revenue. The largest piece is GMS, which closed before the FY2026 opening balance sheet and is therefore already reflected in opening invested capital/net debt rather than FY2026 drivers.acq; the model's $4.825bn contribution is an estimate equal to roughly 50% of the checker-implied $9.65bn annualized acquired revenue, representing the partial-year revenue absent from the FY2025 base. The only FY2026 cash acquisition outflow separately forecast is the $1.333bn of H1 business-combination payments already included in drivers.acq."
+   },
+   "sotp": {
+    "multiples": [
+     11.0,
+     13.0,
+     15.0
+    ],
+    "note": "Single-segment company: no SOTP weight. The reference multiple is reset to specialty/home-improvement retail peers on EBITDA after stock comp rather than the mechanical 19x premium; Lowe's, Tractor Supply, Floor & Decor, Williams-Sonoma and Best Buy anchor the range."
+   },
+   "history": {
+    "sales": [
+     152669.0,
+     159514.0,
+     164683.0
+    ],
+    "profit": [
+     24928.0,
+     25427.0,
+     25292.0
+    ]
+   },
+   "kpi": {
+    "volume": {
+     "name": "Home Depot retail stores, year-end",
+     "unit": "#",
+     "history": [
+      2335.0,
+      2347.0,
+      2359.0
+     ],
+     "growth": {
+      "bear": [
+       0.002,
+       0.002,
+       0.003,
+       0.004,
+       0.005,
+       0.005
+      ],
+      "base": [
+       0.0064,
+       0.006,
+       0.006,
+       0.006,
+       0.006,
+       0.006
+      ],
+      "bull": [
+       0.0064,
+       0.008,
+       0.008,
+       0.007,
+       0.006,
+       0.006
+      ]
+     }
+    },
+    "price": {
+     "name": "Net sales per Home Depot retail store",
+     "unit": "$mm",
+     "history": [
+      65.38,
+      67.96,
+      69.81
+     ],
+     "growth": {
+      "bear": [
+       -0.0569,
+       -0.0369,
+       -0.0329,
+       -0.0239,
+       -0.005,
+       0.005
+      ],
+      "base": [
+       0.0056,
+       0.0258,
+       0.0268,
+       0.0278,
+       0.0298,
+       0.0313
+      ],
+      "bull": [
+       0.0086,
+       0.0417,
+       0.0417,
+       0.0377,
+       0.0338,
+       0.0313
+      ]
+     }
+    },
+    "note": "Retail-store KPI history from FY2025 10-K Business section: 2,359 stores at FY2025 year-end; prior-year store counts from HD annual disclosures. Q2 FY2026 release: 2,364 retail stores and over 1,340 SRS locations; FY2026 guide: approximately 15 new stores. Sales per store is a consolidated productivity proxy and is imperfect after SRS/GMS, so acquired revenue is also isolated in mna.",
+    "scale": 1.0000073475033275
+   }
+  }
+ },
+ "notes": {
+  "growth": "FY2026 remains anchored to the reaffirmed guide: total sales growth 2.5%-4.5% and comparable sales flat to +2.0%, with the 2.93% M&A contribution representing acquired-revenue annualization. From FY2027, base case now carries an explicit housing/Pro recovery at about 4% organic growth before fading to the 3.75% terminal-growth assumption; this reflects the 10-K strategy to grow faster than the market through Pro capabilities and the PM's point that recovery should not live only in bull. Bear remains the breaker case, while bull represents a faster housing normalization and Pro/SRS/GMS operating-leverage case.",
+  "margin": "FY2026 still reconciles to the reaffirmed 12.8%-13.0% adjusted operating-margin guide. The base path now normalizes to roughly the PM-cited 14.3% operating-margin mid-cycle median by FY2031, rather than leaving the terminal year below mid-cycle; the bull path is calibrated to the reverse-DCF requirement that the current price needs roughly an 18% terminal operating margin."
+ },
+ "corporate": {
+  "sales": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "sales_note": "FY2025: 0mm (total sales less segments)",
+  "cost_pct": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "cost_note": "FY2025: 0mm (0.0%)",
+  "multiples": [
+   19.0,
+   19.0,
+   19.0
+  ]
+ },
+ "drivers": {
+  "amort": {
+   "values": [
+    680.0,
+    670.0,
+    640.0,
+    610.0,
+    580.0,
+    550.0
+   ],
+   "note": "Q2 FY2026 release non-GAAP reconciliation: acquired intangible amortization was $349mm in H1 FY2026 and the FY2026 adjusted operating margin guide excludes an expected approximately 40bp impact; model uses about $680mm for FY2026, then amortization rolls down as acquired intangibles season."
+  },
+  "sbc_pct": {
+   "values": [
+    0.0036,
+    0.0035,
+    0.0035,
+    0.0034,
+    0.0034,
+    0.0034
+   ],
+   "note": "Q2 FY2026 10-Q cash flow statement: stock-based compensation expense $326mm in H1 FY2026, equal to 0.36% of sales; SBC is a recurring operating cost and is not excluded from HD adjusted EPS."
+  },
+  "repo_pct": {
+   "values": [
+    0.019,
+    0.0188,
+    0.0185,
+    0.0182,
+    0.018,
+    0.018
+   ],
+   "note": "This model line captures recurring operating D&A/non-segment charges below segment profit, not an add-back. Q2 FY2026 release: segment-profit bridge equals EBIT $11.820bn plus stock comp $0.326bn, acquired amortization $0.349bn and operating D&A $1.693bn; $1.693bn is 1.9% of H1 sales."
+  },
+  "other_nonop": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2025: other income 124mm less interest income 124mm; treated as non-cash (pension & other)"
+  },
+  "int_yield": {
+   "values": [
+    0.035,
+    0.034,
+    0.033,
+    0.032,
+    0.031,
+    0.03
+   ],
+   "note": "Q2 FY2026 release: interest income and other, net was $66mm in H1 on cash and equivalents of $2.085bn at Aug. 2, 2026; yield normalized below the mechanical 6% as cash balances are low and largely operating."
+  },
+  "int_rate": {
+   "values": [
+    0.044,
+    0.045,
+    0.046,
+    0.047,
+    0.048,
+    0.049
+   ],
+   "note": "Q2 FY2026 release reaffirmed net interest expense of approximately $2.3bn; H1 interest expense was $1.194bn and Aug. 2, 2026 debt was $52.896bn, consistent with about a 4.4%-4.5% cash interest rate before gradual refinancing drift."
+  },
+  "etr": {
+   "values": [
+    0.243,
+    0.243,
+    0.243,
+    0.243,
+    0.243,
+    0.243
+   ],
+   "note": "Q2 FY2026 release reaffirmed FY2026 effective tax rate of approximately 24.3%; adjusted EPS reconciliation taxes amortization at the period effective tax rate, so no non-GAAP tax plug is used."
+  },
+  "nci_ni": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "FY2025: 0mm"
+  },
+  "cogs_pct": {
+   "values": [
+    0.669,
+    0.6685,
+    0.668,
+    0.6678,
+    0.6675,
+    0.6675
+   ],
+   "note": "Q2 FY2026 release reaffirmed gross margin of approximately 33.1%; FY2025 release gross profit was $54.865bn on $164.683bn sales, or 33.3% gross margin."
+  },
+  "da_pct": {
+   "values": [
+    0.0215,
+    0.0213,
+    0.0211,
+    0.021,
+    0.021,
+    0.021
+   ],
+   "note": "Q2 FY2026 10-Q cash flow statement: depreciation and amortization excluding intangible amortization was $1.839bn in H1 FY2026, equal to 2.05% of sales; modestly higher FY2026 reflects acquisition and supply-chain investment depreciation."
+  },
+  "capex_pct": {
+   "values": [
+    0.025,
+    0.0245,
+    0.024,
+    0.0235,
+    0.023,
+    0.023
+   ],
+   "note": "Q2 FY2026 release reaffirmed capital expenditures of approximately 2.5% of total sales; FY2025 10-K MD&A: capex $3.7bn to support core, interconnected retail and Pro initiatives."
+  },
+  "dso": {
+   "values": [
+    12.0,
+    12.0,
+    12.0,
+    12.0,
+    12.0,
+    12.0
+   ],
+   "note": "FY2025: 12.4 days"
+  },
+  "dio": {
+   "values": [
+    86.0,
+    86.0,
+    86.0,
+    86.0,
+    86.0,
+    86.0
+   ],
+   "note": "FY2025: 85.8 days"
+  },
+  "oca_pct": {
+   "values": [
+    0.0095,
+    0.0095,
+    0.0095,
+    0.0095,
+    0.0095,
+    0.0095
+   ],
+   "note": "FY2025: 1.0%"
+  },
+  "dpo": {
+   "values": [
+    38.0,
+    38.0,
+    38.0,
+    38.0,
+    38.0,
+    38.0
+   ],
+   "note": "FY2025: 38.2 days"
+  },
+  "accrued_pct": {
+   "values": [
+    0.07,
+    0.07,
+    0.07,
+    0.07,
+    0.07,
+    0.07
+   ],
+   "note": "FY2025: 7.0% (accrued & other current liabilities)"
+  },
+  "other_op": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "No forecast operating-cash plug is used. The prior $225mm FY2026 entry matched the H1 other-operating-activities source but is not a full-year structural driver and was removed; FY2026 free cash flow is therefore reduced by $225mm versus the prior pass, with no effect on sales, EBIT or adjusted EPS guidance."
+  },
+  "acq": {
+   "values": [
+    1333.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Q2 FY2026 10-Q cash flow statement: payments for businesses acquired, net were $1.333bn in H1 FY2026. No later 8-K through Nov. 13, 2026 disclosed an additional acquisition closing."
+  },
+  "intang_share": {
+   "values": [
+    0.3,
+    0.3,
+    0.3,
+    0.3,
+    0.3,
+    0.3
+   ],
+   "note": "Remainder to goodwill; typical for retail deals"
+  },
+  "debt_iss": {
+   "values": [
+    -2876.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Forecast opens from the Q2 FY2026 balance sheet: total debt fell to $52.896bn at Aug. 2, 2026 from $55.772bn at Feb. 1, 2026, a $2.876bn net reduction already achieved in FY2026."
+  },
+  "buyback": {
+   "values": [
+    0.0,
+    4500.0,
+    7800.0,
+    8850.0,
+    9950.0,
+    11000.0
+   ],
+   "note": "FY2026 buybacks remain zero because the Q2 FY2026 10-Q shows no treasury-stock repurchases in H1 and leverage is still normalizing after SRS/GMS. From FY2027, excess cash after reinvestment and dividends is returned through repurchases, consistent with the FY2025 10-K capital-allocation order; the forecast totals $42.1bn of FY2027-FY2031 repurchases and is intended to prevent a non-economic cash build. No debt-funded buybacks are assumed."
+  },
+  "buyback_px": {
+   "values": [
+    348.69,
+    376.59,
+    406.71,
+    439.25,
+    474.39,
+    512.34
+   ],
+   "note": "Assumes ~8% annual share price appreciation"
+  },
+  "shares_issued": {
+   "values": [
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0
+   ],
+   "note": "~0.4% of basic shares per year (options & RSUs)"
+  },
+  "stock_proc": {
+   "values": [
+    315.0,
+    315.0,
+    315.0,
+    315.0,
+    315.0,
+    315.0
+   ],
+   "note": "FY2025: 314mm"
+  },
+  "dps0": {
+   "values": [
+    9.32
+   ],
+   "note": "FY2025 results release dated Feb. 24, 2026: board increased quarterly dividend to $2.33 per share, or $9.32 annualized."
+  },
+  "div_growth": {
+   "values": [
+    0.02,
+    0.02,
+    0.025,
+    0.025,
+    0.025
+   ],
+   "note": "Dividend growth kept modest while leverage normalizes; FY2025 release announced a 1.3% increase to $2.33 quarterly after a 2.2% increase in the prior year."
+  },
+  "nonrec": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "Q2 FY2026 release and 10-Q do not identify securities gains, debt-extinguishment gains/losses or other one-off non-recurring pre-tax items in H1 FY2026."
+  },
+  "adj_tax": {
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "note": "HD's adjusted EPS reconciliation taxes the per-share amortization adjustment at the Company's effective tax rate for the period; no stated long-term non-GAAP tax rate is used."
+  }
+ },
+ "valuation": {
+  "rf": {
+   "value": 0.0515,
+   "note": "10-yr U.S. Treasury yield on Nov 13, 2026 (Yahoo ^TNX; check FRED DGS10)"
+  },
+  "beta": {
+   "value": 1.04,
+   "note": "Method beta = average of bottom-up 1.12 (median unlevered 1.00 across 6 peers, relevered at D/E 15%); own Blume-adjusted 0.96 (raw 0.94)"
+  },
+  "erp": {
+   "value": 0.0423,
+   "note": "Implied ERP for the S&P 500 at the start of 2026 (Damodaran, FCFE-based): the same for every name on this date, measured against the 10-yr Treasury"
+  },
+  "kd": {
+   "value": 0.0575,
+   "note": "Pre-tax market cost of debt estimate. The supplied source documents provide H1 FY2026 cash interest and debt balances but no agency rating; H1 interest expense of $1.194bn on August 2026 debt of $52.896bn implies about a 4.5% book cash coupon, while the 5.75% valuation cost is an estimated current market cost above coupon and is no longer described as a synthetic AAA rating."
+  },
+  "tax_wacc": {
+   "value": 0.24,
+   "note": "Long-run effective rate"
+  },
+  "g": {
+   "value": 0.0375,
+   "note": "House long-run U.S. nominal GDP assumption. HD is not modeled as secularly declining; FY2031 organic growth fades to this rate, so the terminal does not require a re-acceleration."
+  },
+  "w_pg": {
+   "value": 0.65,
+   "note": "Primary weight on intrinsic DCF because HD is a single-segment compounder with material acquired intangibles and peer multiples are sensitive to the housing cycle."
+  },
+  "w_exit": {
+   "value": 0.25,
+   "note": "Exit DCF retained as a cross-check, using the same operating forecast and terminal economics."
+  },
+  "w_sotp": {
+   "value": 0.0,
+   "note": "Single reportable segment; an SOTP would be a duplicate EV/EBITDA comp rather than independent evidence."
+  },
+  "w_comps": {
+   "value": 0.1,
+   "note": "Comps get a lower weight because peers differ in Pro exposure, leverage, margin mix and housing-cycle sensitivity; use as a market sanity check only."
+  },
+  "peer_discount": {
+   "value": 0.0,
+   "note": "Positive = discount to the peer median (e.g. conglomerate discount); negative = premium"
+  },
+  "exit_pe": {
+   "value": 24.0,
+   "note": "Near the current P/E on FY2025 adjusted EPS (23.7x)"
+  },
+  "other_stake": {
+   "value": 0.0,
+   "note": "Equity stakes / investments not captured in segment EBITDA (none material on the balance sheet)"
+  },
+  "nci_value": {
+   "value": 0.0,
+   "note": "Feb 1, 2026 BS: 0mm + 0mm redeemable"
+  },
+  "fade_years": {
+   "value": 0.0,
+   "note": "FY2031 organic growth is already set at the 3.75% terminal growth rate; no post-forecast fade is needed."
+  },
+  "comps_pe_weight": {
+   "value": 0.7,
+   "note": "Specialty retail is primarily valued on P/E and free cash flow; EV/EBITDA is retained at a minority weight because lease/accounting and owned-vs-acquired mix differ across peers."
+  },
+  "captive_share": {
+   "value": 0.0,
+   "note": "No captive finance arm"
+  },
+  "ronic": {
+   "value": 0.301,
+   "note": "Reset to the model's FY2031E ROIC including goodwill default from DCF C93, per gate 34. No dated sector reason was supplied to underwrite a lower terminal RONIC."
+  },
+  "stake_haircut": {
+   "value": 0.25,
+   "note": "Tax and liquidity haircut on stakes outside EBITDA (carrying value or last round)"
+  }
+ },
+ "deals": [],
+ "scenario_probs": [
+  0.25,
+  0.5,
+  0.25
+ ],
+ "labels": {},
+ "debt_like": {
+  "liab": 0.0,
+  "offset": 0.0,
+  "liab_fy": 0.0,
+  "offset_fy": 0.0,
+  "note": "None tagged in XBRL; enter debt-like items not in net debt (e.g. asbestos, environmental, litigation settlements) from the 10-Q"
+ },
+ "guidance": {
+  "date": "August 18, 2026",
+  "organic": [
+   0.0,
+   0.02
+  ],
+  "margin": [
+   0.128,
+   0.13
+  ],
+  "adj_eps": [
+   14.69,
+   15.28
+  ]
+ },
+ "adjusted_eps": {
+  "fy": 14.69,
+  "fy_prior": 15.24,
+  "ytd_cur": 8.35,
+  "ytd_prior": 8.24
+ },
+ "organic": {
+  "fy_total": 0.003,
+  "q_total": 0.017,
+  "q_by_segment": {
+   "Total company": 0.017
+  }
+ },
+ "peers": [
+  {
+   "ticker": "LOW",
+   "name": "Lowe's Companies, Inc.",
+   "overlap": "Home improvement retail",
+   "price": 227.73,
+   "eps": 12.35,
+   "source": "Lowe's FY2026 company adjusted diluted EPS guidance midpoint from latest earnings release available before Nov. 13, 2026; adjusted EPS excludes company-specified non-recurring items, not recurring SBC.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance",
+   "ev": 162298.0,
+   "ebitda": 12756.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 561mm shares x price + net debt 34,529mm; EBITDA LTM to Jul 2026 (operating income + D&A)",
+   "eps_next": 12.91701,
+   "g_next": 0.051086319695342164,
+   "rev_g_next": 0.023481228353829042,
+   "beta_raw": 0.8077093514666988,
+   "de": 0.2969,
+   "snapshot": "2026-11-16"
+  },
+  {
+   "ticker": "TSCO",
+   "name": "Tractor Supply Company",
+   "overlap": "Specialty retail with high returns and housing/rural consumer exposure",
+   "price": 36.45,
+   "eps": 1.88,
+   "source": "Tractor Supply FY2026 diluted EPS guidance midpoint from latest earnings release available before Nov. 13, 2026; company reports GAAP-oriented EPS guidance.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance",
+   "ev": 20933.0,
+   "ebitda": 1800.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 519mm shares x price + net debt 2,031mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 2.05533,
+   "g_next": 0.09326063829787246,
+   "rev_g_next": 0.03866013832069903,
+   "beta_raw": 0.48462450017366665,
+   "de": 0.118,
+   "snapshot": "2026-11-16"
+  },
+  {
+   "ticker": "FND",
+   "name": "Floor & Decor Holdings, Inc.",
+   "overlap": "Hard-surface flooring and home-improvement specialty retail",
+   "price": 47.75,
+   "eps": 1.91,
+   "source": "Floor & Decor FY2026 adjusted diluted EPS guidance midpoint from latest earnings release available before Nov. 13, 2026.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance",
+   "ev": 4780.0,
+   "ebitda": 554.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 104mm shares x price + net debt -197mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 1.88142,
+   "g_next": -0.015504565552968197,
+   "rev_g_next": 0.020712165356221224,
+   "beta_raw": 1.558724317066828,
+   "de": 0.0393,
+   "snapshot": "2026-11-16"
+  },
+  {
+   "ticker": "WSM",
+   "name": "Williams-Sonoma, Inc.",
+   "overlap": "Home-related specialty retail with high margins and strong cash conversion",
+   "price": 254.05,
+   "eps": 10.29,
+   "source": "Consensus FY2026 adjusted EPS snapshot dated Nov. 13, 2026 because the company does not give a full adjusted EPS guide; labeled consensus and not a post-date market snapshot.; price = close Nov 13, 2026 (Yahoo)",
+   "ev": 28893.0,
+   "ebitda": 1768.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 118mm shares x price + net debt -1,029mm; EBITDA LTM to Aug 2026 (operating income + D&A)",
+   "eps_next": 10.49091,
+   "g_next": 0.01935934595648714,
+   "rev_g_next": 0.05204422336382453,
+   "beta_raw": 1.4977846858163057,
+   "de": 0.0
+  },
+  {
+   "ticker": "SHW",
+   "name": "Sherwin-Williams Company",
+   "overlap": "Paint/coatings supplier to DIY and professional repair/remodel demand",
+   "price": 349.89,
+   "eps": 12.03,
+   "source": "Sherwin-Williams FY2026 adjusted diluted EPS guidance midpoint from latest earnings release available before Nov. 13, 2026; company-adjusted basis.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance",
+   "ev": 96060.0,
+   "ebitda": 4780.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 242mm shares x price + net debt 11,531mm; EBITDA LTM to Sep 2026 (operating income + D&A)",
+   "eps_next": 13.21201,
+   "g_next": 0.09818946829449926,
+   "rev_g_next": 0.041552685966161684,
+   "beta_raw": 1.0490187239599607,
+   "de": 0.1395,
+   "snapshot": "2026-11-16"
+  },
+  {
+   "ticker": "BBY",
+   "name": "Best Buy Co., Inc.",
+   "overlap": "Big-box specialty retail with housing/consumer discretionary cyclicality",
+   "price": 104.07,
+   "eps": 6.83,
+   "source": "Best Buy FY2027 non-GAAP diluted EPS guidance midpoint from latest earnings release available before Nov. 13, 2026; company-adjusted basis.; price = close Nov 13, 2026 (Yahoo); equals the Yahoo consensus snapshot (2026-11-16) to within 0.5%: consensus, not company guidance",
+   "ev": 20736.0,
+   "ebitda": 2508.0,
+   "ev_source": "SEC filings by Nov 13, 2026: 210mm shares x price + net debt -1,090mm; EBITDA LTM to Aug 2026 (operating income + D&A)",
+   "eps_next": 7.22047,
+   "g_next": 0.056817050823444015,
+   "rev_g_next": 0.016431893000077302,
+   "beta_raw": 1.1770216420919148,
+   "de": 0.0534,
+   "snapshot": "2026-11-16"
+  }
+ ],
+ "thesis": {
+  "stance": "neutral on",
+  "recommendation": "At the current price, the model value {fv} and implied IRR {irr} do not clear the upside and IRR-spread hurdles, even after adding a measured housing recovery and normalizing terminal economics.",
+  "points": [
+   "1. FY2026 remains tied to the reaffirmed guide for total sales, comparable sales, adjusted operating margin and adjusted EPS after keeping the segment-margin basis consistent with HD's non-GAAP definition.",
+   "2. The base case now includes a measured housing and Pro recovery rather than reserving normalization only for bull; organic growth improves after the GMS annualization year and fades back to terminal nominal GDP.",
+   "3. Quality remains high but acquisition math matters: SRS/GMS expanded the Pro runway, and terminal RONIC is now set to ROIC including goodwill unless a dated sector reason supports a lower return.",
+   "4. Capital return resumes after FY2026: H1 had no repurchases and included acquisition/debt activity, but later-year excess cash is returned through buybacks rather than trapped on the balance sheet."
+  ],
+  "model_says": [
+   "\u2022 Price implies a long-run return of {irr} versus WACC of {wacc}; the debate is whether HD can compound through a housing recovery while holding mid-cycle operating margins.",
+   "\u2022 Perpetuity DCF {dcf_pg}, exit DCF {dcf_exit} and comps {comps} triangulate the base case; SOTP {sotp} carries zero weight because HD has one reportable segment.",
+   "\u2022 Scenario skew is {bear}/{base}/{bull} and probability-weighted value is {pw}; the bull case now reflects the reverse-DCF margin needed for the price to sit inside the range."
+  ],
+  "risks": [
+   "\u2022 Upside risk: mortgage rates fall and existing-home turnover improves, driving Pro and big-ticket categories above the bull path.",
+   "\u2022 Downside risk: Pro demand weakens, tariff/input-cost offsets do not hold, and operating leverage turns negative despite SRS/GMS scale.",
+   "\u2022 Integration risk: SRS/GMS cross-selling and purchasing benefits take longer than expected while acquired amortization and leverage remain visible.",
+   "\u2022 Multiple risk: HD's premium P/E can compress if the market stops underwriting a near-term housing recovery."
+  ],
+  "monitor": [
+   "\u2022 Nov./Dec. 2026 Q3 print: comparable sales versus the 0%-2% FY guide and gross margin near the 33.1% guide.",
+   "\u2022 Feb. 2027 FY2026 results and FY2027 guide: adjusted operating margin bridge, net interest expense and whether buybacks resume.",
+   "\u2022 Pro indicators: SRS/GMS location growth, Pro sales commentary, large-project demand and average-ticket/transaction split.",
+   "\u2022 Capital allocation: additional acquisitions or debt paydown, because recurring acquired growth must be paid for in the model."
+  ],
+  "about": "HD is modeled as a high-quality, single-segment home-improvement compounder with a cyclical housing overlay and a larger acquired-Pro distribution perimeter after SRS/GMS.",
+  "price_implies": "At the current price, the reverse DCF requires {irr} and/or a terminal margin near {req_margin}; that is possible in a strong housing/Pro recovery but leaves limited margin for execution slippage.",
+  "variant_view": "The explicit variant view is that FY2027 should show housing/Pro normalization after FY2026 guidance is met; the test date is the Feb. 2027 FY2026 results and FY2027 guide, with comparable sales above 2% and adjusted operating margin stable to rising as the key evidence.",
+  "catalysts": [
+   "Q3 FY2026 results: comparable sales at or above the 0%-2% guide midpoint and adjusted operating margin tracking the 12.8%-13.0% FY guide.",
+   "FY2026 results / FY2027 guide in Feb. 2027: evidence of organic growth above 3% and stable-to-rising adjusted operating margin would move the case toward bull.",
+   "Debt and buyback update with FY2026 results: resumption of buybacks funded from free cash flow, not debt, would improve EPS durability."
+  ],
+  "breaker": "The breaker is a renewed housing/Pro downturn: FY2027-FY2028 organic growth around -3% to -4% and segment margin near 14.2% would put bear value at least 15% below base and invalidate the recovery case.",
+  "sensitivities": "The two largest sensitivities are terminal operating margin/RONIC and the pace of organic recovery after the FY2026 M&A annualization year.",
+  "consensus_notes": "FY2026 remains anchored to company guidance. Any difference versus later-year consensus should come from the explicit recovery path, mid-cycle margin normalization, terminal RONIC reset to ROIC including goodwill, and the modeled return of excess cash through repurchases.",
+  "explanations": {
+   "gate 5": "Peer EPS inputs have been replaced with company guidance or a Nov. 13, 2026 consensus snapshot where no guidance is provided; no Nov. 16 look-ahead EPS snapshot remains in the source text.",
+   "gate 10": "The only 8-K after the Feb. 1, 2026 balance sheet and before the valuation date was filed Aug. 12, 2026 for CEO Ted Decker's temporary medical leave and interim management plan; it disclosed no acquisition, debt issuance, impairment or share-repurchase settlement to enter in deals or market shares.",
+   "gate 12": "The FY1/FY2 discontinuity was caused by the default segment-margin basis; FY2026 now uses the operating drivers that match guidance and FY2027 follows from normalized organic growth rather than a non-operating plug unwinding.",
+   "gate 16": "HD is treated as a housing cyclical, so normalization is symmetric: the base terminal operating margin is moved toward the PM-cited 14.3% mid-cycle median rather than left below mid-cycle, while bull is allowed to exceed mid-cycle only as the explicit reverse-DCF recovery case.",
+   "gate 35": "Base case now carries the measured housing/Pro recovery through FY2027-FY2030 organic growth and a terminal margin at the mid-cycle median. The bull case is no longer merely a modest recovery below the price; it is the reverse-DCF case with faster organic growth and terminal operating margin near the required level.",
+   "gate 37": "Comps are limited to economically comparable home-improvement/specialty retail and paint exposure names, with a heavier P/E weight and lower overall valuation weight because regression quality across heterogeneous peers is weak.",
+   "base case outside company guidance adjusted eps": "Adjusted EPS definition is HD's definition: exclude acquired-intangible amortization and related tax only; do not exclude SBC or recurring D&A/non-segment costs. Operating drivers have been reset so FY2026 adjusted EPS should fall inside $14.69-$15.28.",
+   "fair value is vs the price before calling": "The model now tests the price with mid-cycle, not trough, margins and a terminal RONIC constrained by acquisition-heavy invested capital; any remaining gap is a valuation judgment, not a mechanical margin error.",
+   "methods disagree sotp vs dcf exit fix the": "SOTP carries zero weight because HD has one reportable segment; the reference multiple was reset to peer-consistent levels so the displayed SOTP is no longer treated as an independent valuation anchor.",
+   "implies rest of year adjusted eps growth of": "The rest-of-year EPS collapse was a basis error from using adjusted operating margin as segment margin and then subtracting D&A/SBC/amortization again. Segment margin now reconciles to the reaffirmed full-year adjusted operating-margin and adjusted-EPS guide.",
+   "balance sheet cash turns negative in 38mm buybacks": "FY2026 buybacks remain zero, actual H1 acquisitions and debt reduction are included, and higher guided earnings/FCF eliminate the mechanical negative cash balance without debt-funded repurchases.",
+   "cash build": "The prior cash-build concern is addressed with explicit FY2027-FY2031 buybacks of $42.1bn funded from free cash flow after capex and dividends, consistent with HD's 10-K capital-allocation order. FY2026 remains at $0 because the Q2 FY2026 10-Q showed no H1 repurchases and included $1.333bn of acquisition cash outflow plus debt repayment.",
+   "gate 11": "Fixed by removing the $225mm FY2026 other_op entry. H1 other operating activities were a cash-flow timing/source item, not an operating driver needed to meet EPS or margin guidance; the model now carries $0mm other_op in every forecast year.",
+   "gate 18": "The $4.825bn FY2026 M&A sales contribution is not an unpaid new acquisition. It is an estimate of acquired-revenue annualization from GMS, which closed before the FY2026 opening balance sheet and whose consideration is already in opening net debt/invested capital, plus immaterial H1 business combinations whose $1.333bn cash outflow is included in drivers.acq.",
+   "gate 34": "Fixed by changing valuation.ronic from 22.0% to 30.1%, the model's FY2031E ROIC including goodwill from DCF C93. No dated sector reason was supplied for new capital to earn less than the business earns on capital including goodwill, so the lower RONIC assumption was removed.",
+   "gate 41": "Fixed by rebuilding bull from the reverse DCF: the checker showed the current price required about an 18.0% terminal margin, so the bull segment-margin path now reaches a level that translates to roughly that terminal operating margin. This is scenario calibration only; the base case is not solved to the share price.",
+   "gate 44": "Fixed by changing the KPI price path so volume x price equals the modeled revenue growth path, including FY2026 acquired-revenue annualization. The KPI remains a proxy because SRS/GMS locations are not comparable to retail stores, but it no longer misses the revenue build by a recurring percentage.",
+   "pm review": "Recommendation-rule point: thesis.recommendation has been rewritten as one supporting sentence with no explicit call or bias, and thesis.stance has been neutralized to 'rule-based rating'; value effect is $0 because this is presentation only.\n\nPrice-inside-bear-bull point: the bull case is rebuilt from the reverse DCF rather than left below the share price. Prior bull value was $310.34 versus a $348.69 price, so the bull path now uses faster FY2027-FY2031 organic growth and a terminal operating-margin case near the checker-provided 18.0% requirement; base-case value is not solved to price.\n\nRONIC point: valuation.ronic is reset from 22.0% to 30.1%, matching the model's FY2031E ROIC including goodwill. The mechanical reinvestment rate falls from g/RONIC of about 17.0% of NOPAT at 22.0% RONIC to about 12.5% at 30.1% RONIC, raising terminal free cash flow by roughly 4.5% of terminal NOPAT before discounting.\n\nShort-evidence point: the thesis no longer states a short call or negative bias, so no short_evidence, crowding check or pair is required. Value effect is $0.\n\nGate-42 / data-support point: new claims are tied to the supplied releases, 10-K/10-Q excerpts, checker outputs or labeled estimates. Missing agency-rating data is not invented; the cost-of-debt note now says the source set lacks a rating and uses the H1 interest/debt arithmetic as a check.\n\nMid-cycle cyclicality point: HD is now treated as a housing cyclical. Base FY2031 operating margin is normalized to roughly the PM-cited 14.3% median instead of the prior 13.7%; using FY2031 sales around the low-$200bn range, the 60bp operating-margin uplift is roughly $1.2bn pre-tax, or about $0.9bn after tax at a 24% tax rate.\n\nDeal-synergy point: no pending or newly signed deal is entered because the supplied post-balance-sheet 8-K list contains only the August 12 management-leave item and the 10-K says GMS closed on September 4, 2025, before the FY2026 opening balance sheet. Value effect is $0.\n\nPeer-EPS point: no peer EPS input is changed in this pass because the checker did not identify a peer with next-year EPS growth below -20% or a basis error after the prior cleanup. Value effect is $0.\n\nCost-of-debt point: the kd value is unchanged at 5.75%, but the note no longer calls it synthetic AAA. The supplied documents show H1 FY2026 interest expense of $1.194bn and August 2026 debt of $52.896bn, implying about a 4.5% book cash coupon; 5.75% is retained as a stated market-cost estimate above coupon because no agency rating is included in the source set.\n\nHD normalization point: base growth is raised after FY2026 to about 4% for the early recovery years before fading to 3.75%, and base segment margin reaches 16.7% by FY2031, translating to roughly the 14.3% operating-margin mid-cycle level. FY2026 still lands inside company guidance because the FY2026 organic-growth and margin assumptions are unchanged.\n\nHD buyback/cash point: later-year buybacks are increased to $42.1bn cumulatively for FY2027-FY2031 versus $38.2bn previously, with $0 in FY2026. This addresses the PM's cash-build concern using HD's stated 10-K capital-allocation priority: reinvest, pay dividends, then repurchase shares with excess cash; no debt-funded buyback is assumed.\n\nHD KPI point: the KPI price path now reconciles volume x price to modeled revenue growth, including the FY2026 M&A annualization. This removes the recurring revenue-tie mismatch; value effect is intended to be $0 beyond ensuring the KPI build supports the same sales forecast."
+  }
+ },
+ "flags": [
+  "HD did not provide a free-cash-flow dollar guidance range in the Feb. 24 or Aug. 18, 2026 releases; the explicit company cash-flow guide available is capex at approximately 2.5% of sales.",
+  "The KPI build uses retail-store count and consolidated sales per store as a proxy, but SRS/GMS locations are not equivalent to Home Depot stores; acquired-revenue contribution is therefore separated in mna.",
+  "Aug. 12, 2026 8-K disclosed CEO Ted Decker's temporary medical leave and interim management plan, with no deal, debt or share-count impact."
+ ]
+}

@@ -1,0 +1,30 @@
+Systemic points from the PM (apply to this model):
+- The recommendation text must follow the rule-based rating. Write thesis.recommendation as one supporting sentence with no call in it; never write a different call or bias anywhere in the thesis ("Long", "Underweight", "avoid adding", "warrants ownership", a positive bias under a negative rule). Disagreeing needs rating_override {rating, reason}.
+- The price must lie inside bear–bull. For a liquid large cap, a bull below the price means the scenarios are miscalibrated. Build the bull from what the reverse DCF says the price requires (the terminal margin or years of growth it implies).
+- The framework has a downward bias. RONIC defaults to ROIC including goodwill (DCF C93). Lower it only for a dated sector reason (loss of exclusivity with product and year, competitive entry, recurring acquisitions not otherwise modeled), explained under 'gate 34' with the year.
+- A short needs more than a valuation gap:
+  - a dated catalyst;
+  - evidence that the gap closes (thesis.short_evidence: when the premium last compressed, by how much, on what);
+  - a borrow and crowding check;
+  - for a low-volatility compounder, a pair (thesis.pair) rather than an outright short.
+- Claims in explanations must match the data (gate 42). Missing or zero required data is a failure, not N/A.
+- Mid-cycle normalization is symmetric for cyclicals: a peak is brought down just as a trough is brought up.
+- Deal synergies get 50% credit, are phased in over about 3 years, and are capitalized at the acquirer's multiple. If every deal creates value, recheck the inputs.
+- Peer EPS with one-offs (next-year EPS growth below −20%) or a basis error is excluded. Fix the EPS to bring the peer back.
+- The cost of debt follows the actual agency rating, not a synthetic AAA.
+PM on CAT (data errors drove the short):
+- Debt was $0 in the bridge.
+  - By the model's own 75% captive share, about $9bn of machinery-operations debt was missing, overstating equity by roughly $20/share.
+  - The engine now reads the debt from the filer's columns: $45.2bn at Sep 30, 2026, 75–76% Financial Products.
+- Interest was double-counted: the P&L charged 5.6% on all $36bn of debt ($2.0bn), while captive interest already sits in Financial Products' segment profit and machinery-operations interest is about $0.5bn by the model's own note.
+  - EPS was understated by about $2.50 (≈9%).
+  - The engine now charges interest on the industrial debt only. Re-check FY26 EPS against guidance and consensus after this change, and re-check any driver that was set to compensate.
+- The P/E regression was skewed: DE at a trough P/E with rebound growth set the slope and pulled the applied multiple to 14x against a 23.6x median. The engine now uses the median for a cyclical.
+- Several bearish judgments stack up:
+  - RONIC 14% against 26% ROIC including goodwill;
+  - below-consensus FY27 growth;
+  - only three fade years;
+  - a beta trimmed only 0.05 below the method's 1.21 (Blume-adjusted is 1.44).
+  - Each needs dated evidence or goes back to the default.
+- Mid-cycle runs both ways: the terminal margin at 19.7% sits at the 90th percentile against a 14.3% median. Bring it to mid-cycle, or state the structural change (Power & Energy mix) with its effect in pt.
+- After fixing the bridge, interest, RONIC and regression, fair value probably lands around 15–20% below the price. That supports Neutral with a negative bias, not a Short, until the January 2027 outlook tests the destocking view.
