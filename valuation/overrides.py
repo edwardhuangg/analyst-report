@@ -35,7 +35,7 @@ VAL_KEYS = ["rf", "beta", "erp", "kd", "tax_wacc", "g", "exit_mult", "w_pg", "w_
             "peer_discount", "exit_pe", "other_stake", "nci_value", "fade_years", "comps_pe_weight", "captive_share",
             "ronic", "stake_haircut"]
 LABEL_KEYS = ["peer_discount", "other_stake", "debt_like", "debt_like_offset", "debt_like_net", "repo"]
-GUIDE_KEYS = ["sales", "organic", "margin", "adj_eps", "fcf"]
+GUIDE_KEYS = ["sales", "organic", "margin", "adj_eps", "fcf", "net_income"]
 THESIS_KEYS = ["stance", "recommendation", "points", "model_says", "risks", "monitor", "about",
                # Part F: what the price implies, variant view, dated catalysts, the thesis-breaking risk
                "price_implies", "variant_view", "catalysts", "breaker", "sensitivities", "consensus_notes",
@@ -156,7 +156,10 @@ still growing well above GDP), comps_pe_weight (0-1: weight of P/E vs EV / LTM E
 captive_share (0-0.99: share of total debt that funds a captive finance arm's receivables - excluded from
 net debt, its interest inside segment profit), ronic (return on new invested capital: terminal reinvestment =
 g / ronic; between WACC and current ROIC for a moat, about WACC when commoditizing, never above ROIC without an
-argument naming ROIC), stake_haircut (0-0.9, default 0.25). rf and erp are set once per valuation date for
+argument naming ROIC), stake_haircut (0-0.9, default 0.25). A decline still running in FY6E (a drug's loss of
+exclusivity, a product run-off) is finished in the fade, not proxied by a lower terminal growth: top-level
+"fade_path": {"values": [growth by fade year, up to 10], "note": "source"} with fade_years at least that long;
+terminal growth stays at the house rate. rf and erp are set once per valuation date for
 every name and cannot be changed; beta moves at most ±0.10 from the method value (with a reason); kd at most
 ±0.75pt from the rating-based value. exit_mult is derived (DCF!C53) unless you set it; if you do, keep it
 within ±20% of the perpetuity-implied multiple. exit_pe is not used: the 3-year exit P/E is derived.
@@ -185,7 +188,9 @@ JUDGMENT_VAL = {"beta", "erp", "kd", "g", "exit_mult", "ronic", "fade_years", "p
 TARGET_RX = re.compile(r"(?i)\b(skew|upside[/ -]downside|(reduce|narrow|shrink|cut|lower)\w* (the )?(upside|gap|"
                        r"spread)|to (keep|hold|reach|get|land|move) (the |a )?(rating|call)|so (that )?the (rating|call)|"
                        r"(clear|meet|stay (within|inside)) the (±?15%|band|threshold)|whatever gap remains|"
-                       r"(residual|remaining) (gap )?is the (explicit )?variant view)")
+                       r"(residual|remaining) (gap )?is the (explicit )?variant view|"
+                       r"to make (the )?(terminal )?reinvestment( rate)? consistent|"
+                       r"so (that )?(the )?(terminal )?reinvestment (fits|matches|is consistent))")
 # scenario risk named as the reason for a non-scenario input
 RISK_ONCE = {"beta", "fade_years"}  # terminal growth has its own rule (the house rate)
 RISK_RX = re.compile(r"(?i)\b(disrupt\w*|cannibali[sz]\w*|AI[- ](risk|substitution|native|threat|competition)|"
@@ -310,6 +315,7 @@ def export(spec: ModelSpec) -> dict:
         "thesis": {k: (spec.thesis.get("recommendation_text") or v if k == "recommendation" else v)
                    for k, v in spec.thesis.items() if k != "recommendation_text"},
         "flags": [FLAG_RX.sub("", f) for f in spec.flags if FLAG_RX.match(f)],
+        **({"fade_path": {"values": list(spec.fade_path), "note": spec.fade_path_note}} if spec.fade_path else {}),
         **({"audit_fv": [list(x) for x in spec.audit_fv]} if spec.audit_fv else {}),
         **({"rejected": {f: {"source": r[0], "value": r[1], "why": r[2], "kept": r[3]}
                          for f, r in spec.rejected.items()}} if spec.rejected else {}),
@@ -388,6 +394,8 @@ def _field_value(spec: ModelSpec, field_: str):
         return list(spec.drivers.get(parts[1], ([],))[0])
     if parts[0] == "valuation":
         return spec.valuation.get(parts[1], (None,))[0]
+    if parts[0] == "guidance":
+        return list(spec.guidance.get(parts[1]) or [])
     return getattr(spec, field_, None)
 
 
@@ -471,13 +479,23 @@ def apply(spec: ModelSpec, doc: dict, source: str = "overrides") -> list[str]:
     stated = spec.stated_adj_tax or []
     off = [x for x in th or [] if _num(x) and stated and min(abs(x - r) for r in stated) > 0.03] \
         if isinstance(th, list) else []
+    if isinstance(th, list) and len(th) == 3 and not stated:  # no stated rate: near that year's GAAP rate, never ~0
+        I_ = spec.hist.IS
+        for j, x in enumerate(th):
+            pt, tx = I_["pretax"][j], I_["tax"][j]
+            etr = tx / pt if pt and tx is not None and pt > 0 else None
+            if _num(x) and (x < 0.08 or (etr is not None and 0 < etr < 0.4 and abs(x - etr) > 0.08)):
+                off.append(x)
+        stated = stated or ["that year's GAAP rate ±8pt, at least 8%"]
     if off:
         # history is locked (PM, ADBE: the FY25 non-GAAP tax rate went to 4.8% against a stated 18% so the adjusted
         # EPS tie-out would pass; moving history to pass a check is worse than failing it)
         _reject(spec, warn, "adj_eps_tax_hist", source, th,
-                f"{', '.join(f'{x:.1%}' for x in off)} is more than 3pt from the {', '.join(f'{r:.1%}' for r in stated)} "
-                "non-GAAP tax rate the releases state: history is locked — if adjusted EPS still does not tie, the "
-                "reported figure or the definition switches are wrong, not the history")
+                f"{', '.join(f'{x:.1%}' for x in off)} is off the " +
+                (f"{', '.join(f'{r:.1%}' for r in stated)} non-GAAP tax rate the releases state (±3pt)"
+                 if all(_num(r) for r in stated) else str(stated[0])) +
+                ": history is locked — if adjusted EPS still does not tie, the reported figure or the definition "
+                "switches are wrong, not the history")
     elif isinstance(th, list) and len(th) == 3 and all(x is None or (_num(x) and 0 <= x <= 0.4) for x in th):
         th = [float(x) if x else None for x in th]
         spec.rejected.pop("adj_eps_tax_hist", None)
@@ -601,6 +619,11 @@ def apply(spec: ModelSpec, doc: dict, source: str = "overrides") -> list[str]:
                 _reject(spec, warn, f"drivers.{k}", source, v, f"outside {BOUNDS[k]} (decimals?)")
                 continue
             spec.rejected.pop(f"drivers.{k}", None)
+            if by_ai and TARGET_RX.search(str(d.get("note") or "")):  # an input bent to fit another (PM round 8, DE:
+                # capex ramped from 3% to 8% "to make terminal reinvestment consistent with" a broken RONIC)
+                _reject(spec, warn, f"drivers.{k}", source, v, "its reason is to fit another input or the output "
+                        f"('{TARGET_RX.search(str(d.get('note'))).group(0)}'), not the business")
+                continue
             if k == "shares_issued" and str(d.get("note") or "").startswith("~0.4% of basic shares") and \
                     max(v) - min(v) < 0.06:
                 continue  # an earlier engine's default, not a judgment: today's default (stock comp ÷ price) stands
@@ -746,7 +769,7 @@ def apply(spec: ModelSpec, doc: dict, source: str = "overrides") -> list[str]:
                 if v is not None:
                     bad = guidance_problem(spec, k, *v)
                     if bad:
-                        warn.append(f"Guidance {k} {_guide_txt(k, v)} from the analyst: {bad}; not used")
+                        _reject(spec, warn, f"guidance.{k}", source, list(v), f"{bad}; not used")
                     elif by_ai and k in ext_g and any(abs(a - b) > 0.01 * max(abs(b), 1e-9) for a, b in zip(v, ext_g[k])):
                         warn.append(f"Guidance {k}: the analyst's {_guide_txt(k, v)} differs from the release's "
                                     f"{_guide_txt(k, ext_g[k])}; the release figure is kept")
@@ -917,6 +940,18 @@ def apply(spec: ModelSpec, doc: dict, source: str = "overrides") -> list[str]:
             continue
         spec.flags.append(f"Analyst ({author if author and author != 'defaults' else source}): {f}")
 
+    fp = doc.get("fade_path")
+    if isinstance(fp, dict) and isinstance(fp.get("values"), list):
+        v = [float(x) for x in fp["values"] if _num(x)]
+        if v and len(v) <= 10 and all(-0.5 <= x <= 0.3 for x in v):
+            spec.fade_path, spec.fade_path_note = v, str(fp.get("note") or "")
+            spec.rejected.pop("fade_path", None)
+            changed.append("fade path")
+            if len(v) > spec.valuation["fade_years"][0]:
+                spec.valuation["fade_years"] = (float(len(v)), spec.valuation["fade_years"][1] +
+                                                f"; {len(v)} years to carry the fade path")
+        elif fp["values"]:
+            _reject(spec, warn, "fade_path", source, fp["values"], "needs up to 10 growth rates between -50% and +30%")
     _restore_rejected(spec, doc.get("rejected"))
     if not spec.audit_fv and isinstance(doc.get("audit_fv"), list):  # the passes as run (PM round 6: a rebuild lost them)
         spec.audit_fv = [(str(a_[0]), float(a_[1])) for a_ in doc["audit_fv"]
@@ -926,7 +961,14 @@ def apply(spec: ModelSpec, doc: dict, source: str = "overrides") -> list[str]:
         warn.append(f"Method weights sum to {w:.0%}; the Summary rescales them")
     if spec.valuation["g"][0] >= 0.8 * _wacc_guess(spec):
         warn.append("Terminal growth is close to the cost of capital: the perpetuity value will be unstable")
-    warn += balance_guards(spec)
+    before = {k: list(spec.drivers[k][0]) for k in (doc.get("drivers") or {}) if k in spec.drivers}
+    changes = balance_guards(spec)
+    warn += changes
+    for k, b in before.items():  # a floor or cap that changes what the analyst wrote is a refusal (PM round 8: the
+        # $647mm acquisitions figure was floored back to $8,779mm three times while gate 45 passed)
+        if list(spec.drivers[k][0]) != b:
+            spec.rejected[f"drivers.{k}"] = (source, b, "changed by an engine guard: " + "; ".join(changes)[:300],
+                                             list(spec.drivers[k][0]))
     spec.provenance.append(f"{who}: {_summary(changed)}")
     if meta.get("summary"):
         spec.notes["analyst_summary"] = str(meta["summary"])

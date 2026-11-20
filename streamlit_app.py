@@ -417,7 +417,7 @@ with tabs[4]:
     st.markdown(f"**FY{spec.fy_fc[0]} company guidance** (for the check on the Interim tab; blank = not given)")
     gmeta = [("sales", "Net sales ($mm)", 1), ("organic", "Organic growth (%)", 100),
              ("margin", "Segment margin (%)", 100), ("adj_eps", "Adjusted EPS ($)", 1),
-             ("fcf", "Free cash flow ($mm)", 1)]
+             ("fcf", "Free cash flow ($mm)", 1), ("net_income", "Net income ($mm)", 1)]
     gdf = pd.DataFrame([{"Metric": label, "Low": (spec.guidance.get(k) or (None, None))[0] * s
                          if spec.guidance.get(k) else None,
                          "High": spec.guidance.get(k)[1] * s if spec.guidance.get(k) else None}
@@ -552,7 +552,8 @@ if st.session_state.get("xlsx"):
         rt, sv = spec.rating or {}, spec.scenario_values or {}
         if rt:  # the rule-based rating and the decision layer (economic framework)
             st.markdown(f"**Rating (rule): {rt.get('rating')}**" +
-                        (f" · sizing: {rt['sizing']}" if str(rt.get("sizing") or "").startswith("binary") else "") +
+                        (f" · sizing: {rt['sizing']}" if str(rt.get("sizing") or "").startswith("binary") and
+                         rt.get("rating") in ("Long", "Short") else "") +
                         f" — {rt.get('why', '')}")
             if sv.get("bear") and sv.get("bull"):
                 d = st.columns(4)

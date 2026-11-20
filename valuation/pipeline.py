@@ -85,9 +85,19 @@ def _split_adjust(hist: F.History, interim: F.Interim, ticker: str, flags: list)
 
 
 def _consensus(ticker: str, fy_end: date, sales_last: Optional[float], flags: list) -> dict:
-    """FY-matched consensus revenue growth for FY1/FY2 (recent valuation dates only)."""
+    """FY-matched consensus revenue growth for FY1/FY2 (recent valuation dates only). A failed fetch is retried once;
+    when FY1 has ended but its 10-K is not out (DE on Nov 20: FY2026 ended Nov 1), Yahoo's current year is FY2 and
+    is used as FY2 (PM round 8: no consensus for a mega-cap is a data failure, not an absence)."""
     est = market.estimates(ticker, fy_end)
     if not est:
+        time.sleep(2)
+        est = market.estimates(ticker, fy_end)
+    if not est:
+        nxt = market.estimates(ticker, _add_years(fy_end, 1))
+        if nxt.get("period") == "0y":
+            flags.append(f"Consensus is for {_add_years(fy_end, 1):%b %Y} (FY2): FY1 has ended and is not yet reported")
+            return {"period": "fy2", "eps": None, "eps_fy2": nxt.get("eps"), "g_fy1": None,
+                    "g_fy2": nxt.get("rev_0y_growth")}
         return {}
     out = {"period": est["period"], "eps": est.get("eps")}
     if est["period"] == "0y":
@@ -756,8 +766,9 @@ def _complete_peers(doc: dict, as_of: date, client) -> None:
                 snap["eps"] = e
                 snap["source"] = _with_price_date(str(p["source"]), snap)
                 if relabeled:
-                    snap["source"] += (f"; equals the Yahoo consensus snapshot ({snap.get('snapshot')}) to within "
-                                       "0.5%: consensus, not company guidance")
+                    snap["source"] += ("; equals the Yahoo consensus " +
+                                       (f"snapshot ({snap['snapshot']}) " if snap.get("snapshot") else "") +
+                                       "to within 0.5%: consensus, not company guidance")
                 else:  # the analyst's own reading replaces today's consensus: no look-ahead, its basis its own
                     snap["snapshot"] = None
                 src = str(p["source"])
@@ -908,8 +919,8 @@ def cap_ronic(spec: ModelSpec, rev: dict) -> bool:
                                f"(was {old:.1%})")
     spec.flags = [f for f in spec.flags if not f.startswith("Terminal RONIC held")]
     spec.flags.append(f"Terminal RONIC held at {new:.1%} (was {old:.1%}): the return including goodwill, because "
-                      "goodwill and acquired intangibles are a large share of capital and the forecast has no "
-                      "recurring acquisitions (gate 34)")
+                      f"growth has been bought ({str(g34.get('detail') or '').split('; ', 1)[-1][:110]}) and the "
+                      "forecast has no recurring acquisitions (gate 34)")
     return True
 
 
@@ -945,6 +956,8 @@ def return_excess_cash(spec: ModelSpec, rev: dict) -> bool:
     B, I = spec.hist.BS, spec.hist.IS
     ebitda0 = (I["opinc"][2] or 0.0) + (I["da"][2] or 0.0)
     debt0 = sum(B[k][2] or 0.0 for k in ("st_debt", "cur_ltd", "ltd"))
+    if spec.captive:  # the captive arm's debt is outside net debt everywhere else (PM round 8, DE: "5.6x" with it)
+        debt0 *= 1 - (spec.valuation.get("captive_share", (0.0,))[0] or 0.0)
     lev0 = (debt0 - cash0) / ebitda0 if ebitda0 > 0 else 0.0
     repay = lev0 > 2.5  # a levered balance sheet (VZ ~3x) deleverages first
     key, cut = ("debt_iss", "; excess cash repays debt") if repay else ("buyback", "; raised so cash above")
@@ -1086,12 +1099,24 @@ def bracket_price(spec: ModelSpec, vals: dict) -> bool:
     if req is None or m6 is None or not px or not spec.segments:
         return False
     moved = []
+    spec.notes.pop("scenario_implausible", None)
+    mh_ = [m_ for _, m_ in spec.margin_hist or []]
     for case, sign in (("bull", 1), ("bear", -1)):
         v = num((sv.get(case) or {}).get("fair_value"))
         if v is None or (sign > 0 and v > px * 1.01) or (sign < 0 and v < px * 0.99):
             continue
         d = req - m6
         if sign * d <= 0.001:
+            continue
+        edge = (max(mh_) if sign > 0 else min(mh_)) if mh_ else None
+        if edge is not None and sign * (req - edge) > 0.05:
+            # evidence the model is wrong, not a scenario to manufacture (PM round 8, DE: the bull was pushed 15pt to
+            # a 42% large-ag margin because the price needed 45% against a 21% ten-year high)
+            spec.notes["scenario_implausible"] = (
+                f"the price needs a {req:.1%} terminal operating margin, {abs(req - edge) * 100:.0f}pt "
+                f"{'above the 10-year high' if sign > 0 else 'below the 10-year low'} of {edge:.1%}: the {case} is "
+                "left as built, because a gap that size means the model is wrong (capital base, mid-cycle "
+                "normalization, RONIC) before it means the market is")
             continue
         d = max(min(d, 0.15), -0.15)
         keep = {id(sg): list(sg.margin.get(case) or sg.margin["base"]) for sg in spec.segments}
@@ -1154,12 +1179,14 @@ def rate(spec: ModelSpec, vals: dict) -> dict:
     if ok_vals:
         gates.append(G.scenario_gate(spec, vals_[0], vals_[1], vals_[2], px))
         inside = vals_[0] < px < vals_[2]
+        bad_ = spec.notes.get("scenario_implausible") if not inside else None
         gates.append({"id": 41, "gate": "The price lies inside bear–bull (else the scenarios are miscalibrated, not the "
-                                        "market)", "status": "PASS" if inside else "WARN",
+                                        "market)", "status": "PASS" if inside else "FAIL" if bad_ else "WARN",
                       "detail": (f"bear ${vals_[0]:,.2f} < price ${px:,.2f} < bull ${vals_[2]:,.2f}" if inside else
                                  f"price ${px:,.2f} outside bear ${vals_[0]:,.2f} – bull ${vals_[2]:,.2f}: rebuild the "
                                  "case from the reverse DCF (what the price requires) or say why the market is "
                                  "wrong on a liquid large cap") +
+                                (f": {bad_}" if bad_ else "") +
                                 (f" ({spec.notes['scenario_rebuild']})" if spec.notes.get("scenario_rebuild") else "")})
         if spec.last_review is not None:
             spec.last_review["gates"] = gates

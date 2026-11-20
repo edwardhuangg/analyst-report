@@ -211,6 +211,8 @@ def assumptions_layout(s: ModelSpec) -> dict:
         extra.append("captive_share")
     for i, k in enumerate(extra):
         r[k] = row + 14 + i
+    if s.framework != "reference":
+        r["fade_path"] = row + 14 + len(extra) + 1
     return r
 
 
@@ -283,7 +285,7 @@ LIVE = {"fv": ("Summary!$G$19", "$", "0.00"), "price": ("Summary!$C$5", "$", "0.
         "ret3y": ("Summary!$C$29", "", "0.0%"), "req_margin": ("DCF!$C$107", "", "0.0%"),
         "req_g": ("DCF!$C$106", "", "0.0%"), "gap": ("Summary!$C$59", "", "0.0%"),
         "irr_spread": ("Summary!$D$59", "", "0.0%"), "p_bear_implied": ("Summary!$C$62", "", "0%"),
-        "p_bear_long": ("Summary!$C$63", "", "0%"), "peer_discount_pe": ("Summary!$C$64", "", "0%"),
+        "p_bear_long": ("Summary!$C$63", "", "0%"), "p_bear_short": ("Summary!$D$63", "", "0%"), "peer_discount_pe": ("Summary!$C$64", "", "0%"),
         "ret3y_pw": ("Summary!$C$65", "", "0.0%"), "g": ("DCF!$C$74", "", "0.00%"), "beta": ("DCF!$C$7", "", "0.00")}
 
 
@@ -822,6 +824,14 @@ def build_workbook(s: ModelSpec, values: dict = None, unstored: bool = False) ->
         else:
             asm.put(f"C{r}", v, num=num, fill="input")
         asm.note(f"E{r}", note)
+    if "fade_path" in A:  # a decline that runs past FY6 (MRK: Keytruda still -15% a year in 2031) is finished here
+        r = A["fade_path"]
+        asm.put(f"A{r}", f"Fade-stage growth by year after {fc_lbl[-1]} (C = first fade year; blank = a straight "
+                         "line from the last forecast year to terminal growth)")
+        for k, c in enumerate("CDEFGHIJKL"):
+            asm.put(f"{c}{r}", s.fade_path[k] if k < len(s.fade_path) else None, num="pct", fill="input")
+        if s.fade_path_note:
+            asm.note(f"A{r}", s.fade_path_note)
     asm.ws.freeze_panes(18, 2)
     asm.finish()
 
@@ -1005,9 +1015,10 @@ def build_workbook(s: ModelSpec, values: dict = None, unstored: bool = False) ->
             (f"Margin ({s.margin_basis or 'basis matched: segment, GAAP or adjusted operating'})", "pct",
              margin_link),
             ("Adjusted EPS ($)", "eps", f"=IS!F{IS['adj_eps']}"),
-            ("Free cash flow ($mm)", "mm", "=CF!F39")]):
+            ("Free cash flow ($mm)", "mm", "=CF!F39"),
+            ("Net income ($mm)", "mm", f"=IS!F{IS['ni_attr']}")]):
         r = INT_G + 2 + k
-        lo, hi = gd.get(["sales", "organic", "margin", "adj_eps", "fcf"][k]) or (None, None)
+        lo, hi = gd.get(["sales", "organic", "margin", "adj_eps", "fcf", "net_income"][k]) or (None, None)
         itm.put(f"A{r}", label)
         itm.put(f"C{r}", lo, num=num)
         itm.put(f"D{r}", hi, num=num)
@@ -2041,7 +2052,11 @@ def build_workbook(s: ModelSpec, values: dict = None, unstored: bool = False) ->
     dcf.put(f"A{FD['per']}", "Discount period (years from valuation date)")
     dcf.put(f"A{FD['pv']}", "Present value", b=True)
     for k, c in enumerate("CDEFGHIJKL", start=1):
-        dcf.put(f"{c}{FD['g']}", f"=IF({k}<={n_},{g0_}+({g_}-{g0_})*{k}/({n_}+1),0)", num="pct")
+        lin_ = f"{g0_}+({g_}-{g0_})*{k}/({n_}+1)"
+        if econ and "fade_path" in A:  # the analyst's path where given (a cliff finished), else the straight line
+            fp_ = f"Assumptions!{'CDEFGHIJKL'[k - 1]}{A['fade_path']}"
+            lin_ = f"IF(ISNUMBER({fp_}),{fp_},{lin_})"
+        dcf.put(f"{c}{FD['g']}", f"=IF({k}<={n_},{lin_},0)", num="pct")
         if econ:
             base = "$K$37" if k == 1 else f"{prev(c)}{FD['nopat']}"
             dcf.put(f"{c}{FD['nopat']}", f"=IF({k}<={n_},{base}*(1+{c}{FD['g']}),0)", num="mm")
@@ -2091,10 +2106,12 @@ def build_workbook(s: ModelSpec, values: dict = None, unstored: bool = False) ->
                                   "G": "10-yr P90", "H": "Percentile"}, right=False)
         mh = [m for _, m in s.margin_hist][-10:]
         hist_rng = f"$C$98:${chr(ord('C') + max(len(mh), 1) - 1)}$98"
-        # financing side: equity + debt - cash (a captive arm's debt included: the receivables it funds are capital
-        # that growth needs, and RONIC defaults to this return)
-        ic = "(BS!K40+BS!K34+BS!K24+BS!K25+BS!K29-BS!K6-BS!K7-BS!K13)"
-        ic_ = "BS!K40+BS!K34+BS!K24+BS!K25+BS!K29-BS!K6-BS!K7-BS!K13-BS!K15-BS!K16"
+        # financing side: equity + debt - cash. A captive finance arm's debt is operating, as in net debt: its
+        # interest is inside EBIT and it funds receivables that earn their own return (PM round 8, DE: with the
+        # captive debt in capital, ROIC read 7.5% against an 8.9% WACC and every dollar of growth destroyed value)
+        dbt = "(BS!K24+BS!K25+BS!K29)" + (f"*(1-{aa('captive_share')})" if s.captive else "")
+        ic = f"(BS!K40+BS!K34+{dbt}-BS!K6-BS!K7-BS!K13)"
+        ic_ = f"BS!K40+BS!K34+{dbt}-BS!K6-BS!K7-BS!K13-BS!K15-BS!K16"
         sanity = [(92, "Operating margin", f"=IS!K{IS['op_margin']}", f"=IS!K{IS['op_margin']}", True),
                   (93, "Return on invested capital incl. goodwill (NOPAT ÷ equity + debt − cash − investments)",
                    f"=K26/{ic}", f"=$C${FD['ronic']}", False),
@@ -2415,11 +2432,11 @@ def build_workbook(s: ModelSpec, values: dict = None, unstored: bool = False) ->
         cmp_.band(CP["eps_band"], "EPS the multiple is applied to")
         cmp_.put(f"A{CP['eps_fy1']}", f"{fc_lbl[0]} operating EPS")
         cmp_.put(f"F{CP['eps_fy1']}", f"=IS!F{IS['op_eps']}", num="eps")
-        mh = sorted(m for _, m in s.margin_hist)
-        mid = mh[len(mh) // 2] if len(mh) >= 5 else None
+        from .spec import mid_cycle_margin
+        mid = mid_cycle_margin(s.margin_hist)[0]
         if s.profile.get("cyclical") and mid is not None:
             # symmetric (PM round 4): a peak is normalized down as a trough is normalized up
-            cmp_.put(f"A{CP['eps_mid']}", f"Mid-cycle EPS: {fc_lbl[0]} EPS × 10-yr median operating margin "
+            cmp_.put(f"A{CP['eps_mid']}", f"Mid-cycle EPS: {fc_lbl[0]} EPS × mid-cycle operating margin "
                                           f"({mid:.1%}) ÷ {fc_lbl[0]} margin, when more than 2pt away (trough or "
                                           "peak)", b=True)
             cmp_.put(f"F{CP['eps_mid']}", f"=IF(ABS(IS!F{IS['op_margin']}-{mid:.4f})>0.02,F{CP['eps_fy1']}*{mid:.4f}"
@@ -2996,7 +3013,7 @@ def build_workbook(s: ModelSpec, values: dict = None, unstored: bool = False) ->
                  num="pct", b=True)
         summ.put("A60", "Rating (rule)", b=True)
         summ.put("C60", rt.get("rating") or "Under review", b=True, fill="key")
-        if rt.get("sizing"):  # sizing is not the rating (PM round 7)
+        if rt.get("sizing") and rt.get("rating") in ("Long", "Short"):  # sizing is for a position, not a Neutral
             summ.put("D60", f"Sizing: {rt['sizing']}", b=rt.get("sizing") != "full")
         summ.note("H60", rt.get("why") or "Rated when the file is built: Long if the probability-weighted value is "
                                           "15%+ above the price (the model's error band), the price offers an IRR "
@@ -3015,8 +3032,9 @@ def build_workbook(s: ModelSpec, values: dict = None, unstored: bool = False) ->
                 f'=IFERROR(MAX(0,MIN(1-{pb_},({top}-C5)/(C50-C49))),"n/a")', "pct", True),
                (63, "Bear probability at which the value is 15% above the price (Long side, in C) and 15% below it "
                     "(Short side, in D)",
-                f'=IFERROR(IF(OR(({top}-1.15*C5)/(C50-C49)<0,({top}-1.15*C5)/(C50-C49)>1-{pb_}),"not reachable",'
-                f'({top}-1.15*C5)/(C50-C49)),"n/a")', "pct", False),
+                f'=IFERROR(IF(({top}-1.15*C5)/(C50-C49)<0,"not reachable: "&TEXT({top}/C5-1,"0%")&" even with no '
+                f'bear (a Long needs +15%)",IF(({top}-1.15*C5)/(C50-C49)>1-{pb_},"reached at any bear probability",'
+                f'({top}-1.15*C5)/(C50-C49))),"n/a")', "pct", False),
                (64, "Discount to the peer median: P/E (C) and EV / EBITDA (D); valuing at peer multiples assumes it "
                     "closes", f'=IFERROR(C9/Comps!F{CP["med"]}-1,"n/a")', "pct", False),
                (65, "Three-year return, probability-weighted (bear / base / bull values compounded at the cost of "
@@ -3025,8 +3043,9 @@ def build_workbook(s: ModelSpec, values: dict = None, unstored: bool = False) ->
         for r, label, f, num, bold in dec:
             summ.put(f"A{r}", label, b=bold)
             summ.put(f"C{r}", f, num=num, b=bold, fill="key" if r in (62, 65) else None)
-        summ.put("D63", f'=IFERROR(IF(OR(({top}-0.85*C5)/(C50-C49)<0,({top}-0.85*C5)/(C50-C49)>1-{pb_}),'
-                        f'"not reachable",({top}-0.85*C5)/(C50-C49)),"n/a")', num="pct")
+        summ.put("D63", f'=IFERROR(IF(({top}-0.85*C5)/(C50-C49)>1-{pb_},"not reachable: the value stays above '
+                        f'-15% at any bear probability",IF(({top}-0.85*C5)/(C50-C49)<0,"below -15% even with no bear",'
+                        f'({top}-0.85*C5)/(C50-C49))),"n/a")', num="pct")
         summ.put("D64", f'=IFERROR(C10/Comps!F{CP["ev_med"]}-1,"n/a")', num="pct")
         summ.put("D65", '=IF(ISNUMBER(C65),IF(C65>C30,"Yes","No"),"n/a")', b=True)
     summ.finish()

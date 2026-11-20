@@ -148,6 +148,9 @@ class ModelSpec:
     reported_eps: dict = field(default_factory=dict)  # adjusted EPS read from the release's reconciliation line
     post_bs_events: list = field(default_factory=list)  # 8-Ks filed between the balance sheet and the valuation date
     margin_basis: str = ""      # the margin guide's basis: "gaap", "adjusted" or "segment" ("" = matched)
+    eps_guide_charge: bool = False  # the release says its EPS outlook includes charges (a guide far below last year)
+    fade_path: list = field(default_factory=list)  # growth by fade year after FY6 (blank = straight line to terminal)
+    fade_path_note: str = ""
     repo_structural: bool = False  # non-segment charges are a structural cost (segment profit above R&D / opex)
     asr_open: bool = False      # an accelerated share repurchase still to settle after the 10-Q share count
     audit_impact: list = field(default_factory=list)  # (group, keys, $/share): fair-value effect of each override group
@@ -677,7 +680,20 @@ def build_spec(data) -> ModelSpec:
     spec.organic_total_last = rel.get("organic_fy_total")
     spec.q_organic_total = rel.get("organic_q_total")
     spec.guidance = {}
-    for k, v in (rel.get("guidance") or {}).items():
+    rtext = " ".join(t for _, t in (getattr(data, "release_texts", None) or {}).values() if t)
+    # PM round 8, MRK: "Expected Non-GAAP EPS Range ... $2.77 and $2.82; Outlook Now Includes One-Time Charge" —
+    # an EPS guide far below last year is real when the release says charges are in it
+    spec.eps_guide_charge = bool(re.search(r"(?is)(non-gaap eps|eps (range|outlook|guidance))[^|]{0,200}?"
+                                           r"(outlook|range)?[^|]{0,60}?includ\w*[^|]{0,60}?charges?", rtext))
+    gd_ = dict(rel.get("guidance") or {})
+    ae = gd_.get("adj_eps")
+    if ae and len(ae) == 2 and all(isinstance(x, (int, float)) for x in ae) and _in_billions(rtext, *ae):
+        # DE: "Net income guidance improved to $4.75 billion to $5.00 billion" read as an EPS guide
+        gd_["net_income"] = [ae[0] * 1000, ae[1] * 1000]
+        gd_.pop("adj_eps")
+        spec.flags.append(f"The release's {ae[0]}–{ae[1]} guide is net income in billions, not EPS: checked as "
+                          f"{ae[0] * 1000:,.0f}–{ae[1] * 1000:,.0f}mm of net income")
+    for k, v in gd_.items():
         if v and len(v) == 2 and all(isinstance(x, (int, float)) for x in v):
             bad = guidance_problem(spec, k, *v)
             if bad:
@@ -742,6 +758,31 @@ def build_spec(data) -> ModelSpec:
     return spec
 
 
+def mid_cycle_margin(margin_hist: list) -> tuple:
+    """(mid-cycle operating margin, how): the 10-year median, or the last five years' median when the business has
+    shifted structurally (more than 3pt from the five years before). PM round 8, DE: 2016-20 margins of 11-12% kept
+    the 10-year median at the 2026 trough, so a business that stepped up to 18-21% never left it."""
+    by_year = [m_ for _, m_ in (margin_hist or [])]
+    if len(by_year) < 5:
+        return None, ""
+    med = sorted(by_year)[len(by_year) // 2]
+    if len(by_year) >= 8:
+        last5, prior5 = sorted(by_year[-5:]), sorted(by_year[:-5][-5:])
+        m_last, m_prior = last5[2], prior5[len(prior5) // 2]
+        if abs(m_last - m_prior) > 0.03:
+            return m_last, (f"the last five years' median operating margin (the five before: {m_prior:.1%}; a "
+                            "structural shift, so the 10-year median is stale)")
+    return med, "the 10-year median operating margin"
+
+
+def _in_billions(text: str, lo: float, hi: float) -> bool:
+    """The two figures appear in the text as a range in billions ('$4.75 billion to $5.00 billion')."""
+    def f(x):  # 5.0 matches "5", "5.0" and "5.00"; 4.75 matches "4.75" and "4.750"
+        t = f"{x:.2f}".rstrip("0").rstrip(".")
+        return rf"\$?\s?{re.escape(t)}" + (r"0*" if "." in t else r"(?:\.0+)?") + r"\s*(?:billion|bn)\b"
+    return bool(re.search(f(lo) + r"[^|]{0,20}?" + f(hi), text or "", re.I))
+
+
 def guidance_problem(spec: ModelSpec, key: str, lo: float, hi: float) -> str:
     """Why a guidance range cannot be right for this company (empty, reversed, or far from last year)."""
     I = spec.hist.IS
@@ -759,8 +800,13 @@ def guidance_problem(spec: ModelSpec, key: str, lo: float, hi: float) -> str:
         return "" if last <= 0 or 0.25 * last <= mid <= 3 * last else f"far from last year's {last:,.0f}mm"
     if key == "adj_eps":
         last = spec.adj_eps_hist[2] or I["eps_dil"][2]
+        if mid > 0 and last and mid < 0.4 * last and getattr(spec, "eps_guide_charge", False):
+            return ""  # the release says the outlook includes charges (MRK: $2.77-2.82 against $8.98)
         return "" if mid > 0 and (not last or last <= 0 or 0.4 * last <= mid <= 3 * last) else \
-            f"far from last year's {last}"
+            f"far from last year's {last}" + (" (if the release says charges are in the outlook, name them)")
+    if key == "net_income":
+        last = I["ni_attr"][2]
+        return "" if last and last > 0 and 0.25 * last <= mid <= 3 * last else f"far from last year's {last:,.0f}mm"
     if key == "organic":
         return "" if -0.3 <= lo and hi <= 0.6 else "outside -30% / +60%"
     if key == "margin":
@@ -1083,7 +1129,8 @@ def defaults_drivers(spec: ModelSpec, data):
     mh = sorted(m_ for _, m_ in (spec.margin_hist or []))
     if spec.profile.get("cyclical") and len(mh) >= 5 and s2 and I["opinc"][2] is not None and \
             total_margin_last is not None and w:
-        med = mh[len(mh) // 2]
+        med, how_ = mid_cycle_margin(spec.margin_hist)
+        spec.notes["mid_cycle"] = how_
         basis_gap = total_margin_last - I["opinc"][2] / s2  # segment basis above GAAP operating margin
         seg6 = sum(_nz(sg.sales[2]) * ((sg.profit[2] / sg.sales[2] if sg.profit[2] is not None and sg.sales[2] else
                                         0.15) + delta + 0.010) for sg in spec.segments) / w
@@ -1091,13 +1138,15 @@ def defaults_drivers(spec: ModelSpec, data):
         if abs(lift) > 0.01:
             spec.notes["margin_anchor"] = (spec.notes.get("margin_anchor", "") +
                                            f"; cyclical: margins {'rise' if lift > 0 else 'fall'} {abs(lift):.1%} by "
-                                           f"{spec.fc_labels[-1]} to the 10-year median operating margin ({med:.1%}, "
-                                           "mid-cycle)")
+                                           f"{spec.fc_labels[-1]} to mid-cycle ({med:.1%}: {how_})")
         else:
             lift = 0.0
     for sg in spec.segments:
         m = sg.profit[2] / sg.sales[2] if sg.profit[2] is not None and sg.sales[2] else 0.15
-        base = [_r(m + delta + 0.002 * t + lift * (t + 1) / 6, 0.001) for t in yrs]
+        # a margin guide anchors year 1, so the mid-cycle move starts in year 2 (HON: the lift pushed FY1 off its
+        # own guide); without a guide it is spread over all six years
+        ramp = [t / 5 for t in yrs] if m_guide else [(t + 1) / 6 for t in yrs]
+        base = [_r(m + delta + 0.002 * t + lift * ramp[t], 0.001) for t in yrs]
         sg.margin["base"] = base
         sg.margin["bear"] = [_r(v - min(0.02, 0.005 * (t + 1)), 0.001) for t, v in enumerate(base)]
         sg.margin["bull"] = [_r(v + min(0.02, 0.005 * (t + 1)), 0.001) for t, v in enumerate(base)]
@@ -1404,6 +1453,9 @@ def defaults_valuation(spec: ModelSpec, data):
     ltm_ebit = _nz(I["opinc"][2]) + (_nz(ytd_c.get("opinc")) - _nz(ytd_p.get("opinc")) if it.available else 0)
     ltm_int = _nz(I["interest_exp"][2]) + (_nz(ytd_c.get("interest_exp")) - _nz(ytd_p.get("interest_exp"))
                                            if it.available else 0)
+    # a one-time charge does not change debt capacity (PM round 8, MRK: LTM EBIT after a $15bn acquired-R&D charge put
+    # coverage at 2.8x and a synthetic BBB on an A-range credit): the higher of LTM and the last fiscal year
+    ltm_ebit = max(ltm_ebit, _nz(I["opinc"][2]))
     cover = ltm_ebit / ltm_int if ltm_int > 0 else None
     rating, spread = capital.synthetic_rating(cover if cover is not None else (99 if ltm_ebit > 0 else None))
     syn = (f"synthetic {rating} from EBIT / interest {cover:.1f}x LTM" if cover is not None else
@@ -1706,8 +1758,14 @@ def verify_release_figures(spec: ModelSpec, data) -> None:
             f"{k} {new:.2f} (extracted {old if old is not None else 'none'}"
             f"{', found only as one end of a range: guidance' if st == 'range' else ', another column of that line: period-shifted' if st == 'shifted' else ', not in the text' if old is not None else ''})"
             for k, (old, st, new) in fixed.items()))
-    rates = list(dict.fromkeys(m.group(1) for m in re.finditer(
-        r"non-gaap tax (?:rate|provision)[^.%]{0,80}?(\d{1,2}(?:\.\d)?)%", norm)))
+    # every rate in the sentence (MRK: "the non-GAAP effective tax rate was 15.4% for the fourth quarter of 2025 and
+    # 14.4% for the full year" — the reader missed "effective", so FY25 history was solved to 4.2%)
+    rates = []
+    for m in re.finditer(r"non-gaap (?:effective )?(?:income )?tax (?:rate|provision)", norm):
+        sent = re.split(r"\.\s", norm[m.end():m.end() + 200])[0]
+        sent = re.sub(r"\d{1,2}(?:\.\d)?%\s*(?:to|-|–)\s*\d{1,2}(?:\.\d)?%", "", sent)  # an outlook range, not history
+        rates += re.findall(r"(\d{1,2}(?:\.\d)?)%", sent)
+    rates = list(dict.fromkeys(rates))
     spec.stated_adj_tax = [float(r) / 100 for r in rates]
     # the year to date + the guided last quarter = the full-year guide (PM round 6: ADBE's 9M estimated at $17.00;
     # the $24.45-24.50 year less the $6.30-6.35 Q4 is $18.15): a release with no year-to-date figure gives it this way
@@ -1880,6 +1938,9 @@ def balance_guards(spec: ModelSpec) -> list[str]:
     ytd = spec.ytd_capital or {}
     for key, what in (("buyback", "buybacks"), ("acq", "acquisitions")):
         booked = _nz(ytd.get(key))
+        own = str(D[key][1] or "").split("; negative entries set to 0")[0].split("; 20")[0]  # the analyst's words
+        if key == "acq" and re.search(r"(?i)in-process|\bIPR&D\b|asset acquisition|expensed", own):
+            continue  # the cost went through EBIT as acquired R&D: flooring the cash too counts it twice (PM, MRK)
         if key in D and booked > 0 and _nz(D[key][0][0]) < 0.98 * booked:
             vals, note = D[key]
             D[key] = ([round(booked)] + list(vals[1:]),

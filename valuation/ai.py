@@ -361,7 +361,9 @@ def extract_releases(cli, company: str, fy: int, interim, seg_names: list, texts
             "gaap_margin": "[low, high] GAAP operating margin decimal or null",
             "adj_eps": "[low, high] NON-GAAP / adjusted EPS $; null if only GAAP EPS is guided",
             "gaap_eps": "[low, high] GAAP EPS $ or null",
-            "fcf": "[low, high] $mm or null (null when not guided; never 0 as a placeholder)"},
+            "fcf": "[low, high] $mm or null (null when not guided; never 0 as a placeholder)",
+            "net_income": "[low, high] $mm when the company guides net income instead of EPS ('net income guidance "
+                          "$4.75 billion to $5.00 billion' = [4750, 5000]); never put it in adj_eps"},
         "adjusted_eps": {
             "_comment": "NON-GAAP / adjusted diluted EPS as the release reports it; every field null if the release "
                         "has no non-GAAP EPS (never put GAAP EPS here)",
@@ -379,7 +381,7 @@ def extract_releases(cli, company: str, fy: int, interim, seg_names: list, texts
     out = _ask(cli, EXTRACT_SYS, user, 2000, what="read earnings releases")
     g = out.get("guidance") or {}
     num = lambda x: isinstance(x, (int, float)) and not isinstance(x, bool)  # noqa: E731
-    out["guidance"] = {k: g.get(k) for k in ("sales", "organic", "margin", "adj_eps", "fcf")
+    out["guidance"] = {k: g.get(k) for k in ("sales", "organic", "margin", "adj_eps", "fcf", "net_income")
                        if isinstance(g.get(k), list) and len(g[k]) == 2 and all(num(x) for x in g[k])}
     adj = out.get("adjusted_eps") if isinstance(out.get("adjusted_eps"), dict) else {}
     out["adjusted_eps"] = {k: adj.get(k) if num(adj.get(k)) else None for k in ("fy", "fy_prior", "ytd_cur", "ytd_prior")}
@@ -468,6 +470,13 @@ ANALYST_SYS = (
     "call as one number in thesis.price_implies: the bear probability the price implies ({p_bear_implied}) against "
     "yours, and where the call changes ({p_bear_long}); quote the probability-weighted 3-year return ({ret3y_pw}); "
     "drivers.shares_issued = stock comp ÷ the repurchase price; "
+    "scenario probabilities are yours, with a basis in thesis.explanations['scenario probabilities'] (numbers: "
+    "pipeline probabilities of success for a drug company, how often past cycles reached the bear for a cyclical) — "
+    "never a template; a decline still running in FY6 (a loss of exclusivity) continues in fade_path to its trough, "
+    "with terminal growth at the house rate; acquisitions paid this year whose cost was expensed as acquired IPR&D "
+    "stay out of drivers.acq (say so in its note: the cost is already in EBIT); a company that guides net income "
+    "goes in guidance.net_income, not adj_eps; frame the call on the side that can be reached ({p_bear_long} for a "
+    "Long, {p_bear_short} for a Short); "
     "year 1 must land inside company guidance where guidance exists; bear < base < bull "
     "with stated reasons; growth, margins, multiples and the thesis must be consistent with each other. "
     "Never remove a real cost to hit a non-GAAP target: stock comp, amortization and recurring restructuring "
@@ -614,7 +623,10 @@ REVIEW_SYS = (
     "guard accepts or fix what made it refuse. An explanation that says fixed, corrected or restored while its "
     "check still fires is marked open: write what remains, not what you intended. A deal that closed before the "
     "balance-sheet date is already in net debt and the forecast: not a 'deals' item; the cash it cost is a fact, "
-    "never raised to make a check tie. Count each risk once: a scenario risk sits in the bear and its probability, "
+    "never raised to make a check tie; cost expensed as acquired IPR&D is not also an acquisition (cite it in the "
+    "note). Never bend an input to fit another (capex raised so reinvestment fits RONIC is rejected): when RONIC "
+    "sits under WACC (gate 49), the capital base is wrong, so say what is in it. A decline still running in FY6 goes "
+    "in fade_path (gate 50). Scenario probabilities need their basis with numbers (gate 51). Count each risk once: a scenario risk sits in the bear and its probability, "
     "not also in beta, terminal growth, fade years or a base below consensus (the engine holds beta, terminal growth "
     "and fade years when their reason is scenario risk). Never give the skew, the gap or the rating as the reason "
     "for a change or an explanation (rejected). Text must match the model: no typed rate that differs from it, no "

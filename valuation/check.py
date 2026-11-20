@@ -139,7 +139,7 @@ def review(spec, xlsx: bytes, scenarios: bool = False) -> dict:
     forecast = {label: [v.get((sh, f"{c}{r}")) for c in FC] for label, (sh, r) in rows.items()}
     g0 = 52 + len(spec.segments) + 2
     guidance = []
-    for k in range(5):
+    for k in range(6):
         r = g0 + k
         lo, hi = v.get(("INTERIM", f"C{r}")), v.get(("INTERIM", f"D{r}"))
         if _n(lo) is not None and _n(hi) is not None:

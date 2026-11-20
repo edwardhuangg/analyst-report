@@ -208,7 +208,7 @@ Built to the buy-side review standard (the CRM / DE / ETN / GOOGL / NFLX / ROK /
   band (only where GAAP EPS is comparable with adjusted EPS), mid-cycle EPS for cyclicals, peers with a spin or
   split excluded from EV/EBITDA, trailing GAAP peer EPS kept out of the forward median, look-ahead flagged;
   corporate cost capitalized at the blended segment multiple, segment EBITDA after stock comp.
-- **Checks tab**: the pre-publication gates (1–48) (definitions, data integrity, balance sheet and timing, plugs,
+- **Checks tab**: the pre-publication gates (1–51) (definitions, data integrity, balance sheet and timing, plugs,
   valuation integrity, decision layer, FCF continuity into the fade, thesis numbers), the open warnings and
   checks with their explanations, consensus comparison, a ten-number final check, release figures verified
   against the release text, and an audit trail of every change with the fair value after each pass and the
@@ -288,6 +288,31 @@ Built to the buy-side review standard (the CRM / DE / ETN / GOOGL / NFLX / ROK /
       gate 47 tests it independently.
   - Quarter margins replace partly tagged stock comp.
   - The D&A check excludes capitalized contract-cost amortization, which is matched by new contract costs.
+- **Sector paths from the first hosted runs (round 9, MRK and DE)**:
+  - **Captive finance:**
+    - A captive arm's debt is operating in invested capital too (C93), as it is in net debt.
+    - The cash policy's leverage test excludes it.
+    - Gate 49 fails when RONIC sits under WACC, because growth then destroys value and the capital base is wrong.
+  - **Mid-cycle:** cyclicals use the last five years' median margin when it is more than 3pt from the five
+    before (a structural shift); otherwise the 10-year median. The defaults, gate 16 and the comps use the same
+    helper.
+  - **Scenarios:**
+    - The engine no longer manufactures a scenario: when the price needs a terminal margin more than 5pt outside
+      the 10-year range, the scenarios are left as built and gate 41 fails.
+    - Gate 51 asks for a stated basis for the scenario probabilities.
+  - **Pharma cliff:** a decline still running in FY6 is finished in the fade (`fade_path`, growth by fade year),
+    and terminal growth stays at the house rate (gate 50).
+  - **Guidance:**
+    - An EPS guide far below last year stands when the release says charges are in it.
+    - A guide in billions is net income (a sixth Interim check row).
+    - The stated non-GAAP tax-rate reader covers "effective" and skips outlook ranges.
+    - With no stated rate, history stays within 8pt of the GAAP rate and at least 8%.
+  - **Refusals:** every engine floor that changes an analyst input fails gate 45, as do refused guidance and an
+    input bent to fit another.
+  - **Acquisitions:** cash expensed as acquired IPR&D stays out of `drivers.acq` when the analyst's note says so.
+  - **Cost of debt:** the synthetic rating uses the higher of LTM and FY0 EBIT.
+  - **Consensus:** retried once, with FY2 used when FY1 has ended unreported. A missing consensus for a $10bn+
+    company is a data failure (gate 24).
 
 `framework: "reference"` in an overrides file reproduces the mechanics of the hand-built HON model (used by the
 regression test); everything else uses the framework above.

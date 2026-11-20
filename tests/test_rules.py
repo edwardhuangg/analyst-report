@@ -188,5 +188,21 @@ pr8 = gates.thesis_number_problems(SimpleNamespace(
     thesis={"explanations": {"gate 37": "Comps remain a 20% cross-check because the regression is rejected."}},
     valuation={**spec7.valuation, "w_comps": (0.10, "")}, peers=[], fc_labels=spec7.fc_labels), v8)
 ok("a typed comps weight that differs from the model is caught", any("comps" in p_ for p_ in pr8), pr8)
+# round 9 (PM on MRK and DE through the hosted app)
+ok("a net-income guide in billions is not an EPS guide (DE)",
+   S._in_billions("Net income guidance improved to $4.75 billion to $5.00 billion.", 4.75, 5.0) and
+   not S._in_billions("Expected Non-GAAP EPS Range To Be Between $2.77 and $2.82", 2.77, 2.82))
+step = [(2016 + k, m) for k, m in enumerate([0.11, 0.12, 0.115, 0.12, 0.11, 0.18, 0.21, 0.21, 0.19, 0.137])]
+flat = [(2016 + k, m) for k, m in enumerate([0.14, 0.15, 0.13, 0.15, 0.14, 0.15, 0.14, 0.16, 0.15, 0.14])]
+ok("a structural step-up sets mid-cycle on the recent cycle (DE); a steady history keeps the 10-year median",
+   abs(S.mid_cycle_margin(step)[0] - 0.19) < 1e-9 and abs(S.mid_cycle_margin(flat)[0] - 0.145) < 0.006, 
+   (S.mid_cycle_margin(step), S.mid_cycle_margin(flat)))
+mrk = SimpleNamespace(hist=SimpleNamespace(IS={"eps_dil": [0, 0, 7.0], "sales": [0, 0, 65000.0], "ni_attr": [0, 0, 1]},
+                                           CF={}), adj_eps_hist=[None, None, 8.98], eps_guide_charge=True)
+ok("an EPS guide far below last year stands when the release says charges are in it (MRK)",
+   S.guidance_problem(mrk, "adj_eps", 2.77, 2.82) == "" and
+   S.guidance_problem(SimpleNamespace(**{**vars(mrk), "eps_guide_charge": False}), "adj_eps", 2.77, 2.82) != "")
+ok("an input bent to fit another is output-targeting (DE capex)",
+   overrides.TARGET_RX.search("Capex ramps to 8% of sales to make terminal reinvestment consistent with RONIC"))
 print(f"{N[1]}/{N[0]} passed")
 sys.exit(0 if N[0] == N[1] else 1)

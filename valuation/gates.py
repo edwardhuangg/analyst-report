@@ -232,8 +232,10 @@ def round3_gates(spec, v: dict, out: dict, IS: dict) -> list:
     wacc, roic_t = get("DCF", "C17"), get("DCF", "C93")
     try:
         gw = _nz(B["goodwill"][2]) + _nz(B["intang"][2])
-        ic_gw = (_nz(B["equity_total"][2]) + _nz(B["redeem_nci"][2]) + _nz(B["st_debt"][2]) + _nz(B["cur_ltd"][2]) +
-                 _nz(B["ltd"][2]) - _nz(B["cash"][2]) - _nz(B["sti"][2]) - _nz(B["lt_inv"][2]))
+        cap_sh = (spec.valuation.get("captive_share", (0.0,))[0] or 0.0) if spec.captive else 0.0
+        ic_gw = (_nz(B["equity_total"][2]) + _nz(B["redeem_nci"][2]) +
+                 (_nz(B["st_debt"][2]) + _nz(B["cur_ltd"][2]) + _nz(B["ltd"][2])) * (1 - cap_sh) -
+                 _nz(B["cash"][2]) - _nz(B["sti"][2]) - _nz(B["lt_inv"][2]))
     except (KeyError, IndexError, TypeError):
         gw, ic_gw = 0.0, 0.0
     gw_share = gw / ic_gw if ic_gw > 0 else 0.0
@@ -244,7 +246,7 @@ def round3_gates(spec, v: dict, out: dict, IS: dict) -> list:
     acq_fc = list(spec.drivers.get("acq", ([0.0] * 6, ""))[0])
     recurring = all(_nz(a) >= 0.005 * _nz(sv) for a, sv in zip(acq_fc[3:], sales_fc[3:]) if sv)
     if ron is not None and wacc and roic_t is not None:
-        bought = gw_share >= 0.20 or acq_pct >= 0.02
+        bought = gw_share >= 0.20 or acq_pct >= 0.03  # DE: 7% goodwill, 2.0% of sales on deals is not bought growth
         cap = max(wacc, roic_t)
         st = FAIL if bought and not recurring and ron > cap + 0.005 else PASS
         res.append((34, "RONIC within the return including goodwill when growth has been bought (or recurring "
@@ -269,6 +271,35 @@ def round3_gates(spec, v: dict, out: dict, IS: dict) -> list:
                         "exclusivity (product, year), competitive entry, or recurring acquisitions not otherwise "
                         f"modeled — in thesis.explanations['gate 34'] with the year; otherwise RONIC = {ref:.1%}",
                         r"(19|20)\d\d"))
+    # scenario probabilities are a judgment with a basis, not a template (PM round 8: MRK carried ADBE's 35/50/15)
+    ex_ = {norm(k): str(w) for k, w in ((spec.thesis or {}).get("explanations") or {}).items()}
+    basis = ex_.get("scenario probabilities") or ex_.get("probabilities") or ""
+    if not re.search(r"\d", basis):  # (round3_gates runs in the economic framework only)
+        pr_ = spec.scenario_probs or [0.25, 0.5, 0.25]
+        res.append((51, "Scenario probabilities have a stated basis", WARN,
+                    f"bear / base / bull at {' / '.join(f'{p:.0%}' for p in pr_)} with no basis in "
+                    "thesis.explanations['scenario probabilities']: say what sets each, with numbers (pipeline "
+                    "probabilities of success, how often past cycles reached the bear, the evidence for the breaker)",
+                    r"\d"))
+    # a decline still running when the forecast ends is finished in the fade (PM round 8, MRK: Keytruda at 34% of
+    # sales falling 15% a year in 2031; the straight-line fade took growth back up and terminal growth was cut instead)
+    s0_ = sum(_nz(sg.sales[2]) for sg in spec.segments) or 1.0
+    falling = [(u.name, u.growth["base"][-1], _nz(u.sales[2]) / s0_) for sg in spec.segments for u in sg.units
+               if u.growth.get("base") and u.growth["base"][-1] <= -0.08 and _nz(u.sales[2]) >= 0.10 * s0_]
+    if falling and not getattr(spec, "fade_path", None):
+        res.append((50, "A decline still running in the last forecast year is finished in the fade (fade_path)", WARN,
+                    "; ".join(f"{n} {g:+.0%} in {spec.fc_labels[-1]} ({w:.0%} of FY{spec.fy_hist[-1]} sales)"
+                              for n, g, w in falling[:3]) +
+                    ": the straight-line fade takes growth back up to terminal before the decline ends — set "
+                    "fade_path (growth by fade year to the trough, with its source) and keep terminal growth at the "
+                    "house rate, or explain with the trough year", r"(19|20)\d\d"))
+    # growth that destroys value means the capital base is wrong, not the business (PM round 8, DE: RONIC 7.5% under
+    # an 8.9% WACC from captive-finance capital; value fell as terminal growth rose and capex was bent to fit)
+    if ron is not None and wacc and ron < wacc - 0.0005 and spec.profile.get("ronic_rule") != "wacc":
+        res.append((49, "Terminal RONIC at or above WACC (else growth destroys value: the capital base is wrong)", FAIL,
+                    f"RONIC {ron:.1%} under the {wacc:.1%} WACC: value falls as terminal growth rises. Check what sits "
+                    "in invested capital (a captive arm's receivables and debt, buyback-shrunk equity, expensed "
+                    "R&D) before using it; a business that truly earns below its cost of capital is the bear case"))
     # 35: base case vs consensus (PM round 3: FY28 at 10.5% vs 9.7% consensus, pinned to a management target)
     cons = spec.consensus or {}
     gaps = []
@@ -1063,8 +1094,12 @@ def gates(spec, v: dict, out: dict, IS: dict, guidance: list, plug_list: list) -
     if econ and pct is not None and tm is not None and len(mh) >= 5:
         med = median(mh)
         cyc = spec.profile.get("cyclical")
+        if cyc:  # the same mid-cycle as the defaults (a structural shift uses the recent cycle)
+            from .spec import mid_cycle_margin
+            med = mid_cycle_margin(spec.margin_hist)[0] or med
         st = PASS
-        why = f"terminal operating margin {tm:.1%} at the {pct:.0%} percentile of {len(mh)} years (median {med:.1%})"
+        why = (f"terminal operating margin {tm:.1%} at the {pct:.0%} percentile of {len(mh)} years "
+               f"({'mid-cycle' if cyc else 'median'} {med:.1%})")
         if cyc and tm < med - 0.02:
             st, why = FAIL, why + ": a cyclical's terminal year must be at mid-cycle"
         elif cyc and tm > med + 0.02:  # symmetric (PM round 4: peaks were never normalized)
@@ -1224,7 +1259,14 @@ def gates(spec, v: dict, out: dict, IS: dict, guidance: list, plug_list: list) -
     add(28, "Thesis numbers are the model's (placeholders such as {fv} link them; typed ones must match)",
         FAIL if stale else PASS, "; ".join(stale[:4]) if stale else "")
     cons = spec.consensus or {}
-    add(24, "Consensus comparison shown, or its absence stated", PASS,
-        "Checks tab: model vs consensus" if cons.get("eps") or cons.get("g_fy1") is not None else
-        "No point-in-time consensus for this valuation date (stated on the Checks tab)")
+    has_c = bool(cons.get("eps") or cons.get("g_fy1") is not None or cons.get("g_fy2") is not None)
+    from .market import is_recent
+    mcap = (spec.price or 0) * ((spec.basic_shares or 0) + (spec.dilutive or 0))
+    big_gap = not has_c and is_recent(spec.as_of) and mcap > 10000 and econ
+    add(24, "Consensus comparison shown, or its absence stated", WARN if big_gap else PASS,
+        "Checks tab: model vs consensus" if has_c else
+        (f"No consensus returned for a ${mcap / 1000:,.0f}bn company on a current date: a data failure (Yahoo did not "
+         "answer), not an absence — rebuild, or quote the consensus you can source with its date" if big_gap else
+         "No point-in-time consensus for this valuation date (stated on the Checks tab)"),
+        r"\d" if big_gap else None)
     return g
