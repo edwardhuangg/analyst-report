@@ -25,8 +25,9 @@ FC = "FGHIJK"
 
 
 def available() -> bool:
-    try:
+    try:  # formulas reads .xlsx through openpyxl, which it installs only as its "excel" extra
         import formulas  # noqa: F401
+        import openpyxl  # noqa: F401
         return True
     except ImportError:
         return False
